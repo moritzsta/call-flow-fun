@@ -45,17 +45,20 @@
   - [x] useOrganizations Hook implementiert
   - [x] OrganizationCard Component erstellt
   - [x] CreateOrganizationDialog Component erstellt
-  - [x] Sidebar mit shadcn Pattern aktualisiert (SidebarProvider, AppSidebar)
+  - [x] Sidebar mit shadcn Pattern aktualisiert
   - [x] Owner wird automatisch als Member hinzugefügt
-  - [ ] OrganizationCard Component erstellen
 
 - **Task 018** Organization Members: Invite & Manage  
-  Meta: id=Task 018 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-05 | story=5 | labels=frontend,organizations | progress=0% | tokens=0
-  - [ ] OrganizationSettings.tsx erstellen
-  - [ ] Member-Management implementieren
-  - [ ] Rollen-Verwaltung implementieren
+  Meta: id=Task 018 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-05 | story=5 | labels=frontend,organizations,members | progress=100% | tokens=7200
+  - [x] OrganizationSettings.tsx Page erstellt
+  - [x] useOrganizationMembers Hook implementiert
+  - [x] InviteMemberDialog Component erstellt
+  - [x] MemberList Component erstellt
+  - [x] Tabs für General & Members
+  - [x] Owner kann Members hinzufügen/entfernen
+  - [x] Owner kann Rollen ändern
 
-- **Task 019** Project Management: Create & List  
+- **Task 019** Project Management: Create & List
   Meta: id=Task 019 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-06 | story=5 | labels=frontend,projects | progress=0% | tokens=0
   - [ ] Projects.tsx Page erstellen
   - [ ] useProjects Hook implementieren
@@ -368,6 +371,16 @@
   - [x] Sidebar mit shadcn Pattern aktualisiert
   - [x] Owner wird automatisch als Member hinzugefügt
 
+- **Task 018** Organization Members: Invite & Manage  
+  Meta: id=Task 018 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-05 | story=5 | labels=frontend,organizations,members | progress=100% | tokens=7200
+  - [x] OrganizationSettings.tsx Page erstellt
+  - [x] useOrganizationMembers Hook implementiert
+  - [x] InviteMemberDialog Component erstellt
+  - [x] MemberList Component erstellt
+  - [x] Tabs für General & Members
+  - [x] Owner kann Members hinzufügen/entfernen
+  - [x] Owner kann Rollen ändern
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -390,7 +403,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=50%
+Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=60%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -443,6 +456,40 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-25 — Task 018: Organization Members - Invite & Manage
+
+**Was wurde umgesetzt?**
+- OrganizationSettings.tsx: Settings-Page mit Tabs (General, Members)
+- useOrganizationMembers Hook: Invite, Update Role, Remove mit react-query
+- InviteMemberDialog: Dialog zum Einladen mit E-Mail, Rolle (Owner/Manager/Read-Only)
+- MemberList: Liste aller Members mit Avatar, Rolle-Badge, Role-Select (Owner-only)
+- Member-Einladung: Prüft ob User existiert, ob bereits Member, fügt dann hinzu
+- Rollen-Verwaltung: Owner kann Rollen aller Members ändern (außer eigene)
+- Member-Entfernung: Owner kann Members entfernen (mit Alert-Dialog)
+- General Tab: Name & Beschreibung bearbeiten (nur für Owner)
+- RLS-Check: Nur Owner/Manager können Members verwalten
+- Profile-Join: Members werden mit Profil-Daten (Email, Name, Avatar) geladen
+
+**Betroffene Dateien:**
+- `src/pages/OrganizationSettings.tsx` (erstellt)
+- `src/hooks/useOrganizationMembers.ts` (erstellt)
+- `src/components/organizations/InviteMemberDialog.tsx` (erstellt)
+- `src/components/organizations/MemberList.tsx` (erstellt)
+- `src/App.tsx` (Route /organizations/:id hinzugefügt)
+
+**Checks:**
+- ✅ Owner kann Members hinzufügen (via E-Mail)
+- ✅ Rollen-Änderung funktioniert (Select für Owner)
+- ✅ Read-Only Members können nicht bearbeiten
+- ✅ Member-Entfernung funktioniert (mit Bestätigung)
+- ✅ User sieht eigene Rolle als Badge "Sie"
+
+**Reuse:**
+- 📘 feature/08-advanced-sharing-pattern (Member-Management, Rollen)
+- 📘 feature/06-ui-ux-pattern (Tabs, Dialoge, Cards)
+
+---
 
 ### 2025-10-25 — Task 017: Organization Management - Create & List
 

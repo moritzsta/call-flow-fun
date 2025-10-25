@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Organizations from "./pages/Organizations";
+import OrganizationSettings from "./pages/OrganizationSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Organizations />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/organizations/:id" 
+              element={
+                <ProtectedRoute>
+                  <OrganizationSettings />
                 </ProtectedRoute>
               } 
             />
