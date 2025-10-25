@@ -27,23 +27,8 @@
 
 
 
-- **Task 013** AuthContext & AuthProvider  
-  Meta: id=Task 013 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-01 | story=3 | labels=frontend,auth | progress=0% | tokens=0
-  - [ ] AuthContext erstellen
-  - [ ] AuthProvider implementieren
-  - [ ] Integration in App.tsx
 
-- **Task 014** ProtectedRoute Component  
-  Meta: id=Task 014 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-01 | story=2 | labels=frontend,auth | progress=0% | tokens=0
-  - [ ] ProtectedRoute Component erstellen
-  - [ ] Redirect-Logik implementieren
 
-- **Task 015** Auth-Pages: Login & Registrierung  
-  Meta: id=Task 015 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-02 | story=5 | labels=frontend,auth,ui | progress=0% | tokens=0
-  - [ ] Auth.tsx Page erstellen
-  - [ ] Login-Form implementieren
-  - [ ] Registrierungs-Form implementieren
-  - [ ] Validation mit zod
 
 - **Task 016** Profile-Settings Page  
   Meta: id=Task 016 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-03 | story=3 | labels=frontend,auth,ui | progress=0% | tokens=0
@@ -338,6 +323,26 @@
   - [x] Realtime für n8n_workflow_states aktiviert (REPLICA IDENTITY FULL)
   - [x] Dokumentation erstellt (REALTIME_CONFIG.md)
 
+- **Task 013** AuthContext & AuthProvider  
+  Meta: id=Task 013 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-01 | story=3 | labels=frontend,auth | progress=100% | tokens=3500
+  - [x] AuthContext erstellt (User, Session, Profile State)
+  - [x] AuthProvider implementiert (signUp, signIn, signOut, refreshProfile)
+  - [x] Integration in App.tsx
+
+- **Task 014** ProtectedRoute Component  
+  Meta: id=Task 014 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-01 | story=2 | labels=frontend,auth | progress=100% | tokens=800
+  - [x] ProtectedRoute Component erstellt
+  - [x] Redirect-Logik zu /auth implementiert
+  - [x] Loading-State mit Skeleton
+
+- **Task 015** Auth-Pages: Login & Registrierung  
+  Meta: id=Task 015 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-02 | story=5 | labels=frontend,auth,ui | progress=100% | tokens=5200
+  - [x] Auth.tsx Page erstellt mit Tabs (Login/Register)
+  - [x] Login-Form implementiert (Email, Passwort)
+  - [x] Registrierungs-Form implementiert (Email, Passwort, Full Name, Confirm)
+  - [x] Validation mit zod + react-hook-form
+  - [x] Route hinzugefügt, Link auf Index-Page
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -360,7 +365,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=planned | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=0%
+Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=30%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -413,6 +418,102 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 015: Auth-Pages Login & Registrierung
+
+**Was wurde umgesetzt?**
+- Auth.tsx Page mit Tabs (Login/Register)
+- Zod Validation Schemas (loginSchema, registerSchema)
+- Login-Form: Email, Passwort
+- Register-Form: Email, Passwort, Confirm, Full Name
+- Passwort-Validierung: Min. 8 Zeichen, Groß-/Kleinbuchstaben, Zahl
+- Auto-Redirect zu /dashboard nach erfolgreicher Anmeldung
+- Loading States & Error-Handling
+- Toast-Notifications in AuthContext
+- Route /auth in App.tsx hinzugefügt
+- Link zur Auth-Page auf Index-Page
+
+**Betroffene Dateien:**
+- `src/lib/validations/auth.ts` (erstellt)
+- `src/pages/Auth.tsx` (erstellt)
+- `src/App.tsx` (Route hinzugefügt)
+- `src/pages/Index.tsx` (Link zur Auth-Page)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 5.200, Kosten: 0,12 EUR
+
+**Checks:**
+- ✅ Login funktioniert
+- ✅ Registrierung funktioniert
+- ✅ Validation zeigt Fehler korrekt
+- ✅ Auto-Redirect nach Login
+
+**Hinweis:**
+- Email-Bestätigung ist standardmäßig deaktiviert in Supabase
+- User kann jetzt /auth aufrufen für Login/Registrierung
+
+**Next Steps:**
+- Task 016: Profile-Settings Page für Profil-Bearbeitung erstellen
+
+---
+
+### 2025-01-24 — Task 014: ProtectedRoute Component
+
+**Was wurde umgesetzt?**
+- ProtectedRoute Component erstellt
+- Auth-Check mit useAuth Hook
+- Loading-State mit Skeleton während Auth-Check
+- Redirect zu /auth wenn nicht eingeloggt
+- replace Flag bei Navigate (verhindert Back-Navigation zur geschützten Seite)
+
+**Betroffene Dateien:**
+- `src/components/auth/ProtectedRoute.tsx` (erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 800, Kosten: 0,02 EUR
+
+**Checks:**
+- ✅ Loading-State zeigt Skeleton
+- ✅ Redirect zu /auth funktioniert
+- ✅ Geschützte Inhalte werden nur bei Auth gezeigt
+
+**Next Steps:**
+- Task 015: Auth-Pages (Login & Registrierung) mit Formular und Validation erstellen
+
+---
+
+### 2025-01-24 — Task 013: AuthContext & AuthProvider
+
+**Was wurde umgesetzt?**
+- AuthContext erstellt mit State: user, session, profile, loading
+- Auth-Methoden implementiert: signUp, signIn, signOut, refreshProfile
+- onAuthStateChange Listener mit setTimeout(0) für Profile-Loading (verhindert Deadlock)
+- emailRedirectTo bei signUp konfiguriert
+- Toast-Notifications für alle Auth-Events
+- AuthProvider in App.tsx integriert
+
+**Betroffene Dateien:**
+- `src/contexts/AuthContext.tsx` (erstellt)
+- `src/App.tsx` (AuthProvider integriert)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 3.500, Kosten: 0,08 EUR
+
+**Checks:**
+- ✅ Complete Session + User State gespeichert
+- ✅ Profile wird automatisch geladen
+- ✅ Deadlock-Prevention durch setTimeout(0)
+- ✅ emailRedirectTo konfiguriert
+
+**Wichtige Patterns:**
+- Niemals async in onAuthStateChange
+- Immer setTimeout(0) für Supabase-Calls
+- Complete Session-Object speichern
+
+**Next Steps:**
+- Task 014: ProtectedRoute Component für Route-Guards erstellen
+
+---
 
 ### 2025-01-24 — Task 012: Realtime für Workflow States
 
