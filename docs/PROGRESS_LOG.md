@@ -30,11 +30,14 @@
 
 
 
-- **Task 016** Profile-Settings Page  
-  Meta: id=Task 016 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-03 | story=3 | labels=frontend,auth,ui | progress=0% | tokens=0
-  - [ ] ProfileSettings.tsx erstellen
-  - [ ] Theme-Switcher implementieren
-  - [ ] Sprache-Switcher implementieren
+- **Task 016** Dashboard Skeleton & Layout  
+  Meta: id=Task 016 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-03 | story=3 | labels=frontend,ui,layout | progress=100% | tokens=4500
+  - [x] Dashboard.tsx Page erstellt
+  - [x] Sidebar.tsx Component erstellt
+  - [x] Header.tsx Component erstellt
+  - [x] ProtectedRoute für /dashboard
+  - [x] User-Name aus Profile anzeigen
+  - [x] Navigation zu Orgs/Projects (Placeholder)
 
 - **Task 017** Organization Management: Create & List  
   Meta: id=Task 017 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-04 | story=5 | labels=frontend,organizations | progress=0% | tokens=0
@@ -343,6 +346,15 @@
   - [x] Validation mit zod + react-hook-form
   - [x] Route hinzugefügt, Link auf Index-Page
 
+- **Task 016** Dashboard Skeleton & Layout  
+  Meta: id=Task 016 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-03 | story=3 | labels=frontend,ui,layout | progress=100% | tokens=4500
+  - [x] Dashboard.tsx Page erstellt
+  - [x] Sidebar.tsx Component erstellt
+  - [x] Header.tsx Component erstellt
+  - [x] ProtectedRoute für /dashboard
+  - [x] User-Name aus Profile anzeigen
+  - [x] Navigation zu Orgs/Projects (Placeholder)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -365,7 +377,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=30%
+Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=40%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -418,6 +430,36 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-25 — Task 016: Dashboard Skeleton & Layout
+
+**Was wurde umgesetzt?**
+- Dashboard.tsx Page mit Layout (Sidebar + Main Content)
+- Sidebar.tsx mit Navigation (Dashboard, Organisationen, Projekte, Einstellungen)
+- Header.tsx mit User-Avatar, Dropdown-Menü (Profil, Einstellungen, Abmelden)
+- Willkommenstext mit User-Namen aus profile.full_name
+- Quick Stats Placeholder (Organisationen, Projekte, Workflows)
+- ProtectedRoute Integration für /dashboard
+- Responsive Design: Sidebar nur auf Desktop (md:flex)
+- Design-System: Alle Farben über HSL-Tokens (bg-card, text-foreground, border-border)
+
+**Betroffene Dateien:**
+- `src/pages/Dashboard.tsx` (erstellt)
+- `src/components/layout/Sidebar.tsx` (erstellt)
+- `src/components/layout/Header.tsx` (erstellt)
+- `src/App.tsx` (Route /dashboard mit ProtectedRoute)
+
+**Checks:**
+- ✅ Dashboard nur für authentifizierte User zugänglich
+- ✅ User-Name wird angezeigt (aus Profile)
+- ✅ Sidebar/Navigation sichtbar und funktional
+- ✅ Navigation-Links vorhanden (noch ohne Ziel-Routen)
+
+**Reuse:**
+- 📘 feature/01-auth-profile-pattern (Profile-Anzeige im Header)
+- 📘 feature/06-ui-ux-pattern (Sidebar & Navigation)
+
+---
 
 ### 2025-01-24 — Task 015: Auth-Pages Login & Registrierung
 
