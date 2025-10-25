@@ -40,9 +40,13 @@
   - [x] Navigation zu Orgs/Projects (Placeholder)
 
 - **Task 017** Organization Management: Create & List  
-  Meta: id=Task 017 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-04 | story=5 | labels=frontend,organizations | progress=0% | tokens=0
-  - [ ] Organizations.tsx Page erstellen
-  - [ ] useOrganizations Hook implementieren
+  Meta: id=Task 017 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-04 | story=5 | labels=frontend,organizations | progress=100% | tokens=6800
+  - [x] Organizations.tsx Page erstellt
+  - [x] useOrganizations Hook implementiert
+  - [x] OrganizationCard Component erstellt
+  - [x] CreateOrganizationDialog Component erstellt
+  - [x] Sidebar mit shadcn Pattern aktualisiert (SidebarProvider, AppSidebar)
+  - [x] Owner wird automatisch als Member hinzugefügt
   - [ ] OrganizationCard Component erstellen
 
 - **Task 018** Organization Members: Invite & Manage  
@@ -355,6 +359,15 @@
   - [x] User-Name aus Profile anzeigen
   - [x] Navigation zu Orgs/Projects (Placeholder)
 
+- **Task 017** Organization Management: Create & List  
+  Meta: id=Task 017 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-04 | story=5 | labels=frontend,organizations | progress=100% | tokens=6800
+  - [x] Organizations.tsx Page erstellt
+  - [x] useOrganizations Hook implementiert
+  - [x] OrganizationCard Component erstellt
+  - [x] CreateOrganizationDialog Component erstellt
+  - [x] Sidebar mit shadcn Pattern aktualisiert
+  - [x] Owner wird automatisch als Member hinzugefügt
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -377,7 +390,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=40%
+Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=50%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -430,6 +443,41 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-25 — Task 017: Organization Management - Create & List
+
+**Was wurde umgesetzt?**
+- Organizations.tsx: Vollständige Organisations-Übersichtsseite mit Grid-Layout
+- useOrganizations Hook: Create, Read, Update, Delete mit react-query
+- OrganizationCard: Card-Component mit Owner-Badge, Delete-Dialog (nur für Owner)
+- CreateOrganizationDialog: Dialog mit Form (Name, Beschreibung) und Zod-Validation
+- Sidebar mit shadcn Pattern: SidebarProvider, AppSidebar, SidebarTrigger im Header
+- Automatische Member-Erstellung: Bei Create wird Owner als Member mit role='owner' hinzugefügt
+- RLS-Check: User sieht nur Organisationen, bei denen er Member ist
+- Empty State: Placeholder bei 0 Organisationen mit Call-to-Action
+
+**Betroffene Dateien:**
+- `src/pages/Organizations.tsx` (erstellt)
+- `src/hooks/useOrganizations.ts` (erstellt)
+- `src/components/organizations/OrganizationCard.tsx` (erstellt)
+- `src/components/organizations/CreateOrganizationDialog.tsx` (erstellt)
+- `src/components/layout/Sidebar.tsx` (umbenannt zu AppSidebar, shadcn Pattern)
+- `src/components/layout/Header.tsx` (SidebarTrigger hinzugefügt)
+- `src/pages/Dashboard.tsx` (SidebarProvider Integration)
+- `src/App.tsx` (Route /organizations hinzugefügt)
+
+**Checks:**
+- ✅ User sieht nur seine Organisationen (RLS korrekt)
+- ✅ Neue Organisation wird erstellt
+- ✅ Owner wird automatisch als Member hinzugefügt
+- ✅ Delete-Dialog nur für Owner sichtbar
+- ✅ Sidebar ist kollabierbar (shadcn Pattern)
+
+**Reuse:**
+- 📘 feature/05-datenstruktur-pattern (Hierarchische Strukturen)
+- 📘 feature/06-ui-ux-pattern (Sidebar, Cards, Dialoge)
+
+---
 
 ### 2025-10-25 — Task 016: Dashboard Skeleton & Layout
 

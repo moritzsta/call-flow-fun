@@ -1,23 +1,25 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 
 export default function Dashboard() {
-  const { profile, loading } = useAuth();
+  const { profile } = useAuth();
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      {/* Sidebar Navigation */}
-      <Sidebar />
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-background">
+        {/* Sidebar Navigation */}
+        <AppSidebar />
 
-      {/* Main Content Area */}
-      <div className="flex flex-col flex-1 overflow-hidden">
-        {/* Header */}
-        <Header />
+        {/* Main Content Area */}
+        <div className="flex flex-col flex-1 overflow-hidden">
+          {/* Header */}
+          <Header />
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
+          {/* Main Content */}
+          <main className="flex-1 overflow-y-auto p-6">
+            <div className="max-w-7xl mx-auto space-y-6">
             {/* Welcome Section */}
             <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-lg p-8 border border-border">
               <h1 className="text-3xl font-bold text-foreground mb-2">
@@ -76,9 +78,10 @@ export default function Dashboard() {
                 Noch keine Aktivitäten vorhanden. Erstellen Sie Ihre erste Organisation, um zu beginnen.
               </p>
             </div>
-          </div>
-        </main>
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
