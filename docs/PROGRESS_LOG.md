@@ -399,6 +399,8 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 
 ---
 
+%%%%%%%%%%%%
+
 ### 2025-01-24 — Task 002: Environment & Secrets Setup
 
 **Was wurde umgesetzt?**
