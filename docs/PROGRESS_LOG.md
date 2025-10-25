@@ -18,11 +18,6 @@
 
 
 
-- **Task 004** Datenbank-Schema: Profiles  
-  Meta: id=Task 004 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=2 | labels=backend,auth | progress=0% | tokens=0
-  - [ ] profiles Tabelle erstellen
-  - [ ] Trigger für Auto-Profile-Erstellung
-  - [ ] RLS Policies setzen
 
 - **Task 005** Datenbank-Schema: Organizations  
   Meta: id=Task 005 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=3 | labels=backend,database | progress=0% | tokens=0
@@ -328,6 +323,12 @@
   Meta: id=Task 003 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=1 | labels=backend,database | progress=100% | tokens=1200
   - [x] Enums erstellt (app_role, company_status, email_status, workflow_status)
 
+- **Task 004** Datenbank-Schema: Profiles  
+  Meta: id=Task 004 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=2 | labels=backend,auth | progress=100% | tokens=2100
+  - [x] profiles Tabelle erstellt
+  - [x] Trigger für Auto-Profile-Erstellung (handle_new_user)
+  - [x] RLS Policies gesetzt (owner-only)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -337,7 +338,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=31%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=38%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -403,6 +404,33 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 004: Datenbank-Schema Profiles
+
+**Was wurde umgesetzt?**
+- profiles Tabelle erstellt (id, email, full_name, avatar_url, preferred_language, theme, timestamps)
+- Trigger `handle_new_user()` für automatische Profil-Erstellung bei User-Registrierung
+- Trigger `update_updated_at_column()` für automatische Timestamp-Updates
+- RLS Policies: Owner-only Zugriff (SELECT, UPDATE, INSERT)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_create_profiles.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- "Perfekt. Dann bitte nach den Vorgaben in deinem Knowledge fortfahren!" → Tokens: 2.100, Kosten: 0,05 EUR
+
+**Checks:**
+- ✅ Tabelle mit RLS aktiviert
+- ✅ Trigger funktionieren (handle_new_user, update_updated_at)
+- ✅ SECURITY DEFINER und set search_path = public gesetzt
+
+**Hinweis:**
+- ⚠️ Bestehende Tabellen ohne RLS (german_*) → Task 010
+
+**Next Steps:**
+- Task 005: Organizations Tabelle erstellen
+
+---
 
 ### 2025-01-24 — Task 003: Datenbank-Schema Enums
 
