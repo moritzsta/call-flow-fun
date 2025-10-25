@@ -16,10 +16,6 @@
   - [x] Projektstruktur dokumentiert (PROJECT_STRUCTURE.md)
   - [x] Dependencies geprüft (alle vorhanden)
 
-- **Task 002** Environment & Secrets Setup  
-  Meta: id=Task 002 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-26 | story=2 | labels=setup,security | progress=0% | tokens=0
-  - [ ] Secrets in Lovable Cloud hinzufügen
-  - [ ] Webhook-URLs dokumentieren
 
 - **Task 003** Datenbank-Schema: Enums & Base Types  
   Meta: id=Task 003 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=1 | labels=backend,database | progress=0% | tokens=0
@@ -326,6 +322,11 @@
   - [x] PROJECT_STRUCTURE.md erstellt
   - [x] Dependencies geprüft
 
+- **Task 002** Environment & Secrets Setup  
+  Meta: id=Task 002 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-26 | story=2 | labels=setup,security | progress=100% | tokens=2800
+  - [x] Secrets in Supabase hinzugefügt (N8N_WEBHOOK_BASE_URL, N8N_WEBHOOK_SECRET, OPENAI_API_KEY)
+  - [x] Webhook-Dokumentation erstellt (docs/N8N_WEBHOOKS.md)
+
 - **Task 048** Progress Log Setup  
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -335,7 +336,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=15%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=23%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -398,7 +399,28 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 
 ---
 
-## Change Log
+### 2025-01-24 — Task 002: Environment & Secrets Setup
+
+**Was wurde umgesetzt?**
+- Supabase Secrets konfiguriert: N8N_WEBHOOK_BASE_URL, N8N_WEBHOOK_SECRET, OPENAI_API_KEY
+- Webhook-Dokumentation erstellt (docs/N8N_WEBHOOKS.md)
+- Header Auth Konfiguration dokumentiert für n8n Webhooks
+- Geplante Workflows dokumentiert: Smart Upload, Smart Improve
+
+**Betroffene Dateien:**
+- `docs/N8N_WEBHOOKS.md` (erstellt)
+- Supabase Secrets (3 Secrets hinzugefügt)
+
+**Lovable Prompts verwendet:**
+- "Stelle mir bitte nocheinmal die Eingabemaske für die secrets zur Verfügung" → Tokens: 2.800, Kosten: 0,06 EUR
+
+**Checks:**
+- [x] Secrets in Supabase hinterlegt (N8N_WEBHOOK_BASE_URL, N8N_WEBHOOK_SECRET, OPENAI_API_KEY)
+- [x] Dokumentation in docs/N8N_WEBHOOKS.md erstellt
+- [x] Webhook-URL Format dokumentiert
+- [x] Header Auth Konfiguration dokumentiert
+
+---
 
 ### 2025-10-25 14:30 UTC — Task 001: Repository Setup & Projektstruktur
 
@@ -449,8 +471,8 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 
 ## Next Steps
 
-- **Task 002:** Environment & Secrets Setup — Priority: high (n8n Webhooks, Secrets konfigurieren)
 - **Task 003:** Datenbank-Schema: Enums & Base Types — Priority: high (Enums erstellen)
+- **Task 004:** Datenbank-Schema: Profiles — Priority: high (profiles Tabelle + Auto-Trigger + RLS)
 
 ---
 
