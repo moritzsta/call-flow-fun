@@ -21,11 +21,6 @@
 
 
 
-- **Task 007** Datenbank-Schema: Companies  
-  Meta: id=Task 007 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=3 | labels=backend,database | progress=0% | tokens=0
-  - [ ] companies Tabelle erstellen
-  - [ ] Indizes für Projekt-Isolation
-  - [ ] RLS Policies setzen
 
 - **Task 008** Datenbank-Schema: Project Emails  
   Meta: id=Task 008 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=2 | labels=backend,database | progress=0% | tokens=0
@@ -331,6 +326,12 @@
   - [x] projects Tabelle erstellt
   - [x] RLS Policies für rollen-basierten Zugriff (Owner/Manager/Read-Only)
 
+- **Task 007** Datenbank-Schema: Companies  
+  Meta: id=Task 007 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=3 | labels=backend,database | progress=100% | tokens=3200
+  - [x] companies Tabelle erstellt (mit JSONB für analysis)
+  - [x] Indizes für Performance (project_id, email, phone, status, city, state)
+  - [x] RLS Policies mit has_project_access() Funktion
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -340,7 +341,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=54%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=62%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -406,6 +407,32 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 007: Datenbank-Schema Companies
+
+**Was wurde umgesetzt?**
+- companies Tabelle (id, project_id, company, industry, ceo_name, phone, email, website, address, district, city, state, analysis, status, timestamps)
+- JSONB-Feld `analysis` für Analyse Anna Daten
+- Enum `company_status` für Workflow-Tracking (found, analyzed, contacted, qualified, rejected)
+- SECURITY DEFINER Funktion: has_project_access()
+- RLS Policies: Zugriff über Projekt-Mitgliedschaft
+- Indizes für Performance (project_id, email, phone, status, city, state)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_create_companies.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 3.200, Kosten: 0,08 EUR
+
+**Checks:**
+- ✅ RLS aktiviert
+- ✅ Projekt-Isolation funktioniert
+- ✅ Status-Updates möglich
+
+**Next Steps:**
+- Task 008: Project Emails Tabelle für generierte E-Mails erstellen
+
+---
 
 ### 2025-01-24 — Task 006: Datenbank-Schema Projects
 
