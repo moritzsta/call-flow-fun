@@ -26,10 +26,6 @@
 
 
 
-- **Task 012** Realtime für Workflow-States aktivieren  
-  Meta: id=Task 012 | assignee=@AI | milestone=M1 | priority=medium | due=2025-10-31 | story=1 | labels=backend,realtime | progress=0% | tokens=0
-  - [ ] Realtime für n8n_workflow_states aktivieren
-  - [ ] Dokumentation erstellen
 
 - **Task 013** AuthContext & AuthProvider  
   Meta: id=Task 013 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-01 | story=3 | labels=frontend,auth | progress=0% | tokens=0
@@ -337,6 +333,11 @@
   - [x] has_role() Function mit SECURITY DEFINER (anti-recursive)
   - [x] RLS Policies gesetzt (Users sehen eigene Rollen)
 
+- **Task 012** Realtime für Workflow-States aktivieren  
+  Meta: id=Task 012 | assignee=@AI | milestone=M1 | priority=medium | due=2025-10-31 | story=1 | labels=backend,realtime | progress=100% | tokens=1500
+  - [x] Realtime für n8n_workflow_states aktiviert (REPLICA IDENTITY FULL)
+  - [x] Dokumentation erstellt (REALTIME_CONFIG.md)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -346,7 +347,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=92%
+Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=100%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -412,6 +413,38 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 012: Realtime für Workflow States
+
+**Was wurde umgesetzt?**
+- Realtime für n8n_workflow_states aktiviert (REPLICA IDENTITY FULL)
+- ALTER PUBLICATION supabase_realtime ADD TABLE n8n_workflow_states
+- Dokumentation erstellt (docs/REALTIME_CONFIG.md)
+- Frontend-Integration-Beispiele dokumentiert
+- Use Cases beschrieben (Status Updates, Progress Tracking, Multi-User)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_enable_realtime.sql` (automatisch erstellt)
+- `docs/REALTIME_CONFIG.md` (erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 1.500, Kosten: 0,04 EUR
+
+**Checks:**
+- ✅ REPLICA IDENTITY FULL gesetzt
+- ✅ Publication supabase_realtime erweitert
+- ✅ Dokumentation vollständig
+
+**Milestone M1 abgeschlossen!** 🎉
+- Alle Datenbank-Tabellen erstellt
+- RLS-Policies gesetzt
+- SECURITY DEFINER Funktionen implementiert
+- Realtime aktiviert
+
+**Next Steps:**
+- Milestone M2: Auth & Org/Projekt-Management (Task 013-022)
+
+---
 
 ### 2025-01-24 — Task 011: Datenbank-Schema User Roles
 
