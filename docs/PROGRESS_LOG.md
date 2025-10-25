@@ -24,10 +24,6 @@
 
 
 
-- **Task 010** Datenbank-Schema: Lookup-Tabellen (German Cities/Districts)  
-  Meta: id=Task 010 | assignee=@AI | milestone=M1 | priority=medium | due=2025-10-30 | story=1 | labels=backend,database | progress=0% | tokens=0
-  - [ ] german_cities Tabelle prüfen/erstellen
-  - [ ] german_districts Tabelle prüfen/erstellen
 
 - **Task 011** Datenbank-Schema: User Roles (SECURITY DEFINER)  
   Meta: id=Task 011 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-31 | story=3 | labels=backend,security | progress=0% | tokens=0
@@ -334,6 +330,12 @@
   - [x] n8n_workflow_states Tabelle erstellt
   - [x] RLS Policies gesetzt (Projekt-Mitglieder-Zugriff)
 
+- **Task 010** Datenbank-Schema: Lookup-Tabellen (German Cities/Districts)  
+  Meta: id=Task 010 | assignee=@AI | milestone=M1 | priority=medium | due=2025-10-30 | story=1 | labels=backend,database | progress=100% | tokens=900
+  - [x] german_cities mit RLS gesichert (Public Read)
+  - [x] german_districts mit RLS gesichert (Public Read)
+  - [x] german_companies mit RLS gesichert (Public Read)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -343,7 +345,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=77%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=85%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -409,6 +411,30 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 010: Datenbank-Schema Lookup-Tabellen
+
+**Was wurde umgesetzt?**
+- RLS aktiviert für german_cities, german_districts, german_companies
+- Public Read Policies erstellt (SELECT für alle User)
+- Lookup-Tabellen sind jetzt gesichert und read-only
+- Alle Security-Warnings behoben ✅
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_secure_lookup_tables.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 900, Kosten: 0,02 EUR
+
+**Checks:**
+- ✅ RLS aktiviert für alle drei Tabellen
+- ✅ Public Read funktioniert
+- ✅ Keine Security-Warnings mehr
+
+**Next Steps:**
+- Task 011: user_roles Tabelle mit SECURITY DEFINER Funktion erstellen
+
+---
 
 ### 2025-01-24 — Task 009: Datenbank-Schema Workflow States
 
