@@ -22,10 +22,6 @@
 
 
 
-- **Task 008** Datenbank-Schema: Project Emails  
-  Meta: id=Task 008 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=2 | labels=backend,database | progress=0% | tokens=0
-  - [ ] project_emails Tabelle erstellen
-  - [ ] RLS Policies setzen
 
 - **Task 009** Datenbank-Schema: Workflow States  
   Meta: id=Task 009 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-30 | story=2 | labels=backend,database,realtime | progress=0% | tokens=0
@@ -332,6 +328,11 @@
   - [x] Indizes für Performance (project_id, email, phone, status, city, state)
   - [x] RLS Policies mit has_project_access() Funktion
 
+- **Task 008** Datenbank-Schema: Project Emails  
+  Meta: id=Task 008 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=2 | labels=backend,database | progress=100% | tokens=2200
+  - [x] project_emails Tabelle erstellt
+  - [x] RLS Policies gesetzt (Projekt-Mitglieder-Zugriff)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -341,7 +342,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=62%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=69%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -407,6 +408,30 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 008: Datenbank-Schema Project Emails
+
+**Was wurde umgesetzt?**
+- project_emails Tabelle (id, project_id, company_id, recipient_email, subject, body, status, sent_at, timestamps)
+- Enum `email_status` für E-Mail-Tracking (draft, ready_to_send, sent, failed)
+- RLS Policies: Zugriff über has_project_access()
+- Indizes für Performance (project_id, company_id, status, sent_at)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_create_project_emails.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 2.200, Kosten: 0,05 EUR
+
+**Checks:**
+- ✅ RLS aktiviert
+- ✅ Status-Tracking funktioniert
+- ✅ E-Mails sind projekt-isoliert
+
+**Next Steps:**
+- Task 009: n8n_workflow_states Tabelle für Workflow-Tracking erstellen
+
+---
 
 ### 2025-01-24 — Task 007: Datenbank-Schema Companies
 
