@@ -1,0 +1,535 @@
+# Progress Log - Cold Calling App
+
+**Projekt:** Cold Calling Automatisierungs-Plattform  
+**Stand:** 2025-10-25 00:00 UTC  
+**Phase:** Setup & Planung
+
+---
+
+## Status Board
+
+### Backlog
+
+- **Task 001** Repository Setup & Projektstruktur  
+  Meta: id=Task 001 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-26 | story=2 | labels=setup,backend | progress=0% | tokens=0
+  - [ ] Lovable Cloud aktivieren
+  - [ ] Projektstruktur dokumentieren
+  - [ ] Dependencies prüfen
+
+- **Task 002** Environment & Secrets Setup  
+  Meta: id=Task 002 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-26 | story=2 | labels=setup,security | progress=0% | tokens=0
+  - [ ] Secrets in Lovable Cloud hinzufügen
+  - [ ] Webhook-URLs dokumentieren
+
+- **Task 003** Datenbank-Schema: Enums & Base Types  
+  Meta: id=Task 003 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=1 | labels=backend,database | progress=0% | tokens=0
+  - [ ] Enums erstellen (app_role, company_status, email_status, workflow_status)
+
+- **Task 004** Datenbank-Schema: Profiles  
+  Meta: id=Task 004 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=2 | labels=backend,auth | progress=0% | tokens=0
+  - [ ] profiles Tabelle erstellen
+  - [ ] Trigger für Auto-Profile-Erstellung
+  - [ ] RLS Policies setzen
+
+- **Task 005** Datenbank-Schema: Organizations  
+  Meta: id=Task 005 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=3 | labels=backend,database | progress=0% | tokens=0
+  - [ ] organizations Tabelle erstellen
+  - [ ] organization_members Tabelle erstellen
+  - [ ] RLS Policies setzen
+
+- **Task 006** Datenbank-Schema: Projects  
+  Meta: id=Task 006 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=2 | labels=backend,database | progress=0% | tokens=0
+  - [ ] projects Tabelle erstellen
+  - [ ] RLS Policies für Projekt-Isolation
+
+- **Task 007** Datenbank-Schema: Companies  
+  Meta: id=Task 007 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=3 | labels=backend,database | progress=0% | tokens=0
+  - [ ] companies Tabelle erstellen
+  - [ ] Indizes für Projekt-Isolation
+  - [ ] RLS Policies setzen
+
+- **Task 008** Datenbank-Schema: Project Emails  
+  Meta: id=Task 008 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=2 | labels=backend,database | progress=0% | tokens=0
+  - [ ] project_emails Tabelle erstellen
+  - [ ] RLS Policies setzen
+
+- **Task 009** Datenbank-Schema: Workflow States  
+  Meta: id=Task 009 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-30 | story=2 | labels=backend,database,realtime | progress=0% | tokens=0
+  - [ ] n8n_workflow_states Tabelle erstellen
+  - [ ] RLS Policies setzen
+
+- **Task 010** Datenbank-Schema: Lookup-Tabellen (German Cities/Districts)  
+  Meta: id=Task 010 | assignee=@AI | milestone=M1 | priority=medium | due=2025-10-30 | story=1 | labels=backend,database | progress=0% | tokens=0
+  - [ ] german_cities Tabelle prüfen/erstellen
+  - [ ] german_districts Tabelle prüfen/erstellen
+
+- **Task 011** Datenbank-Schema: User Roles (SECURITY DEFINER)  
+  Meta: id=Task 011 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-31 | story=3 | labels=backend,security | progress=0% | tokens=0
+  - [ ] user_roles Tabelle erstellen
+  - [ ] has_role() Function mit SECURITY DEFINER
+  - [ ] RLS Policies setzen
+
+- **Task 012** Realtime für Workflow-States aktivieren  
+  Meta: id=Task 012 | assignee=@AI | milestone=M1 | priority=medium | due=2025-10-31 | story=1 | labels=backend,realtime | progress=0% | tokens=0
+  - [ ] Realtime für n8n_workflow_states aktivieren
+  - [ ] Dokumentation erstellen
+
+- **Task 013** AuthContext & AuthProvider  
+  Meta: id=Task 013 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-01 | story=3 | labels=frontend,auth | progress=0% | tokens=0
+  - [ ] AuthContext erstellen
+  - [ ] AuthProvider implementieren
+  - [ ] Integration in App.tsx
+
+- **Task 014** ProtectedRoute Component  
+  Meta: id=Task 014 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-01 | story=2 | labels=frontend,auth | progress=0% | tokens=0
+  - [ ] ProtectedRoute Component erstellen
+  - [ ] Redirect-Logik implementieren
+
+- **Task 015** Auth-Pages: Login & Registrierung  
+  Meta: id=Task 015 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-02 | story=5 | labels=frontend,auth,ui | progress=0% | tokens=0
+  - [ ] Auth.tsx Page erstellen
+  - [ ] Login-Form implementieren
+  - [ ] Registrierungs-Form implementieren
+  - [ ] Validation mit zod
+
+- **Task 016** Profile-Settings Page  
+  Meta: id=Task 016 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-03 | story=3 | labels=frontend,auth,ui | progress=0% | tokens=0
+  - [ ] ProfileSettings.tsx erstellen
+  - [ ] Theme-Switcher implementieren
+  - [ ] Sprache-Switcher implementieren
+
+- **Task 017** Organization Management: Create & List  
+  Meta: id=Task 017 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-04 | story=5 | labels=frontend,organizations | progress=0% | tokens=0
+  - [ ] Organizations.tsx Page erstellen
+  - [ ] useOrganizations Hook implementieren
+  - [ ] OrganizationCard Component erstellen
+
+- **Task 018** Organization Members: Invite & Manage  
+  Meta: id=Task 018 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-05 | story=5 | labels=frontend,organizations | progress=0% | tokens=0
+  - [ ] OrganizationSettings.tsx erstellen
+  - [ ] Member-Management implementieren
+  - [ ] Rollen-Verwaltung implementieren
+
+- **Task 019** Project Management: Create & List  
+  Meta: id=Task 019 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-06 | story=5 | labels=frontend,projects | progress=0% | tokens=0
+  - [ ] Projects.tsx Page erstellen
+  - [ ] useProjects Hook implementieren
+  - [ ] ProjectCard Component erstellen
+
+- **Task 020** Project Dashboard: Overview  
+  Meta: id=Task 020 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-07 | story=5 | labels=frontend,projects,ui | progress=0% | tokens=0
+  - [ ] ProjectDashboard.tsx erstellen
+  - [ ] KPI-Cards implementieren
+  - [ ] Action-Buttons implementieren
+
+- **Task 021** Project Settings: Archive & Delete  
+  Meta: id=Task 021 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-08 | story=3 | labels=frontend,projects | progress=0% | tokens=0
+  - [ ] ProjectSettings.tsx erstellen
+  - [ ] Archive-Funktion implementieren
+  - [ ] Delete-Funktion mit Bestätigung
+
+- **Task 022** Routing & Navigation Setup  
+  Meta: id=Task 022 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-09 | story=3 | labels=frontend,navigation | progress=0% | tokens=0
+  - [ ] Vollständiges Routing einrichten
+  - [ ] Navigation Component erstellen
+  - [ ] Layout Component erstellen
+
+- **Task 023** Webhook-Integration: Finder Felix Trigger  
+  Meta: id=Task 023 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-10 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
+  - [ ] FinderFelixDialog Component erstellen
+  - [ ] useWorkflowTrigger Hook implementieren
+  - [ ] Webhook-Call implementieren
+
+- **Task 024** Webhook-Integration: Analyse Anna Trigger  
+  Meta: id=Task 024 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-11 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
+  - [ ] AnalyseAnnaDialog Component erstellen
+  - [ ] Multi-Select für Firmen implementieren
+  - [ ] Webhook-Call implementieren
+
+- **Task 025** Webhook-Integration: Pitch Paul Trigger  
+  Meta: id=Task 025 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-12 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
+  - [ ] PitchPaulDialog Component erstellen
+  - [ ] E-Mail-Generierung triggern
+  - [ ] Webhook-Call implementieren
+
+- **Task 026** Webhook-Integration: E-Mail Versand (Single)  
+  Meta: id=Task 026 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-13 | story=3 | labels=frontend,emails,integration | progress=0% | tokens=0
+  - [ ] SendEmailButton Component erstellen
+  - [ ] Status-Update implementieren
+  - [ ] Error-Handling implementieren
+
+- **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
+  Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=0% | tokens=0
+  - [ ] SendEmailsBatchButton Component erstellen
+  - [ ] Batch-Versand implementieren
+  - [ ] Progress-Anzeige implementieren
+
+- **Task 028** Workflow-Status: Realtime Updates  
+  Meta: id=Task 028 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-15 | story=5 | labels=frontend,workflows,realtime | progress=0% | tokens=0
+  - [ ] useWorkflowStatus Hook implementieren
+  - [ ] WorkflowStatusBadge Component erstellen
+  - [ ] Realtime Subscription einrichten
+
+- **Task 029** Companies List: Anzeige & Filter  
+  Meta: id=Task 029 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-16 | story=5 | labels=frontend,companies,ui | progress=0% | tokens=0
+  - [ ] ProjectCompanies.tsx Page erstellen
+  - [ ] useCompanies Hook implementieren
+  - [ ] Filter & Sortierung implementieren
+
+- **Task 030** Company Detail View  
+  Meta: id=Task 030 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-17 | story=5 | labels=frontend,companies,ui | progress=0% | tokens=0
+  - [ ] CompanyDetail.tsx Page erstellen
+  - [ ] Analysis-Display implementieren
+  - [ ] Workflow-Trigger implementieren
+
+- **Task 031** Company Import/Export (optional)  
+  Meta: id=Task 031 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-18 | story=5 | labels=frontend,companies,import | progress=0% | tokens=0
+  - [ ] CSV-Import implementieren
+  - [ ] CSV-Export implementieren
+  - [ ] Error-Handling implementieren
+
+- **Task 032** Project Emails List: Anzeige & Filter  
+  Meta: id=Task 032 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-19 | story=5 | labels=frontend,emails,ui | progress=0% | tokens=0
+  - [ ] ProjectEmails.tsx Page erstellen
+  - [ ] useEmails Hook implementieren
+  - [ ] Filter & Sortierung implementieren
+
+- **Task 033** Email Detail View & Editor  
+  Meta: id=Task 033 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-20 | story=5 | labels=frontend,emails,ui | progress=0% | tokens=0
+  - [ ] EmailDetail.tsx Page erstellen
+  - [ ] HTML-Vorschau implementieren
+  - [ ] Edit-Mode implementieren
+
+- **Task 034** Email Templates (optional)  
+  Meta: id=Task 034 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-21 | story=5 | labels=frontend,emails,templates | progress=0% | tokens=0
+  - [ ] email_templates Tabelle erstellen
+  - [ ] Template-Management implementieren
+  - [ ] Template-Integration in Pitch Paul
+
+- **Task 035** Dashboard: Landing Page  
+  Meta: id=Task 035 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-22 | story=5 | labels=frontend,dashboard,ui | progress=0% | tokens=0
+  - [ ] Dashboard.tsx Page erstellen
+  - [ ] Organization-Cards implementieren
+  - [ ] Active-Workflows anzeigen
+
+- **Task 036** Notifications & Toast System  
+  Meta: id=Task 036 | assignee=@AI | milestone=M3 | priority=medium | due=2025-11-23 | story=2 | labels=frontend,notifications | progress=0% | tokens=0
+  - [ ] notifications.ts Helper erstellen
+  - [ ] sonner Integration
+  - [ ] Toast-Calls vereinheitlichen
+
+- **Task 037** Design System: Theme & HSL-Tokens  
+  Meta: id=Task 037 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-24 | story=3 | labels=frontend,design,ui | progress=0% | tokens=0
+  - [ ] index.css mit HSL-Tokens aktualisieren
+  - [ ] tailwind.config.ts aktualisieren
+  - [ ] Design System dokumentieren
+
+- **Task 038** Responsive Design: Mobile-First  
+  Meta: id=Task 038 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-25 | story=5 | labels=frontend,responsive,ui | progress=0% | tokens=0
+  - [ ] Mobile-Kompatibilität prüfen
+  - [ ] use-mobile Hook erstellen
+  - [ ] Adaptive Components implementieren
+
+- **Task 039** Internationalisierung (i18n) Setup (optional)  
+  Meta: id=Task 039 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-26 | story=5 | labels=frontend,i18n | progress=0% | tokens=0
+  - [ ] react-i18next installieren
+  - [ ] Sprachdateien erstellen (DE/EN)
+  - [ ] Language-Switcher implementieren
+
+- **Task 040** Loading States & Skeletons  
+  Meta: id=Task 040 | assignee=@AI | milestone=M4 | priority=medium | due=2025-11-27 | story=3 | labels=frontend,ui | progress=0% | tokens=0
+  - [ ] Skeleton-Components erstellen
+  - [ ] Loading-States in alle Pages integrieren
+  - [ ] Error-States implementieren
+
+- **Task 041** Error Handling & Error Boundaries  
+  Meta: id=Task 041 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-28 | story=3 | labels=frontend,error-handling | progress=0% | tokens=0
+  - [ ] ErrorBoundary Component erstellen
+  - [ ] ErrorFallback Component erstellen
+  - [ ] Integration in App.tsx
+
+- **Task 042** Performance: Query Optimization  
+  Meta: id=Task 042 | assignee=@AI | milestone=M4 | priority=medium | due=2025-11-29 | story=3 | labels=backend,performance | progress=0% | tokens=0
+  - [ ] Indizes erstellen
+  - [ ] Queries optimieren
+  - [ ] Pagination implementieren
+
+- **Task 043** Accessibility (A11y) Check  
+  Meta: id=Task 043 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-30 | story=5 | labels=frontend,accessibility | progress=0% | tokens=0
+  - [ ] A11y-Audit durchführen
+  - [ ] aria-labels hinzufügen
+  - [ ] Keyboard-Navigation testen
+
+- **Task 044** Landing Page (Public)  
+  Meta: id=Task 044 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-01 | story=5 | labels=frontend,landing,ui | progress=0% | tokens=0
+  - [ ] Landing.tsx Page erstellen
+  - [ ] Hero-Sektion implementieren
+  - [ ] Features-Sektion implementieren
+
+- **Task 045** SEO & Meta Tags  
+  Meta: id=Task 045 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-02 | story=2 | labels=seo | progress=0% | tokens=0
+  - [ ] Meta-Tags in index.html setzen
+  - [ ] robots.txt prüfen
+  - [ ] Open Graph Tags setzen
+
+- **Task 046** Documentation: User Guide  
+  Meta: id=Task 046 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-03 | story=3 | labels=docs | progress=0% | tokens=0
+  - [ ] USER_GUIDE.md erstellen
+  - [ ] Workflows dokumentieren
+  - [ ] FAQ erstellen
+
+- **Task 047** Documentation: Technical Docs  
+  Meta: id=Task 047 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-04 | story=3 | labels=docs | progress=0% | tokens=0
+  - [ ] API_REFERENCE.md erstellen
+  - [ ] DEPLOYMENT.md erstellen
+  - [ ] SOFTWARE_DOKU.md aktualisieren
+
+- **Task 048** Progress Log Setup  
+  Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
+  - [x] PROGRESS_LOG.md erstellt
+  - [x] Status Board initialisiert
+  - [x] Milestones definiert
+
+- **Task 049** Testing: Unit Tests Setup (optional)  
+  Meta: id=Task 049 | assignee=@AI | milestone=M5 | priority=low | due=2025-12-05 | story=5 | labels=testing | progress=0% | tokens=0
+  - [ ] vitest installieren
+  - [ ] Beispiel-Tests erstellen
+  - [ ] TESTING.md dokumentieren
+
+- **Task 050** Testing: Integration Tests (optional)  
+  Meta: id=Task 050 | assignee=@AI | milestone=M5 | priority=low | due=2025-12-06 | story=5 | labels=testing | progress=0% | tokens=0
+  - [ ] E2E-Tests einrichten
+  - [ ] Kritische Flows testen
+  - [ ] TESTING.md aktualisieren
+
+- **Task 051** Deployment: Lovable Cloud Production  
+  Meta: id=Task 051 | assignee=@AI | milestone=M5 | priority=high | due=2025-12-07 | story=3 | labels=deployment | progress=0% | tokens=0
+  - [ ] Production-Deployment durchführen
+  - [ ] Live-Tests durchführen
+  - [ ] Production-URL dokumentieren
+
+- **Task 052** Handover & Final Checks  
+  Meta: id=Task 052 | assignee=@AI | milestone=M5 | priority=high | due=2025-12-08 | story=5 | labels=handover,docs | progress=0% | tokens=0
+  - [ ] HANDOVER.md erstellen
+  - [ ] Finale Checkliste abarbeiten
+  - [ ] Projekt-Übergabe vorbereiten
+
+### In Progress
+
+- **Task 048** Progress Log Setup  
+  Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
+  - [x] PROGRESS_LOG.md erstellt
+
+### Done
+
+---
+
+## Milestones
+
+### M1: Backend & Setup
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=8%
+
+**Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
+
+**Key Deliverables:**
+- Lovable Cloud Backend aktiv
+- Alle Datenbank-Tabellen mit RLS
+- Realtime für Workflow-Status
+- Dokumentation der Projektstruktur
+
+---
+
+### M2: Auth & Org/Projekt-Management
+Meta: id=M2 | status=planned | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=0%
+
+**Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
+
+**Key Deliverables:**
+- Login & Registrierung funktioniert
+- Organisationen & Projekte können erstellt werden
+- Member-Management mit Rollen
+- Vollständiges Routing
+
+---
+
+### M3: Core Features (Workflows & Data)
+Meta: id=M3 | status=planned | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=0%
+
+**Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
+
+**Key Deliverables:**
+- Alle 3 KI-Workflows integriert (Felix, Anna, Paul)
+- Firmen-Liste mit Filter & Detail-View
+- E-Mail-Liste mit Editor & Versand
+- Dashboard mit KPIs
+
+---
+
+### M4: UI/UX & Polish
+Meta: id=M4 | status=planned | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=0%
+
+**Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
+
+**Key Deliverables:**
+- Design System mit HSL-Tokens
+- Mobile-First Responsive Design
+- A11y-Konform (WCAG AA)
+- Vollständige Dokumentation
+
+---
+
+### M5: Testing & Deployment
+Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Task 049, Task 050, Task 051, Task 052] | progress=0%
+
+**Beschreibung:** Testing (optional), Production-Deployment, Handover.
+
+**Key Deliverables:**
+- App ist live auf Lovable Cloud
+- Alle Features funktionieren in Production
+- Handover-Dokumentation vollständig
+
+---
+
+## Change Log
+
+### 2025-10-25 00:00 UTC — Task 048: Progress Log Setup
+
+**Was wurde umgesetzt?**
+- PROGRESS_LOG.md initialisiert
+- Status Board mit allen 52 Tasks gefüllt
+- 5 Milestones definiert (M1-M5)
+- Parser-kompatibles Format implementiert
+
+**Betroffene Dateien:**
+- `docs/PROGRESS_LOG.md` (erstellt)
+
+**Lovable Prompts verwendet:**
+- "Erstelle PROGRESS_LOG.md nach Parser-Schema" → Tokens: 3.500, Kosten: 0,07 EUR
+
+**Checks:**
+- [x] PROGRESS_LOG.md ist erstellt
+- [x] Status Board ist gefüllt
+- [x] Milestones sind definiert
+- [x] Parser-Schema ist eingehalten
+
+---
+
+## Next Steps
+
+- Task 001: Repository Setup & Projektstruktur — Priority: high
+- Task 002: Environment & Secrets Setup — Priority: high
+- Task 003: Datenbank-Schema: Enums & Base Types — Priority: high
+
+---
+
+## Decisions (ADR-Light)
+
+### DEC-001: Parser-Schema für PROGRESS_LOG.md
+
+- **Kontext:** Projekt-Tracking muss maschinenlesbar sein für automatisierte Auswertung
+- **Entscheidung:** Verwendung eines strukturierten Parser-Schemas mit Meta-Zeilen
+- **Begründung:** Ermöglicht automatisierte Extraktion von Task-Status, Milestones und Kosten
+- **Alternativen:** Freiform-Markdown (verworfen: nicht maschinenlesbar), JSON (verworfen: nicht menschenlesbar)
+- **Auswirkungen:** Alle Updates müssen exaktes Format einhalten; ermöglicht aber automatische Reports
+- **Datum:** 2025-10-25
+
+---
+
+### DEC-002: Milestone-Struktur (5 Phasen)
+
+- **Kontext:** 52 Tasks müssen sinnvoll gruppiert werden
+- **Entscheidung:** 5 Milestones: Setup, Auth/Org, Core Features, UI/UX, Testing/Deployment
+- **Begründung:** Logische Abhängigkeiten und klare Meilensteine für Fortschrittsmessung
+- **Alternativen:** 3 Milestones (zu grob), 10 Milestones (zu granular)
+- **Auswirkungen:** Ermöglicht klare Kommunikation des Projektfortschritts an Stakeholder
+- **Datum:** 2025-10-25
+
+---
+
+## Issues/Blocker
+
+### ISS-001: n8n-Workflow-Setup parallel erforderlich
+
+Meta: id=ISS-001 | severity=medium | status=open | owner=@AI | related_tasks=[Task 023, Task 024, Task 025, Task 026, Task 027] | related_milestones=[M3] | next=N8N_WEBHOOKS.md dokumentieren und Webhook-URLs bereitstellen
+
+**Details:** Die Workflow-Integration (Tasks 023-027) erfordert funktionierende n8n-Webhooks. Diese müssen parallel zum Frontend-Development eingerichtet werden. Webhook-URLs müssen in Task 002 dokumentiert werden.
+
+**Maßnahmen:**
+- Task 002: N8N_WEBHOOKS.md dokumentieren
+- Webhook-URLs als Secrets in Lovable Cloud hinterlegen
+- Test-Endpoints für lokale Entwicklung bereitstellen
+
+---
+
+## Tests/Audit
+
+### Security Audit (geplant)
+
+- [ ] RLS Policies getestet (Cross-Tenant-Isolation)
+- [ ] SECURITY DEFINER Functions geprüft
+- [ ] Storage-Zugriff nur über signierte URLs
+- [ ] Secrets korrekt in Lovable Cloud gespeichert
+
+### Performance Tests (geplant)
+
+- [ ] Lighthouse Score > 90/100
+- [ ] FCP < 1.5s
+- [ ] LCP < 2.5s
+- [ ] Query-Performance mit großen Datenmengen
+
+### Accessibility Tests (geplant)
+
+- [ ] WCAG AA Kontrast-Ratios (4.5:1 für Text)
+- [ ] Keyboard-Navigation funktioniert
+- [ ] Screenreader-Kompatibilität (NVDA/VoiceOver)
+
+---
+
+## Kosten
+
+**Gesamt-Token-Summe:** 3.500 Tokens  
+**Geschätzt für MVP (M1-M3):** 150.000 Tokens  
+**Geschätzt für Full-Release (M1-M5):** 200.000 Tokens  
+**Ungefähre Kosten (EUR):** ~3,00 EUR (bei 0,00002 EUR/Token)
+
+**Breakdown (High-Cost Tasks - Schätzung):**
+- Task 023-027 (Workflow-Integration): ~8.000 Tokens pro Task = 40.000 Tokens
+- Task 029-030 (Companies Management): ~8.000 Tokens
+- Task 032-033 (Email Management): ~8.000 Tokens
+- Task 037-038 (Design System & Responsive): ~12.000 Tokens
+- Task 043 (A11y Check): ~6.000 Tokens
+- Restliche Tasks: ~120.000 Tokens
+
+**Hinweis:** Kostenberechnung basiert auf geschätztem Lovable AI Pricing (google/gemini-2.5-flash: ~0,00002 EUR/Token). Tatsächliche Kosten können variieren je nach Komplexität und Iterationen.
+
+---
+
+## Notizen
+
+### Projektkontext
+
+**Cold Calling App** ist eine Plattform zur Automatisierung der Kaltakquise im Sales-Bereich. Sie orchestriert drei KI-gestützte n8n-Workflows:
+
+1. **Finder Felix**: Webscraping für Firmendaten (Gelbe Seiten)
+2. **Analyse Anna**: KI-basierte Webseitenanalyse (Firecrawl + GPT)
+3. **Pitch Paul**: Personalisierte E-Mail-Generierung (GPT-4)
+
+Die Anwendung unterstützt Team-Kollaboration mit Organisationen, Projekten und Rollen-Management.
+
+### Technologie-Stack
+
+- **Frontend**: React, Vite, Tailwind CSS, TypeScript
+- **Backend**: Lovable Cloud (Supabase)
+- **Database**: PostgreSQL (Supabase)
+- **Realtime**: Supabase Realtime
+- **Auth**: Supabase Auth
+- **Workflows**: n8n (externe Integration)
+- **AI**: OpenAI GPT-4 (via n8n)
+
+### Besonderheiten
+
+- Multi-Tenant-Architektur mit Organisation-Projekten
+- Rollen-basierte Zugriffskontrolle (Owner/Manager/Read-Only)
+- Realtime-Updates für Workflow-Status
+- Vollständige RLS-Policies für Datenisolation
+- HSL-basiertes Design System (Light/Dark Mode)
