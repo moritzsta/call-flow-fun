@@ -1,7 +1,7 @@
 # BUILD_PROMPTS.md – Cold Calling App
 
 **Projekt**: Cold Calling Automatisierungs-Plattform  
-**Stack**: Lovable (React, Vite, Tailwind), Supabase (Lovable Cloud), n8n Workflows  
+**Stack**: Lovable (React, Vite, Tailwind), Supabase (externe Datenbank), n8n Workflows  
 **Version**: 1.0  
 **Stand**: 2025-10-25
 
@@ -35,21 +35,21 @@ Die Anwendung unterstützt Team-Kollaboration mit Organisationen, Projekten und 
 
 ## 001 Repository Setup & Projektstruktur
 
-**Ziel**: Projektstruktur einrichten, Dependencies installieren, Lovable Cloud aktivieren.
+**Ziel**: Projektstruktur einrichten, Dependencies installieren, bestehende Supabase-Datenbank nutzen.
 
 **ToDo**:
-- Lovable Cloud aktivieren (Supabase Backend)
+- ✅ Bestehende Supabase-Datenbank ist bereits verbunden (externe Supabase-Instanz)
 - Projektstruktur planen: `src/components/`, `src/hooks/`, `src/lib/`
 - Package.json prüfen und ggf. ergänzen: `@supabase/supabase-js`, `@tanstack/react-query`, `zod`
 - `.env`-Vorlage dokumentieren (für lokale Entwicklung, falls nötig)
 
 **Output**:
-- Aktiviertes Lovable Cloud Backend
+- Bestehende Supabase-Datenbank ist verbunden und nutzbar
 - Dokumentierte Projektstruktur in `docs/PROJECT_STRUCTURE.md`
 
 **Checks**:
-- [ ] Lovable Cloud ist aktiviert
-- [ ] Supabase-Credentials sind verfügbar
+- [x] Supabase-Datenbank ist verbunden (externe Instanz)
+- [x] Supabase-Credentials sind verfügbar
 - [ ] Dependencies sind installiert
 
 **Weiter**: 002
@@ -61,14 +61,14 @@ Die Anwendung unterstützt Team-Kollaboration mit Organisationen, Projekten und 
 **Ziel**: Secrets für n8n-Webhooks und KI-APIs konfigurieren.
 
 **ToDo**:
-- Secrets in Lovable Cloud hinzufügen:
+- Secrets in Supabase konfigurieren:
   - `N8N_WEBHOOK_BASE_URL` (z.B. `https://your-n8n.app`)
   - `N8N_WEBHOOK_SECRET` (für Signature Verification)
   - `OPENAI_API_KEY` (falls direkt genutzt, sonst n8n managed)
 - Dokumentiere Webhook-URLs in `docs/N8N_WEBHOOKS.md`
 
 **Output**:
-- Secrets in Lovable Cloud hinzugefügt
+- Secrets in Supabase konfiguriert
 - `docs/N8N_WEBHOOKS.md` mit Webhook-Endpunkten
 
 **Checks**:
