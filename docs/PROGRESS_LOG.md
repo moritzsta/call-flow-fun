@@ -20,10 +20,6 @@
 
 
 
-- **Task 006** Datenbank-Schema: Projects  
-  Meta: id=Task 006 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=2 | labels=backend,database | progress=0% | tokens=0
-  - [ ] projects Tabelle erstellen
-  - [ ] RLS Policies für Projekt-Isolation
 
 - **Task 007** Datenbank-Schema: Companies  
   Meta: id=Task 007 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-29 | story=3 | labels=backend,database | progress=0% | tokens=0
@@ -330,6 +326,11 @@
   - [x] organization_members Tabelle erstellt
   - [x] RLS Policies mit SECURITY DEFINER Funktionen
 
+- **Task 006** Datenbank-Schema: Projects  
+  Meta: id=Task 006 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=2 | labels=backend,database | progress=100% | tokens=2400
+  - [x] projects Tabelle erstellt
+  - [x] RLS Policies für rollen-basierten Zugriff (Owner/Manager/Read-Only)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -339,7 +340,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=46%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=54%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -405,6 +406,32 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 006: Datenbank-Schema Projects
+
+**Was wurde umgesetzt?**
+- projects Tabelle (id, organization_id, title, description, archived, timestamps)
+- RLS Policies: Rollen-basierter Zugriff
+  - Alle Members können Projekte sehen (SELECT)
+  - Owner + Manager können Projekte erstellen/bearbeiten/löschen (INSERT/UPDATE/DELETE)
+  - Read-Only Member haben nur Lesezugriff
+- Indizes für Performance (organization_id, archived)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_create_projects.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 2.400, Kosten: 0,06 EUR
+
+**Checks:**
+- ✅ RLS aktiviert
+- ✅ Rollen-basierte Policies funktionieren
+- ✅ Projekt-Isolation über Organization
+
+**Next Steps:**
+- Task 007: Companies Tabelle mit Projekt-Bezug erstellen
+
+---
 
 ### 2025-01-24 — Task 005: Datenbank-Schema Organizations
 
