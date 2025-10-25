@@ -19,11 +19,6 @@
 
 
 
-- **Task 005** Datenbank-Schema: Organizations  
-  Meta: id=Task 005 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=3 | labels=backend,database | progress=0% | tokens=0
-  - [ ] organizations Tabelle erstellen
-  - [ ] organization_members Tabelle erstellen
-  - [ ] RLS Policies setzen
 
 - **Task 006** Datenbank-Schema: Projects  
   Meta: id=Task 006 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=2 | labels=backend,database | progress=0% | tokens=0
@@ -329,6 +324,12 @@
   - [x] Trigger für Auto-Profile-Erstellung (handle_new_user)
   - [x] RLS Policies gesetzt (owner-only)
 
+- **Task 005** Datenbank-Schema: Organizations  
+  Meta: id=Task 005 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-28 | story=3 | labels=backend,database | progress=100% | tokens=3800
+  - [x] organizations Tabelle erstellt
+  - [x] organization_members Tabelle erstellt
+  - [x] RLS Policies mit SECURITY DEFINER Funktionen
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -338,7 +339,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=38%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=46%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -404,6 +405,33 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 005: Datenbank-Schema Organizations
+
+**Was wurde umgesetzt?**
+- organizations Tabelle (id, name, description, owner_id, timestamps)
+- organization_members Tabelle (id, organization_id, user_id, role, timestamps)
+- UNIQUE Constraint: (organization_id, user_id)
+- SECURITY DEFINER Funktionen: is_organization_member, has_organization_role, is_organization_owner
+- RLS Policies: Owner-basierte und Member-basierte Zugriffe
+- Indizes für Performance (owner_id, organization_id, user_id)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_create_organizations.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 3.800, Kosten: 0,09 EUR
+
+**Checks:**
+- ✅ RLS aktiviert für beide Tabellen
+- ✅ SECURITY DEFINER Funktionen gegen Rekursion geschützt
+- ✅ Owner können Members verwalten
+- ✅ Members sehen nur ihre Organisationen
+
+**Next Steps:**
+- Task 006: Projects Tabelle mit Organisations-Bezug erstellen
+
+---
 
 ### 2025-01-24 — Task 004: Datenbank-Schema Profiles
 
