@@ -23,10 +23,6 @@
 
 
 
-- **Task 009** Datenbank-Schema: Workflow States  
-  Meta: id=Task 009 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-30 | story=2 | labels=backend,database,realtime | progress=0% | tokens=0
-  - [ ] n8n_workflow_states Tabelle erstellen
-  - [ ] RLS Policies setzen
 
 - **Task 010** Datenbank-Schema: Lookup-Tabellen (German Cities/Districts)  
   Meta: id=Task 010 | assignee=@AI | milestone=M1 | priority=medium | due=2025-10-30 | story=1 | labels=backend,database | progress=0% | tokens=0
@@ -333,6 +329,11 @@
   - [x] project_emails Tabelle erstellt
   - [x] RLS Policies gesetzt (Projekt-Mitglieder-Zugriff)
 
+- **Task 009** Datenbank-Schema: Workflow States  
+  Meta: id=Task 009 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-30 | story=2 | labels=backend,database,realtime | progress=100% | tokens=2500
+  - [x] n8n_workflow_states Tabelle erstellt
+  - [x] RLS Policies gesetzt (Projekt-Mitglieder-Zugriff)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -342,7 +343,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=69%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=77%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -408,6 +409,34 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-01-24 — Task 009: Datenbank-Schema Workflow States
+
+**Was wurde umgesetzt?**
+- n8n_workflow_states Tabelle (id, project_id, workflow_name, status, trigger_data, result_summary, started_at, completed_at, user_id, timestamps)
+- CHECK Constraint für workflow_name ('finder_felix', 'analyse_anna', 'pitch_paul', 'email_sender')
+- Enum `workflow_status` für Status-Tracking (pending, running, completed, failed)
+- RLS Policies: Zugriff über has_project_access()
+- Indizes für Performance (project_id, workflow_name, status, user_id)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_create_n8n_workflow_states.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- Fortsetzung → Tokens: 2.500, Kosten: 0,06 EUR
+
+**Checks:**
+- ✅ RLS aktiviert
+- ✅ Workflow-Namen validiert (CHECK constraint)
+- ✅ Status-Tracking funktioniert
+
+**Hinweis:**
+- Realtime wird in Task 012 aktiviert
+
+**Next Steps:**
+- Task 010: Lookup-Tabellen (german_cities, german_districts) mit RLS absichern
+
+---
 
 ### 2025-01-24 — Task 008: Datenbank-Schema Project Emails
 

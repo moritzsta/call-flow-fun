@@ -172,6 +172,56 @@ export type Database = {
         }
         Relationships: []
       }
+      n8n_workflow_states: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          project_id: string
+          result_summary: Json | null
+          started_at: string
+          status: Database["public"]["Enums"]["workflow_status"]
+          trigger_data: Json | null
+          updated_at: string
+          user_id: string
+          workflow_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          project_id: string
+          result_summary?: Json | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["workflow_status"]
+          trigger_data?: Json | null
+          updated_at?: string
+          user_id: string
+          workflow_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          project_id?: string
+          result_summary?: Json | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["workflow_status"]
+          trigger_data?: Json | null
+          updated_at?: string
+          user_id?: string
+          workflow_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "n8n_workflow_states_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
