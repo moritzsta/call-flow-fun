@@ -17,9 +17,6 @@
   - [x] Dependencies geprüft (alle vorhanden)
 
 
-- **Task 003** Datenbank-Schema: Enums & Base Types  
-  Meta: id=Task 003 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=1 | labels=backend,database | progress=0% | tokens=0
-  - [ ] Enums erstellen (app_role, company_status, email_status, workflow_status)
 
 - **Task 004** Datenbank-Schema: Profiles  
   Meta: id=Task 004 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=2 | labels=backend,auth | progress=0% | tokens=0
@@ -327,7 +324,11 @@
   - [x] Secrets in Supabase hinzugefügt (N8N_WEBHOOK_BASE_URL, N8N_WEBHOOK_SECRET, OPENAI_API_KEY)
   - [x] Webhook-Dokumentation erstellt (docs/N8N_WEBHOOKS.md)
 
-- **Task 048** Progress Log Setup  
+- **Task 003** Datenbank-Schema: Enums & Base Types  
+  Meta: id=Task 003 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-27 | story=1 | labels=backend,database | progress=100% | tokens=1200
+  - [x] Enums erstellt (app_role, company_status, email_status, workflow_status)
+
+- **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
 
@@ -336,7 +337,7 @@
 ## Milestones
 
 ### M1: Backend & Setup
-Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=23%
+Meta: id=M1 | status=in_progress | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=31%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
@@ -400,6 +401,34 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ---
 
 %%%%%%%%%%%%
+
+## Change Log
+
+### 2025-01-24 — Task 003: Datenbank-Schema Enums
+
+**Was wurde umgesetzt?**
+- Enums erstellt: `app_role` (owner, manager, read_only)
+- Enums erstellt: `company_status` (found, analyzed, contacted, qualified, rejected)
+- Enums erstellt: `email_status` (draft, ready_to_send, sent, failed)
+- Enums erstellt: `workflow_status` (pending, running, completed, failed)
+
+**Betroffene Dateien:**
+- `supabase/migrations/*_create_enums.sql` (automatisch erstellt)
+
+**Lovable Prompts verwendet:**
+- "Perfekt. Dann bitte nach den Vorgaben in deinem Knowledge fortfahren!" → Tokens: 1.200, Kosten: 0,03 EUR
+
+**Checks:**
+- ✅ Enums sind in Supabase verfügbar
+- ✅ Können in zukünftigen Tabellen verwendet werden
+
+**Hinweis:**
+- ⚠️ Bestehende Tabellen (german_cities, german_companies, german_districts) ohne RLS → wird in Task 010 adressiert
+
+**Next Steps:**
+- Task 004: Profiles Tabelle mit Trigger erstellen
+
+---
 
 ### 2025-01-24 — Task 002: Environment & Secrets Setup
 
