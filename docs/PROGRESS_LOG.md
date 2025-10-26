@@ -122,10 +122,13 @@
   - [x] Webhook-Call implementiert (pitch_paul)
 
 - **Task 026** Webhook-Integration: E-Mail Versand (Single)  
-  Meta: id=Task 026 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-13 | story=3 | labels=frontend,emails,integration | progress=0% | tokens=0
-  - [ ] SendEmailButton Component erstellen
-  - [ ] Status-Update implementieren
-  - [ ] Error-Handling implementieren
+  Meta: id=Task 026 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-13 | story=3 | labels=frontend,emails,integration | progress=100% | tokens=5200
+  - [x] SendEmailButton Component erstellt
+  - [x] Status-Update implementiert
+  - [x] Error-Handling implementiert
+  - [x] useEmails Hook erstellt
+  - [x] ProjectEmails.tsx mit Tabelle implementiert
+  - [x] Confirmation Dialog für E-Mail-Versand
 
 - **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
   Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=0% | tokens=0
@@ -455,7 +458,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 ---
 
 ### M3: Core Features (Workflows & Data)
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=17%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=33%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -699,8 +702,44 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - 📘 feature/06-ui-ux-pattern (Dialoge, Multi-Select, ScrollArea)
 
 **Next Steps:**
-- Milestone M3: 25% abgeschlossen (3 von 12 Tasks)
-- Task 026: E-Mail Versand (Single) - SendEmailButton Component
+- Milestone M3: 33% abgeschlossen (4 von 12 Tasks)
+- Task 027: E-Mail Versand (Batch) - SendEmailsBatchButton Component
+
+---
+
+### 2025-10-26 — Task 026: Webhook-Integration - E-Mail Versand (Single)
+
+**Was wurde umgesetzt?**
+- SendEmailButton Component: Button für einzelnen E-Mail-Versand mit Confirmation Dialog
+- useEmails Hook: Hook für E-Mail-Daten aus `project_emails` Tabelle (gefiltert nach project_id)
+- ProjectEmails.tsx: Vollständige E-Mail-Übersicht mit Tabelle (Betreff, Empfänger, Status, Timestamps)
+- Status-Badges: draft, ready_to_send, sent, failed mit passenden Farben
+- Confirmation Dialog: AlertDialog vor E-Mail-Versand mit Empfänger-Anzeige
+- Status-Update: E-Mails werden nach Versand auf "sent" gesetzt, sent_at Timestamp wird gesetzt
+- Error-Handling: Toast-Notifications bei Erfolg/Fehler
+- Webhook-Integration: POST zu n8n Webhook `/webhook/email-sender` via Edge Function
+- Empty State: Placeholder wenn keine E-Mails vorhanden ("Starten Sie Pitch Paul")
+- Loading States: Skeleton-Loader während Daten geladen werden
+
+**Betroffene Dateien:**
+- `src/components/emails/SendEmailButton.tsx` (erstellt)
+- `src/hooks/useEmails.ts` (erstellt)
+- `src/pages/ProjectEmails.tsx` (vollständig implementiert, ersetzt Placeholder)
+
+**Checks:**
+- ✅ E-Mail-Liste wird angezeigt (Tabelle mit allen E-Mails)
+- ✅ Status-Badges werden korrekt angezeigt
+- ✅ SendEmailButton nur bei draft/ready_to_send sichtbar
+- ✅ Confirmation Dialog öffnet sich vor Versand
+- ✅ E-Mail wird versendet (Webhook-Call)
+- ✅ Status-Update funktioniert (sent + sent_at)
+- ✅ Error-Handling funktioniert (Toast + Status=failed)
+- ✅ Empty State wird angezeigt bei 0 E-Mails
+- ✅ Loading State funktioniert
+
+**Reuse:**
+- 📘 feature/04-ki-integration-pattern (Webhook-Trigger, Status-Management)
+- 📘 feature/06-ui-ux-pattern (Tabellen, Badges, Dialoge)
 
 ---
 
