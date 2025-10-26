@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/Sidebar';
@@ -10,6 +11,7 @@ import { useProjects } from '@/hooks/useProjects';
 import { useOrganizations } from '@/hooks/useOrganizations';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 import { useAuth } from '@/contexts/AuthContext';
+import { FinderFelixDialog } from '@/components/workflows/FinderFelixDialog';
 import { 
   ArrowLeft, 
   Building2, 
@@ -25,6 +27,7 @@ export default function ProjectDashboard() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [finderFelixOpen, setFinderFelixOpen] = useState(false);
 
   const { organizations, isLoading: orgsLoading } = useOrganizations();
   
@@ -246,7 +249,11 @@ export default function ProjectDashboard() {
                       Durchsuchen Sie die Datenbank nach passenden Firmen basierend auf
                       Branche, Standort und weiteren Kriterien.
                     </p>
-                    <Button className="w-full" disabled={!canManage}>
+                    <Button 
+                      className="w-full" 
+                      disabled={!canManage}
+                      onClick={() => setFinderFelixOpen(true)}
+                    >
                       <Search className="mr-2 h-4 w-4" />
                       Firmen suchen
                     </Button>
@@ -353,6 +360,15 @@ export default function ProjectDashboard() {
           </main>
         </div>
       </div>
+
+      {/* Finder Felix Dialog */}
+      {id && (
+        <FinderFelixDialog
+          open={finderFelixOpen}
+          onOpenChange={setFinderFelixOpen}
+          projectId={id}
+        />
+      )}
     </SidebarProvider>
   );
 }

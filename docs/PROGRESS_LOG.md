@@ -95,10 +95,13 @@
   - [x] User-Dropdown mit Profil & Einstellungen-Links (Header)
 
 - **Task 023** Webhook-Integration: Finder Felix Trigger  
-  Meta: id=Task 023 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-10 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
-  - [ ] FinderFelixDialog Component erstellen
-  - [ ] useWorkflowTrigger Hook implementieren
-  - [ ] Webhook-Call implementieren
+  Meta: id=Task 023 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-10 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=6500
+  - [x] FinderFelixDialog Component erstellt
+  - [x] useWorkflowTrigger Hook implementiert
+  - [x] Webhook-Call implementiert (Edge Function)
+  - [x] Integration in ProjectDashboard
+  - [x] Input Validation (min 10, max 500 chars)
+  - [x] Optional: Bundesland, Stadt, Bezirk Filter
 
 - **Task 024** Webhook-Integration: Analyse Anna Trigger  
   Meta: id=Task 024 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-11 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
@@ -446,7 +449,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 ---
 
 ### M3: Core Features (Workflows & Data)
-Meta: id=M3 | status=planned | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=0%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=8%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -590,6 +593,37 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 
 **Next Steps:**
 - Milestone M3: Workflow-Integration (Task 023-036)
+
+---
+
+### 2025-10-26 — Task 023: Webhook-Integration - Finder Felix Trigger
+
+**Was wurde umgesetzt?**
+- FinderFelixDialog Component: Dialog mit Freitext-Input (Textarea), optional: Bundesland, Stadt, Bezirk
+- useWorkflowTrigger Hook: Generic Hook für alle n8n-Workflow-Trigger (finder_felix, analyse_anna, etc.)
+- Edge Function: `trigger-n8n-workflow` ruft n8n Webhooks auf mit Header Auth (X-Webhook-Secret)
+- Workflow State Management: Erstellt Eintrag in `n8n_workflow_states` (pending → running)
+- Input Validation: Zod-Schema (min 10, max 500 chars für user_input)
+- Error Handling: Toast-Notifications, DB-Updates bei Fehler (status: failed)
+- Integration in ProjectDashboard: Button "Firmen suchen" öffnet Dialog (nur für Owner/Manager)
+
+**Betroffene Dateien:**
+- `src/components/workflows/FinderFelixDialog.tsx` (erstellt)
+- `src/hooks/useWorkflowTrigger.ts` (erstellt)
+- `supabase/functions/trigger-n8n-workflow/index.ts` (erstellt)
+- `src/pages/ProjectDashboard.tsx` (Button onClick hinzugefügt, Dialog eingebunden)
+
+**Checks:**
+- ✅ Dialog öffnet sich bei Klick auf "Firmen suchen"
+- ✅ Input Validation funktioniert (min 10, max 500 chars)
+- ✅ Workflow State wird in DB erstellt (status: pending)
+- ✅ Edge Function ruft n8n Webhook auf (mit Header Auth)
+- ✅ Error Handling funktioniert (Toast + DB-Update bei Fehler)
+- ✅ Nur Owner/Manager können Dialog öffnen
+
+**Reuse:**
+- 📘 feature/04-ki-integration-pattern (Workflow-Trigger, n8n-Integration)
+- 📘 feature/06-ui-ux-pattern (Dialoge, Forms, Input Validation)
 
 ---
 
