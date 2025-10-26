@@ -41,10 +41,13 @@
 
 
 - **Task 046** Documentation: User Guide  
-  Meta: id=Task 046 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-03 | story=3 | labels=docs | progress=0% | tokens=0
-  - [ ] USER_GUIDE.md erstellen
-  - [ ] Workflows dokumentieren
-  - [ ] FAQ erstellen
+  Meta: id=Task 046 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-03 | story=3 | labels=docs | progress=100% | tokens=4200
+  - [x] USER_GUIDE.md erstellt mit vollständiger Dokumentation
+  - [x] Workflows dokumentiert (Felix, Anna, Paul)
+  - [x] FAQ erstellt mit 15+ häufigen Fragen
+  - [x] Erste Schritte Guide hinzugefügt
+  - [x] Team-Kollaboration dokumentiert
+  - [x] Firmen- und E-Mail-Management dokumentiert
 
 - **Task 047** Documentation: Technical Docs  
   Meta: id=Task 047 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-04 | story=3 | labels=docs | progress=0% | tokens=0
@@ -88,7 +91,18 @@
 
 ### Done
 
-- **Task 045** SEO & Meta Tags  
+- **Task 046** Documentation: User Guide  
+  Meta: id=Task 046 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-03 | story=3 | labels=docs | progress=100% | tokens=4200
+  - [x] USER_GUIDE.md erstellt (umfassende Benutzer-Dokumentation)
+  - [x] Workflows dokumentiert (Finder Felix, Analyse Anna, Pitch Paul)
+  - [x] FAQ mit 15+ Fragen erstellt
+  - [x] Erste Schritte Guide (Registrierung, Login, Profil)
+  - [x] Organisationen & Projekte Anleitung
+  - [x] Firmenverwaltung & E-Mail-Management
+  - [x] Team-Kollaboration & Rollen erklärt
+  - [x] Support & Kontakt Informationen
+
+- **Task 045** SEO & Meta Tags
   Meta: id=Task 045 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-02 | story=2 | labels=seo | progress=100% | tokens=1200
   - [x] Meta-Tags in index.html aktualisiert
   - [x] Title optimiert: "Cold Calling App | KI-gestützte Kaltakquise automatisieren"
@@ -526,7 +540,7 @@ Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scop
 
 ### M4: UI/UX & Polish
 
-Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=67%
+Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=75%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
@@ -556,6 +570,94 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 046: Documentation: User Guide
+
+**Änderungen:**
+- **docs/USER_GUIDE.md** erstellt mit vollständiger Benutzer-Dokumentation:
+  - Inhaltsverzeichnis mit 9 Hauptkapiteln
+  - Übersicht über die drei KI-Workflows (Felix, Anna, Paul)
+  - Schritt-für-Schritt Erste Schritte Guide
+  
+- **Erste Schritte** (Kapitel 2):
+  - Registrierung & Login-Anleitung
+  - Profil einrichten
+  - Vollständige Onboarding-Anleitung für neue User
+  
+- **Organisationen & Projekte** (Kapitel 3):
+  - Organisationen erstellen und verwalten
+  - Team-Mitglieder einladen
+  - Projekte erstellen und konfigurieren
+  - Projekt-Dashboard erklärt
+  
+- **Die drei KI-Workflows** (Kapitel 4):
+  - 🔍 **Finder Felix**: Detaillierte Anleitung für Firmenfinder
+    - Suchkriterien-Eingabe (Suchbegriff, Bundesland, Stadt, Bezirk)
+    - Was passiert nach dem Start?
+    - Limits und Best Practices
+  - 🧠 **Analyse Anna**: Webseiten-Analyse-Workflow
+    - Firmen auswählen und analysieren
+    - Analyse-Fokus eingeben
+    - Was wird analysiert? (Geschäftsmodell, Zielgruppe, Pain Points)
+    - Limits und Best Practices
+  - ✉️ **Pitch Paul**: E-Mail-Generator
+    - Analysierte Firmen auswählen
+    - Pitch-Template eingeben
+    - Was enthält die E-Mail?
+    - Limits und Best Practices
+  
+- **Firmenverwaltung** (Kapitel 5):
+  - Firmen-Liste anzeigen und navigieren
+  - Firmen filtern (Suche, Status, Bundesland, Stadt)
+  - Firmen sortieren
+  - Firmen-Details anzeigen mit Analyse-Daten
+  - Firmen-Status erklärt (found, analyzed, contacted, qualified, rejected)
+  
+- **E-Mail-Management** (Kapitel 6):
+  - E-Mail-Liste anzeigen
+  - E-Mails filtern nach Status
+  - Einzelne E-Mail versenden mit Bestätigung
+  - Batch-Versand (mehrere E-Mails)
+  - E-Mail-Status erklärt (draft, ready_to_send, sent, failed)
+  
+- **Team-Kollaboration** (Kapitel 7):
+  - Rollen und Berechtigungen (Owner, Manager, Read-Only)
+  - Mitglieder hinzufügen, Rolle ändern, Mitglied entfernen
+  - Vollständige Anleitung für Team-Management
+  
+- **FAQ** (Kapitel 8) mit 15+ häufigen Fragen:
+  - **Allgemeine Fragen**: Workflow-Dauer, Abbruch, Fehler
+  - **Datenschutz & Sicherheit**: Datenspeicherung, Zugriffsrechte, Auto-Versand
+  - **Technische Fragen**: Browser-Support, Mobile, API
+  - **Probleme & Fehlerbehebung**: Login-Probleme, Workflow hängt, Firmen nicht sichtbar, E-Mail-Versand fehlgeschlagen
+  
+- **Support & Kontakt** (Kapitel 9):
+  - Support-E-Mail, Dokumentation, Status-Page
+  - Feedback & Feature-Requests
+
+**Rationale:**
+- **Umfassende Dokumentation**: Alle wichtigen Features vollständig dokumentiert
+- **User-Friendly**: Schritt-für-Schritt Anleitungen mit Screenshots-Platzhaltern
+- **Workflow-Fokus**: Detaillierte Erklärungen der drei KI-Workflows
+- **FAQ**: Beantwortet häufigste Fragen proaktiv
+- **Support**: Klare Kontaktinformationen
+
+**Features:**
+- 9 Hauptkapitel mit vollständiger Abdeckung aller Features
+- Emojis für bessere Visualisierung (🔍 Felix, 🧠 Anna, ✉️ Paul)
+- Best Practices und Tipps für optimale Nutzung
+- Troubleshooting-Sektion für häufige Probleme
+- Responsive Markdown-Formatierung
+
+**Testing:**
+- USER_GUIDE.md ist erstellt und vollständig
+- Alle Workflows sind dokumentiert
+- FAQ deckt wichtigste Fragen ab
+- Markdown-Formatierung ist korrekt
+
+**Status:** ✅ Done (100%)
+
+---
 
 ### 2025-10-26 — Task 045: SEO & Meta Tags
 
