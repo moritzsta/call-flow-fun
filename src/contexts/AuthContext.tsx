@@ -1,7 +1,10 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyAuthSuccess, 
+  notifyAuthError 
+} from '@/lib/notifications';
 
 interface Profile {
   id: string;
@@ -121,15 +124,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        toast.error(error.message);
+        notifyAuthError(error.message);
         return { error };
       }
 
-      toast.success('Registrierung erfolgreich! Bitte überprüfen Sie Ihre E-Mails.');
+      notifyAuthSuccess('register');
       return { error: null };
     } catch (error) {
       const err = error as Error;
-      toast.error(err.message);
+      notifyAuthError(err.message);
       return { error: err };
     }
   };
@@ -142,15 +145,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        toast.error(error.message);
+        notifyAuthError(error.message);
         return { error };
       }
 
-      toast.success('Erfolgreich angemeldet!');
+      notifyAuthSuccess('login');
       return { error: null };
     } catch (error) {
       const err = error as Error;
-      toast.error(err.message);
+      notifyAuthError(err.message);
       return { error: err };
     }
   };
@@ -159,17 +162,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast.error(error.message);
+        notifyAuthError(error.message);
         return;
       }
 
       setUser(null);
       setSession(null);
       setProfile(null);
-      toast.success('Erfolgreich abgemeldet!');
+      notifyAuthSuccess('logout');
     } catch (error) {
       const err = error as Error;
-      toast.error(err.message);
+      notifyAuthError(err.message);
     }
   };
 

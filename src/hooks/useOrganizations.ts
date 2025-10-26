@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyOrganizationCreated,
+  notifyOrganizationUpdated,
+  notifyOrganizationDeleted,
+  notifyCrudError 
+} from '@/lib/notifications';
 
 export interface Organization {
   id: string;
@@ -66,10 +71,10 @@ export const useOrganizations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Organisation erfolgreich erstellt!');
+      notifyOrganizationCreated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Erstellen: ${error.message}`);
+      notifyCrudError('Erstellen', error.message);
     },
   });
 
@@ -88,10 +93,10 @@ export const useOrganizations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Organisation aktualisiert!');
+      notifyOrganizationUpdated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      notifyCrudError('Aktualisieren', error.message);
     },
   });
 
@@ -107,10 +112,10 @@ export const useOrganizations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Organisation gelöscht!');
+      notifyOrganizationDeleted();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Löschen: ${error.message}`);
+      notifyCrudError('Löschen', error.message);
     },
   });
 

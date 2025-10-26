@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyCompanyDeleted, 
+  notifyCompanyStatusUpdated,
+  notifyCrudError 
+} from '@/lib/notifications';
 
 export interface Company {
   id: string;
@@ -97,10 +101,10 @@ export const useCompanies = (
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies', projectId] });
-      toast.success('Firma wurde gelöscht');
+      notifyCompanyDeleted();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Löschen: ${error.message}`);
+      notifyCrudError('Löschen', error.message);
     },
   });
 
@@ -122,10 +126,10 @@ export const useCompanies = (
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['companies', projectId] });
-      toast.success('Status aktualisiert');
+      notifyCompanyStatusUpdated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      notifyCrudError('Aktualisieren', error.message);
     },
   });
 

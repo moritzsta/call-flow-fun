@@ -16,7 +16,7 @@ import { AnalysisDisplay } from '@/components/companies/AnalysisDisplay';
 import { useWorkflowTrigger } from '@/hooks/useWorkflowTrigger';
 import { useAuth } from '@/contexts/AuthContext';
 import { Company } from '@/hooks/useCompanies';
-import { toast } from 'sonner';
+import { notifyError } from '@/lib/notifications';
 
 export default function CompanyDetail() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -33,7 +33,7 @@ export default function CompanyDetail() {
 
   const handleAnalyze = () => {
     if (!company || !user) {
-      toast.error('Fehler: Firma oder User nicht gefunden');
+      notifyError('Fehler: Firma oder User nicht gefunden');
       return;
     }
 
@@ -50,7 +50,7 @@ export default function CompanyDetail() {
 
   const handleGenerateEmail = () => {
     if (!company || !user) {
-      toast.error('Fehler: Firma oder User nicht gefunden');
+      notifyError('Fehler: Firma oder User nicht gefunden');
       return;
     }
 

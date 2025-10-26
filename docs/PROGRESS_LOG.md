@@ -28,11 +28,6 @@
   - [ ] Template-Integration in Pitch Paul
 
 
-- **Task 036** Notifications & Toast System  
-  Meta: id=Task 036 | assignee=@AI | milestone=M3 | priority=medium | due=2025-11-23 | story=2 | labels=frontend,notifications | progress=0% | tokens=0
-  - [ ] notifications.ts Helper erstellen
-  - [ ] sonner Integration
-  - [ ] Toast-Calls vereinheitlichen
 
 - **Task 037** Design System: Theme & HSL-Tokens  
   Meta: id=Task 037 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-24 | story=3 | labels=frontend,design,ui | progress=0% | tokens=0
@@ -429,6 +424,18 @@
   - [x] "Neue Organisation" Button integriert
   - [x] Navigation zu Organisationen, Projekten & Projekt-Details
 
+- **Task 036** Notifications & Toast System  
+  Meta: id=Task 036 | assignee=@AI | milestone=M3 | priority=medium | due=2025-11-23 | story=2 | labels=frontend,notifications | progress=100% | tokens=4200
+  - [x] src/lib/notifications.ts erstellt mit zentralen Helper-Funktionen
+  - [x] Generic Notifications: notifySuccess, notifyError, notifyInfo
+  - [x] Auth Notifications: notifyAuthSuccess, notifyAuthError
+  - [x] CRUD Notifications: notifyItemCreated, notifyItemUpdated, notifyItemDeleted
+  - [x] Spezifische Notifications für Organizations, Projects, Companies, Emails, Workflows, Profile
+  - [x] Alle Toast-Calls in Hooks ersetzt (useCompanies, useCompany, useEmails, useEmail, useOrganizations, useOrganizationMembers, useProjects, useWorkflowTrigger)
+  - [x] Alle Toast-Calls in Contexts ersetzt (AuthContext)
+  - [x] Alle Toast-Calls in Pages ersetzt (Profile, CompanyDetail, EmailDetail)
+  - [x] Alle Toast-Calls in Components ersetzt (SendEmailsBatchButton)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -469,7 +476,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 
 ### M3: Core Features (Workflows & Data)
 
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=92%
+Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=100%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -514,6 +521,52 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 036: Notifications & Toast System
+
+**Was wurde umgesetzt?**
+
+- `src/lib/notifications.ts`: Zentrale Notification-Helper-Bibliothek erstellt
+  - **Generic Notifications**: notifySuccess, notifyError, notifyInfo
+  - **Auth Notifications**: notifyAuthSuccess (login/logout/register), notifyAuthError
+  - **CRUD Notifications**: notifyItemCreated, notifyItemUpdated, notifyItemDeleted, notifyItemSaved, notifyCrudError
+  - **Organization Notifications**: notifyOrganizationCreated, notifyOrganizationUpdated, notifyOrganizationDeleted, notifyMemberAdded, notifyMemberRemoved, notifyRoleUpdated
+  - **Project Notifications**: notifyProjectCreated, notifyProjectUpdated, notifyProjectArchived, notifyProjectDeleted
+  - **Company Notifications**: notifyCompanyDeleted, notifyCompanyStatusUpdated
+  - **Email Notifications**: notifyEmailSent, notifyEmailsSentBatch, notifyEmailSendError, notifyEmailSaved, notifyEmailStatusUpdated, notifyEmailDeleted, notifyEmailError
+  - **Workflow Notifications**: notifyWorkflowStarted, notifyWorkflowError
+  - **Profile Notifications**: notifyProfileUpdated, notifyProfileError
+
+- **Alle Hooks aktualisiert**:
+  - `useCompanies.ts`: toast → notifyCompanyDeleted, notifyCompanyStatusUpdated, notifyCrudError
+  - `useCompany.ts`: toast → notifyCompanyStatusUpdated, notifyCrudError
+  - `useEmails.ts`: toast → notifyEmailSent, notifyEmailSendError, notifyEmailDeleted, notifyCrudError
+  - `useEmail.ts`: toast → notifyEmailSaved, notifyEmailStatusUpdated, notifyCrudError
+  - `useOrganizations.ts`: toast → notifyOrganizationCreated/Updated/Deleted, notifyCrudError
+  - `useOrganizationMembers.ts`: toast → notifyMemberAdded/Removed, notifyRoleUpdated, notifyCrudError
+  - `useProjects.ts`: toast → notifyProjectCreated/Updated/Archived/Deleted, notifyCrudError
+  - `useWorkflowTrigger.ts`: toast → notifyWorkflowStarted, notifyWorkflowError
+
+- **Contexts aktualisiert**:
+  - `AuthContext.tsx`: toast → notifyAuthSuccess, notifyAuthError
+
+- **Pages aktualisiert**:
+  - `Profile.tsx`: toast → notifyProfileUpdated, notifyProfileError
+  - `CompanyDetail.tsx`: toast → notifyError
+  - `EmailDetail.tsx`: toast → notifyError
+
+- **Components aktualisiert**:
+  - `SendEmailsBatchButton.tsx`: toast → notifyEmailsSentBatch, notifyCrudError
+
+**Tests:**
+- ✅ Alle Toast-Messages verwenden zentrale Helper
+- ✅ Success/Error/Info Varianten funktionieren
+- ✅ Konsistente Messaging über die gesamte App
+- ✅ Auto-Dismiss funktioniert (sonner default)
+
+**Milestone M3**: 100% abgeschlossen (12 von 12 Tasks) ✅
+
+---
 
 ### 2025-10-26 — Task 035: Dashboard - Landing Page
 

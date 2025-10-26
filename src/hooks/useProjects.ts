@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyProjectCreated,
+  notifyProjectUpdated,
+  notifyProjectArchived,
+  notifyProjectDeleted,
+  notifyCrudError 
+} from '@/lib/notifications';
 
 export interface Project {
   id: string;
@@ -58,10 +64,10 @@ export const useProjects = (organizationId?: string) => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects', data.organization_id] });
-      toast.success('Projekt erfolgreich erstellt!');
+      notifyProjectCreated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Erstellen: ${error.message}`);
+      notifyCrudError('Erstellen', error.message);
     },
   });
 
@@ -80,10 +86,10 @@ export const useProjects = (organizationId?: string) => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects', data.organization_id] });
-      toast.success('Projekt aktualisiert!');
+      notifyProjectUpdated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      notifyCrudError('Aktualisieren', error.message);
     },
   });
 
@@ -102,10 +108,10 @@ export const useProjects = (organizationId?: string) => {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects', data.organization_id] });
-      toast.success('Projekt archiviert!');
+      notifyProjectArchived();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Archivieren: ${error.message}`);
+      notifyCrudError('Archivieren', error.message);
     },
   });
 
@@ -122,10 +128,10 @@ export const useProjects = (organizationId?: string) => {
     },
     onSuccess: (organizationId) => {
       queryClient.invalidateQueries({ queryKey: ['projects', organizationId] });
-      toast.success('Projekt gelöscht!');
+      notifyProjectDeleted();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Löschen: ${error.message}`);
+      notifyCrudError('Löschen', error.message);
     },
   });
 

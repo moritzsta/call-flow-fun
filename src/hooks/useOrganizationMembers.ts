@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyMemberAdded,
+  notifyMemberRemoved,
+  notifyRoleUpdated,
+  notifyCrudError 
+} from '@/lib/notifications';
 
 export interface OrganizationMember {
   id: string;
@@ -103,10 +108,10 @@ export const useOrganizationMembers = (organizationId: string | undefined) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] });
-      toast.success('Mitglied erfolgreich hinzugefügt!');
+      notifyMemberAdded();
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      notifyCrudError('Hinzufügen des Mitglieds', error.message);
     },
   });
 
@@ -125,10 +130,10 @@ export const useOrganizationMembers = (organizationId: string | undefined) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] });
-      toast.success('Rolle erfolgreich aktualisiert!');
+      notifyRoleUpdated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      notifyCrudError('Aktualisieren', error.message);
     },
   });
 
@@ -144,10 +149,10 @@ export const useOrganizationMembers = (organizationId: string | undefined) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organization-members', organizationId] });
-      toast.success('Mitglied entfernt!');
+      notifyMemberRemoved();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Entfernen: ${error.message}`);
+      notifyCrudError('Entfernen', error.message);
     },
   });
 

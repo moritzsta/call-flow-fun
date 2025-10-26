@@ -1,6 +1,9 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyWorkflowStarted, 
+  notifyWorkflowError 
+} from '@/lib/notifications';
 
 interface TriggerWorkflowParams {
   workflowName: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'email_sender';
@@ -71,14 +74,10 @@ export const useWorkflowTrigger = () => {
       } as WorkflowResponse;
     },
     onSuccess: (data) => {
-      toast.success('Workflow erfolgreich gestartet!', {
-        description: `Workflow-ID: ${data.workflow_id}`,
-      });
+      notifyWorkflowStarted(data.workflow_id);
     },
     onError: (error: Error) => {
-      toast.error('Fehler beim Starten des Workflows', {
-        description: error.message,
-      });
+      notifyWorkflowError(error.message);
     },
   });
 

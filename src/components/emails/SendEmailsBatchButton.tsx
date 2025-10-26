@@ -14,7 +14,10 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { 
+  notifyEmailsSentBatch, 
+  notifyCrudError 
+} from '@/lib/notifications';
 import { Send, Loader2 } from 'lucide-react';
 import type { ProjectEmail } from '@/hooks/useEmails';
 
@@ -102,13 +105,9 @@ export const SendEmailsBatchButton = ({
 
     // Show summary toast
     if (successCount > 0) {
-      toast.success(`${successCount} von ${selectedEmails.length} E-Mails versendet`, {
-        description: failCount > 0 ? `${failCount} E-Mails fehlgeschlagen` : undefined,
-      });
+      notifyEmailsSentBatch(successCount, selectedEmails.length);
     } else {
-      toast.error('Fehler beim Versenden der E-Mails', {
-        description: 'Alle E-Mails sind fehlgeschlagen',
-      });
+      notifyCrudError('Versenden der E-Mails', 'Alle E-Mails sind fehlgeschlagen');
     }
 
     onSuccess();

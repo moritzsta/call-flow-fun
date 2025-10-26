@@ -8,10 +8,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { User, Save } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  notifyProfileUpdated, 
+  notifyProfileError 
+} from '@/lib/notifications';
 
 const profileSchema = z.object({
   full_name: z.string().trim().min(2, 'Name muss mindestens 2 Zeichen lang sein').max(100),
@@ -65,9 +70,9 @@ export default function Profile() {
       if (error) throw error;
 
       await refreshProfile();
-      toast.success('Profil erfolgreich aktualisiert!');
+      notifyProfileUpdated();
     } catch (error: any) {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      notifyProfileError(error.message);
     } finally {
       setIsUpdating(false);
     }

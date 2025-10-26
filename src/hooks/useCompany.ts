@@ -1,6 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyCompanyStatusUpdated,
+  notifyCrudError 
+} from '@/lib/notifications';
 import { Company } from './useCompanies';
 
 export const useCompany = (companyId?: string) => {
@@ -41,10 +44,10 @@ export const useCompany = (companyId?: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['company', companyId] });
       queryClient.invalidateQueries({ queryKey: ['companies'] });
-      toast.success('Status aktualisiert');
+      notifyCompanyStatusUpdated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      notifyCrudError('Aktualisieren', error.message);
     },
   });
 

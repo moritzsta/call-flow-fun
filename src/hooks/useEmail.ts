@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyEmailSaved, 
+  notifyEmailStatusUpdated,
+  notifyCrudError 
+} from '@/lib/notifications';
 import { ProjectEmail } from './useEmails';
 
 export const useEmail = (emailId?: string) => {
@@ -58,10 +62,10 @@ export const useEmail = (emailId?: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['email', emailId] });
       queryClient.invalidateQueries({ queryKey: ['project_emails'] });
-      toast.success('E-Mail gespeichert');
+      notifyEmailSaved();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Speichern: ${error.message}`);
+      notifyCrudError('Speichern', error.message);
     },
   });
 
@@ -83,10 +87,10 @@ export const useEmail = (emailId?: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['email', emailId] });
       queryClient.invalidateQueries({ queryKey: ['project_emails'] });
-      toast.success('Status aktualisiert');
+      notifyEmailStatusUpdated();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+      notifyCrudError('Aktualisieren', error.message);
     },
   });
 

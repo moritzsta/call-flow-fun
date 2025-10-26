@@ -1,6 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { 
+  notifyEmailSent, 
+  notifyEmailSendError,
+  notifyCrudError,
+  notifyEmailDeleted 
+} from '@/lib/notifications';
 
 export interface ProjectEmail {
   id: string;
@@ -102,13 +107,11 @@ export const useEmails = (
       return webhookResponse;
     },
     onSuccess: (data, variables) => {
-      toast.success('E-Mail erfolgreich versendet!');
+      notifyEmailSent();
       queryClient.invalidateQueries({ queryKey: ['project_emails', projectId] });
     },
     onError: (error: Error) => {
-      toast.error('Fehler beim Versenden der E-Mail', {
-        description: error.message,
-      });
+      notifyEmailSendError(error.message);
     },
   });
 
@@ -138,9 +141,7 @@ export const useEmails = (
       queryClient.invalidateQueries({ queryKey: ['project_emails'] });
     },
     onError: (error: Error) => {
-      toast.error('Fehler beim Aktualisieren des Status', {
-        description: error.message,
-      });
+      notifyCrudError('Aktualisieren des Status', error.message);
     },
   });
 
@@ -155,10 +156,10 @@ export const useEmails = (
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project_emails'] });
-      toast.success('E-Mail wurde gelöscht');
+      notifyEmailDeleted();
     },
     onError: (error: Error) => {
-      toast.error(`Fehler beim Löschen: ${error.message}`);
+      notifyCrudError('Löschen', error.message);
     },
   });
 

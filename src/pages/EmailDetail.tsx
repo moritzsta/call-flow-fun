@@ -17,7 +17,7 @@ import { useEmails, ProjectEmail } from '@/hooks/useEmails';
 import { EmailPreview } from '@/components/emails/EmailPreview';
 import { EmailEditor } from '@/components/emails/EmailEditor';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
+import { notifyError } from '@/lib/notifications';
 
 const statusMap = {
   draft: { label: 'Entwurf', className: 'bg-gray-500/10 text-gray-700 dark:text-gray-400' },
@@ -41,7 +41,7 @@ export default function EmailDetail() {
 
   const handleSend = (userId: string) => {
     if (!email || !emailId) {
-      toast.error('Fehler: E-Mail nicht gefunden');
+      notifyError('Fehler: E-Mail nicht gefunden');
       return;
     }
 
