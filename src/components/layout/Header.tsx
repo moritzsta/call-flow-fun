@@ -12,10 +12,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, User, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 export const Header = () => {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     await signOut();
@@ -40,8 +43,9 @@ export const Header = () => {
       </div>
 
       {/* Right side - User Menu */}
-      <div className="flex items-center gap-4">
-        <DropdownMenu>
+        <div className="flex items-center gap-4">
+          {!isMobile && <LanguageSwitcher />}
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button 
               variant="ghost" 

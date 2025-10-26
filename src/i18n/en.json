@@ -1,0 +1,111 @@
+{
+  "common": {
+    "back": "Back",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "refresh": "Refresh",
+    "logout": "Logout",
+    "profile": "Profile"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full Name",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginSuccess": "Successfully logged in",
+    "registerSuccess": "Successfully registered",
+    "loginError": "Login error",
+    "registerError": "Registration error"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "organizations": "Organizations",
+    "projects": "Projects",
+    "recentActivity": "Recent Activity"
+  },
+  "organizations": {
+    "title": "Organizations",
+    "create": "Create Organization",
+    "name": "Name",
+    "description": "Description",
+    "members": "Members",
+    "settings": "Settings",
+    "createSuccess": "Organization created successfully",
+    "updateSuccess": "Organization updated successfully",
+    "deleteSuccess": "Organization deleted successfully"
+  },
+  "projects": {
+    "title": "Projects",
+    "create": "Create Project",
+    "name": "Name",
+    "description": "Description",
+    "archived": "Archived",
+    "createSuccess": "Project created successfully",
+    "updateSuccess": "Project updated successfully",
+    "deleteSuccess": "Project deleted successfully"
+  },
+  "companies": {
+    "title": "Companies",
+    "company": "Company",
+    "industry": "Industry",
+    "ceo": "CEO",
+    "contact": "Contact",
+    "status": "Status",
+    "found": "Found",
+    "analyzed": "Analyzed",
+    "contacted": "Contacted",
+    "qualified": "Qualified",
+    "rejected": "Rejected",
+    "import": "CSV Import",
+    "export": "CSV Export",
+    "importSuccess": "Companies imported successfully",
+    "exportSuccess": "Companies exported successfully"
+  },
+  "emails": {
+    "title": "Emails",
+    "subject": "Subject",
+    "recipient": "Recipient",
+    "status": "Status",
+    "draft": "Draft",
+    "readyToSend": "Ready to Send",
+    "sent": "Sent",
+    "failed": "Failed",
+    "send": "Send",
+    "preview": "Preview",
+    "sendSuccess": "Email sent successfully",
+    "sendError": "Error sending email"
+  },
+  "templates": {
+    "title": "Email Templates",
+    "create": "Create Template",
+    "templateName": "Template Name",
+    "subjectTemplate": "Subject Template",
+    "bodyTemplate": "Body Template",
+    "createSuccess": "Template created successfully",
+    "updateSuccess": "Template updated successfully",
+    "deleteSuccess": "Template deleted successfully"
+  },
+  "workflows": {
+    "finderFelix": "Finder Felix",
+    "analyseAnna": "Analyse Anna",
+    "pitchPaul": "Pitch Paul",
+    "pending": "Pending",
+    "running": "Running",
+    "completed": "Completed",
+    "failed": "Failed"
+  }
+}

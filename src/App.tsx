@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import '@/i18n/config';
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -19,6 +20,7 @@ import ProjectEmails from "./pages/ProjectEmails";
 import Profile from "./pages/Profile";
 import CompanyDetail from "./pages/CompanyDetail";
 import EmailDetail from "./pages/EmailDetail";
+import EmailTemplates from "./pages/EmailTemplates";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -111,6 +113,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EmailDetail />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/organizations/:organizationId/templates" 
+              element={
+                <ProtectedRoute>
+                  <EmailTemplates />
                 </ProtectedRoute>
               } 
             />
