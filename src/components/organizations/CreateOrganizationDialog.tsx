@@ -32,9 +32,21 @@ const organizationSchema = z.object({
 
 type OrganizationInput = z.infer<typeof organizationSchema>;
 
-export const CreateOrganizationDialog = () => {
-  const [open, setOpen] = useState(false);
+interface CreateOrganizationDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export const CreateOrganizationDialog = ({ 
+  open: controlledOpen, 
+  onOpenChange 
+}: CreateOrganizationDialogProps = {}) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const { createOrganization, isCreating } = useOrganizations();
+
+  // Use controlled state if provided, otherwise use internal state
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
 
   const form = useForm<OrganizationInput>({
     resolver: zodResolver(organizationSchema),
@@ -59,12 +71,14 @@ export const CreateOrganizationDialog = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Organisation erstellen
-        </Button>
-      </DialogTrigger>
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Organisation erstellen
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Neue Organisation erstellen</DialogTitle>

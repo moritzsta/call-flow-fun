@@ -27,11 +27,6 @@
   - [ ] Template-Management implementieren
   - [ ] Template-Integration in Pitch Paul
 
-- **Task 035** Dashboard: Landing Page  
-  Meta: id=Task 035 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-22 | story=5 | labels=frontend,dashboard,ui | progress=0% | tokens=0
-  - [ ] Dashboard.tsx Page erstellen
-  - [ ] Organization-Cards implementieren
-  - [ ] Active-Workflows anzeigen
 
 - **Task 036** Notifications & Toast System  
   Meta: id=Task 036 | assignee=@AI | milestone=M3 | priority=medium | due=2025-11-23 | story=2 | labels=frontend,notifications | progress=0% | tokens=0
@@ -423,6 +418,17 @@
   - [x] Edit-Mode mit Textarea für HTML-Body
   - [x] Route /emails/:emailId in App.tsx hinzugefügt
 
+- **Task 035** Dashboard: Landing Page  
+  Meta: id=Task 035 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-22 | story=5 | labels=frontend,dashboard,ui | progress=100% | tokens=7800
+  - [x] Dashboard.tsx vollständig neu implementiert mit echten Daten
+  - [x] OrganizationCards Component erstellt mit Quick-Links
+  - [x] RecentProjects Component erstellt mit KPI-Cards
+  - [x] ActiveWorkflows Component erstellt mit Workflow-Liste
+  - [x] useAllWorkflows Hook implementiert (Workflows aller Projekte laden)
+  - [x] Quick Stats mit echten Zahlen (Organisationen, Projekte, laufende Workflows)
+  - [x] "Neue Organisation" Button integriert
+  - [x] Navigation zu Organisationen, Projekten & Projekt-Details
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -463,7 +469,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 
 ### M3: Core Features (Workflows & Data)
 
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=83%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=92%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -508,6 +514,64 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 035: Dashboard - Landing Page
+
+**Was wurde umgesetzt?**
+
+- `src/pages/Dashboard.tsx`: Vollständig neu implementiert
+  - Welcome-Section mit Gradient-Background & User-Name
+  - Quick Stats mit echten Zahlen (Organisationen, aktive Projekte, laufende Workflows)
+  - Integration von OrganizationCards, RecentProjects & ActiveWorkflows Components
+  - CreateOrganizationDialog Integration mit "Neue Organisation" Button
+  - Layout Component für Sidebar + Header
+  - Loading-States für alle Sections
+
+- `src/components/dashboard/OrganizationCards.tsx`: Organization-Übersicht
+  - Grid mit Organization Cards (3 Spalten auf Desktop)
+  - Hover-Effekte & Click-Navigation zu Organization-Settings
+  - Icon, Name, Beschreibung, Member-Count pro Card
+  - "Neue Organisation" Button
+  - Empty State wenn keine Organisationen vorhanden
+  - Loading-Skeleton während Daten laden
+
+- `src/components/dashboard/RecentProjects.tsx`: Projekt-Übersicht
+  - Grid mit Project Cards (2 Spalten auf Desktop)
+  - Nur aktive Projekte (nicht archiviert)
+  - Hover-Effekte & Click-Navigation zu Project-Dashboard
+  - Titel, Beschreibung, Organization-Name, "Aktiv"-Badge
+  - "Alle Projekte" Button zum Navigieren zu /projects
+  - Empty State wenn keine Projekte vorhanden
+  - Limitierung auf 4 neueste Projekte
+
+- `src/components/dashboard/ActiveWorkflows.tsx`: Workflow-Status
+  - Liste der letzten 5 Workflows
+  - WorkflowStatusBadge mit Farben (pending/running/completed/failed)
+  - Workflow-Name (mapped zu lesbaren Namen: Finder Felix, Analyse Anna, etc.)
+  - Projekt-Titel & Datum/Zeit formatiert (dd.MM.yyyy HH:mm)
+  - Click-Navigation zum jeweiligen Projekt
+  - Empty State wenn keine Workflows vorhanden
+
+- `src/hooks/useAllWorkflows.ts`: Hook für alle User-Workflows
+  - Query für n8n_workflow_states mit Join zu projects & organizations
+  - Filter auf user_id (nur eigene Workflows)
+  - Sortierung nach started_at (neueste zuerst)
+  - Limit 20 Workflows
+  - Flattenning von project_title & organization_name
+
+**Tests:**
+- ✅ Dashboard lädt alle Daten korrekt
+- ✅ Quick Stats zeigen echte Zahlen
+- ✅ Organization Cards sind klickbar und navigieren korrekt
+- ✅ Project Cards zeigen Organization-Namen
+- ✅ Workflow-Liste zeigt aktuelle Workflows mit Status
+- ✅ "Neue Organisation" Dialog öffnet sich
+- ✅ Empty States werden korrekt angezeigt
+- ✅ Loading-States funktionieren
+
+**Milestone M3**: 92% abgeschlossen (11 von 12 Tasks)
+
+---
 
 ### 2025-10-26 — Task 033: Email Detail View & Editor
 
