@@ -19,11 +19,6 @@
   - [ ] CSV-Export implementieren
   - [ ] Error-Handling implementieren
 
-- **Task 032** Project Emails List: Anzeige & Filter  
-  Meta: id=Task 032 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-19 | story=5 | labels=frontend,emails,ui | progress=0% | tokens=0
-  - [ ] ProjectEmails.tsx Page erstellen
-  - [ ] useEmails Hook implementieren
-  - [ ] Filter & Sortierung implementieren
 
 - **Task 033** Email Detail View & Editor  
   Meta: id=Task 033 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-20 | story=5 | labels=frontend,emails,ui | progress=0% | tokens=0
@@ -409,6 +404,17 @@
   - [x] Navigation: Zurück-Button zur vorherigen Seite
   - [x] Route /companies/:companyId in App.tsx hinzugefügt
 
+- **Task 032** Project Emails List: Anzeige & Filter  
+  Meta: id=Task 032 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-19 | story=5 | labels=frontend,emails,ui | progress=100% | tokens=6800
+  - [x] ProjectEmails.tsx Page vollständig neu implementiert
+  - [x] useEmails Hook erweitert (Filter, Sortierung, Delete Mutation)
+  - [x] EmailFilters Component erstellt (Status, Company, Search)
+  - [x] EmailsTable Component erstellt (Sortierung, Actions, Delete-Dialog)
+  - [x] Company-Namen via Join aus companies Tabelle geladen
+  - [x] Filter für Status, Company-Name, Search (Betreff/Empfänger)
+  - [x] Sortierung für: created_at, sent_at, status, subject
+  - [x] Delete Mutation mit Bestätigungs-Dialog
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -449,7 +455,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 
 ### M3: Core Features (Workflows & Data)
 
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=67%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=75%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -494,6 +500,55 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 032: Project Emails List: Anzeige & Filter
+
+**Was wurde umgesetzt?**
+
+- `src/pages/ProjectEmails.tsx`: Komplett neu implementiert
+  - Filter & Sortierung Integration
+  - EmailFilters & EmailsTable Components eingebunden
+  - Refresh-Button zum manuellen Neuladen
+  - Loading-State mit Skeleton
+  - Header mit Icon und E-Mail-Count
+  - Layout mit Layout Component (Sidebar + Header)
+
+- `src/hooks/useEmails.ts`: Hook erweitert
+  - EmailFilters Interface: status, company_name, search
+  - EmailSortConfig Interface: field (created_at/sent_at/status/subject), ascending
+  - Join mit companies Tabelle um company_name zu laden
+  - Filter-Logik: status (eq), company_name (ilike), search (or: subject/recipient_email)
+  - Sortierung für alle relevanten Felder
+  - Delete Mutation mit Query-Invalidierung und Toast-Feedback
+  - Query-Key erweitert mit filters & sortConfig für korrekte Cache-Handhabung
+
+- `src/components/emails/EmailFilters.tsx`: Filter-Component
+  - Search-Input für Betreff & Empfänger (mit Icon)
+  - Status-Select (draft/ready_to_send/sent/failed)
+  - Company-Name-Input (Freitext-Suche)
+  - Reset-Button (nur sichtbar wenn Filter aktiv)
+  - Responsive Grid Layout (3 Spalten auf Desktop, 1 auf Mobile)
+
+- `src/components/emails/EmailsTable.tsx`: Table-Component
+  - Spalten: Betreff, Empfänger, Firma, Status, Erstellt, Versendet, Aktionen
+  - Sortierung für: subject, status, created_at, sent_at (mit ArrowUpDown Icon)
+  - Status-Badge mit Farben (draft=gray, ready=blue, sent=green, failed=red)
+  - Dropdown-Menü: Details anzeigen, Versenden (wenn draft/ready), Löschen
+  - Delete Confirmation Dialog mit AlertDialog
+  - Empty State wenn keine E-Mails vorhanden
+  - Datum-Formatierung mit date-fns (dd.MM.yyyy HH:mm)
+
+**Tests:**
+- ✅ E-Mails werden mit Company-Namen angezeigt
+- ✅ Filter funktionieren (Status, Company, Search)
+- ✅ Sortierung funktioniert (alle Felder)
+- ✅ Delete mit Bestätigung funktioniert
+- ✅ Empty State wird angezeigt
+- ✅ Responsive Layout funktioniert
+
+**Milestone M3**: 75% abgeschlossen (9 von 12 Tasks)
+
+---
 
 ### 2025-10-26 — Task 030: Company Detail View
 
