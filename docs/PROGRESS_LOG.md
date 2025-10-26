@@ -38,11 +38,6 @@
   - [ ] Language-Switcher implementieren
 
 
-- **Task 041** Error Handling & Error Boundaries  
-  Meta: id=Task 041 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-28 | story=3 | labels=frontend,error-handling | progress=0% | tokens=0
-  - [ ] ErrorBoundary Component erstellen
-  - [ ] ErrorFallback Component erstellen
-  - [ ] Integration in App.tsx
 
 - **Task 042** Performance: Query Optimization  
   Meta: id=Task 042 | assignee=@AI | milestone=M4 | priority=medium | due=2025-11-29 | story=3 | labels=backend,performance | progress=0% | tokens=0
@@ -451,6 +446,14 @@
   - [x] useOrganizations, useProjects, useAllWorkflows mit refetch erweitert
   - [x] Dashboard mit vollständigen Error-Handling
 
+- **Task 041** Error Handling & Error Boundaries  
+  Meta: id=Task 041 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-28 | story=3 | labels=frontend,error-handling | progress=100% | tokens=2800
+  - [x] ErrorBoundary Component erstellt (React Class Component)
+  - [x] ErrorFallback Component erstellt (Functional Component)
+  - [x] Integration in App.tsx (Wrap gesamte App)
+  - [x] Development Mode zeigt Error Details
+  - [x] Retry-Funktionalität implementiert
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -506,7 +509,7 @@ Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scop
 
 ### M4: UI/UX & Polish
 
-Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=25%
+Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=33%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
@@ -536,6 +539,47 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 041: Error Handling & Error Boundaries
+
+**Änderungen:**
+- `src/components/ErrorBoundary.tsx` erstellt: React Error Boundary Class Component
+  - Fängt unerwartete JavaScript-Fehler in React-Komponenten ab
+  - getDerivedStateFromError: Setzt Error-State
+  - componentDidCatch: Logging und Error-Tracking
+  - handleReset: Zurücksetzen des Error-States
+  - Development Mode: Zeigt Error Details und Stack Trace
+  - Production Mode: Generische Fehlermeldung ohne technische Details
+- `src/components/ErrorFallback.tsx` erstellt: Functional Error Fallback Component
+  - Kann als Custom Fallback in ErrorBoundary verwendet werden
+  - Zeigt Error-Karte mit Icon
+  - Retry-Button und "Zur Startseite"-Button
+  - Development Mode: Error Message und Stack Trace
+- `src/App.tsx` aktualisiert:
+  - ErrorBoundary umschließt gesamte App (nach AuthProvider)
+  - Fängt alle unerwarteten React-Rendering-Fehler
+  - Verhindert White-Screen-of-Death bei Fehlern
+
+**Unterschied zu Task 040 Error-States:**
+- **Task 040 (ErrorState)**: Für API-Fehler und Daten-Lade-Fehler (z.B. fetch failed)
+- **Task 041 (ErrorBoundary)**: Für React-Rendering-Fehler und unerwartete JavaScript-Fehler (z.B. undefined property access)
+
+**Features:**
+- React Error Boundary fängt alle unerwarteten Fehler
+- Graceful Degradation (App stürzt nicht komplett ab)
+- Development Mode zeigt technische Details
+- Production Mode zeigt benutzerfreundliche Fehlermeldung
+- Retry-Funktionalität zum Zurücksetzen des Error-States
+
+**Testing:**
+- Error Boundary fängt Fehler korrekt ab
+- Fallback-UI wird angezeigt
+- Retry funktioniert
+- Development vs Production Mode getestet
+
+**Status:** ✅ Done (100%)
+
+---
 
 ### 2025-10-26 — Task 040: Loading States & Skeletons
 
