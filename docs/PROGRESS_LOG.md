@@ -111,13 +111,15 @@
   - [x] Integration in ProjectDashboard
   - [x] Input Validation (min 10, max 500 chars, min 1 company)
   - [x] Empty State wenn keine Firmen vorhanden
-  - [ ] Webhook-Call implementieren
+  - [x] Webhook-Call implementiert
 
 - **Task 025** Webhook-Integration: Pitch Paul Trigger  
-  Meta: id=Task 025 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-12 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
-  - [ ] PitchPaulDialog Component erstellen
-  - [ ] E-Mail-Generierung triggern
-  - [ ] Webhook-Call implementieren
+  Meta: id=Task 025 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-12 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=6200
+  - [x] PitchPaulDialog Component erstellt
+  - [x] Multi-Select für analysierte Firmen implementiert
+  - [x] Input Validation (min 10, max 500 chars, min 1 company)
+  - [x] Integration in ProjectDashboard (Button + Dialog)
+  - [x] Webhook-Call implementiert (pitch_paul)
 
 - **Task 026** Webhook-Integration: E-Mail Versand (Single)  
   Meta: id=Task 026 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-13 | story=3 | labels=frontend,emails,integration | progress=0% | tokens=0
@@ -662,6 +664,43 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 **Reuse:**
 - 📘 feature/04-ki-integration-pattern (Workflow-Trigger, Multi-Select-Logic)
 - 📘 feature/06-ui-ux-pattern (Dialoge, Multi-Select, ScrollArea)
+
+---
+
+### 2025-10-26 — Task 025: Webhook-Integration - Pitch Paul Trigger
+
+**Was wurde umgesetzt?**
+- PitchPaulDialog Component: Dialog mit Freitext-Input (Textarea) + Multi-Select für analysierte Firmen
+- Filter: Nur Firmen mit Status "analyzed" werden angezeigt
+- Multi-Select: Checkbox-Liste mit Firmen-Details (Name, Industry, Stadt)
+- Select All / Deselect All: Bulk-Actions für Firmen-Auswahl
+- Scroll-Area: Liste scrollbar bei vielen Firmen (max-height: 240px)
+- Empty State: Placeholder wenn keine analysierten Firmen vorhanden ("Führe zuerst Analyse Anna aus")
+- Input Validation: Zod-Schema (min 10, max 500 chars für user_input, min 1 company)
+- useAuth Integration: User-ID wird intern via useAuth() geholt (konsistent mit anderen Dialogen)
+- Integration in ProjectDashboard: Button "E-Mails generieren" öffnet Dialog (nur für Owner/Manager)
+
+**Betroffene Dateien:**
+- `src/components/workflows/PitchPaulDialog.tsx` (erstellt)
+- `src/pages/ProjectDashboard.tsx` (Button onClick hinzugefügt, Dialog eingebunden)
+
+**Checks:**
+- ✅ Dialog öffnet sich bei Klick auf "E-Mails generieren"
+- ✅ Nur analysierte Firmen werden angezeigt (status: "analyzed")
+- ✅ Multi-Select funktioniert (Checkbox-Liste)
+- ✅ Select All / Deselect All funktioniert
+- ✅ Input Validation funktioniert (min 10 chars, min 1 company)
+- ✅ Empty State wird angezeigt bei 0 analysierten Firmen
+- ✅ Workflow wird getriggert (via useWorkflowTrigger Hook)
+- ✅ Nur Owner/Manager können Dialog öffnen
+
+**Reuse:**
+- 📘 feature/04-ki-integration-pattern (Workflow-Trigger, Company-Filter)
+- 📘 feature/06-ui-ux-pattern (Dialoge, Multi-Select, ScrollArea)
+
+**Next Steps:**
+- Milestone M3: 25% abgeschlossen (3 von 12 Tasks)
+- Task 026: E-Mail Versand (Single) - SendEmailButton Component
 
 ---
 

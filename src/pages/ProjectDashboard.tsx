@@ -13,6 +13,7 @@ import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 import { useAuth } from '@/contexts/AuthContext';
 import { FinderFelixDialog } from '@/components/workflows/FinderFelixDialog';
 import { AnalyseAnnaDialog } from '@/components/workflows/AnalyseAnnaDialog';
+import { PitchPaulDialog } from '@/components/workflows/PitchPaulDialog';
 import { 
   ArrowLeft, 
   Building2, 
@@ -30,6 +31,7 @@ export default function ProjectDashboard() {
   const { user } = useAuth();
   const [finderFelixOpen, setFinderFelixOpen] = useState(false);
   const [analyseAnnaOpen, setAnalyseAnnaOpen] = useState(false);
+  const [pitchPaulOpen, setPitchPaulOpen] = useState(false);
 
   const { organizations, isLoading: orgsLoading } = useOrganizations();
   
@@ -314,7 +316,12 @@ export default function ProjectDashboard() {
                       Lassen Sie personalisierte Cold-Calling E-Mails basierend auf der
                       Firmenanalyse erstellen.
                     </p>
-                    <Button className="w-full" variant="outline" disabled={!canManage}>
+                    <Button 
+                      className="w-full" 
+                      variant="outline" 
+                      disabled={!canManage}
+                      onClick={() => setPitchPaulOpen(true)}
+                    >
                       <Mail className="mr-2 h-4 w-4" />
                       E-Mails generieren
                     </Button>
@@ -379,6 +386,11 @@ export default function ProjectDashboard() {
           <AnalyseAnnaDialog
             open={analyseAnnaOpen}
             onOpenChange={setAnalyseAnnaOpen}
+            projectId={id}
+          />
+          <PitchPaulDialog
+            open={pitchPaulOpen}
+            onOpenChange={setPitchPaulOpen}
             projectId={id}
           />
         </>
