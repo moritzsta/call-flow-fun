@@ -18,7 +18,7 @@ export interface ProjectEmail {
 export const useEmails = (projectId?: string) => {
   const queryClient = useQueryClient();
 
-  const { data: emails = [], isLoading, error } = useQuery({
+  const { data: emails = [], isLoading, error, refetch } = useQuery({
     queryKey: ['project_emails', projectId],
     queryFn: async () => {
       if (!projectId) return [];
@@ -102,6 +102,7 @@ export const useEmails = (projectId?: string) => {
     emails,
     isLoading,
     error,
+    refetch,
     sendEmail: sendEmailMutation.mutate,
     isSending: sendEmailMutation.isPending,
     updateEmailStatus: updateEmailStatusMutation.mutate,

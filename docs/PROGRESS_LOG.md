@@ -131,6 +131,15 @@
   - [x] Confirmation Dialog für E-Mail-Versand
 
 - **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
+  Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=100% | tokens=6800
+  - [x] SendEmailsBatchButton Component erstellt
+  - [x] Multi-Select für E-Mails implementiert
+  - [x] Progress-Anzeige während Versand
+  - [x] Batch-Versand implementiert
+  - [x] Toast mit "X von Y E-Mails versendet"
+  - [x] Integration in ProjectEmails.tsx (Tabs: Einzelansicht / Batch-Versand)
+
+- **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
   Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=0% | tokens=0
   - [ ] SendEmailsBatchButton Component erstellen
   - [ ] Batch-Versand implementieren
@@ -458,7 +467,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 ---
 
 ### M3: Core Features (Workflows & Data)
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=33%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=42%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -702,8 +711,44 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - 📘 feature/06-ui-ux-pattern (Dialoge, Multi-Select, ScrollArea)
 
 **Next Steps:**
-- Milestone M3: 33% abgeschlossen (4 von 12 Tasks)
-- Task 027: E-Mail Versand (Batch) - SendEmailsBatchButton Component
+- Milestone M3: 42% abgeschlossen (5 von 12 Tasks)
+- Task 028: Workflow-Status: Realtime Updates
+
+---
+
+### 2025-10-26 — Task 027: Webhook-Integration - E-Mail Versand (Batch)
+
+**Was wurde umgesetzt?**
+- SendEmailsBatchButton Component: Batch-Versand mit Multi-Select für E-Mails
+- Multi-Select: Checkbox-Liste für alle versandbaren E-Mails (draft, ready_to_send)
+- Select All / Deselect All: Bulk-Actions für E-Mail-Auswahl
+- Progress-Anzeige: Progress Bar während Batch-Versand mit Prozentwert
+- Sequential Sending: E-Mails werden nacheinander versendet (Rate-Limit-freundlich)
+- Success/Fail Tracking: Zählt erfolgreich versendete und fehlgeschlagene E-Mails
+- Summary Toast: "X von Y E-Mails versendet" mit Fehler-Info falls vorhanden
+- Confirmation Dialog: AlertDialog vor Batch-Versand mit Anzahl der E-Mails
+- Tab-Integration: ProjectEmails.tsx nutzt Tabs (Einzelansicht / Batch-Versand)
+- Auto-Refresh: E-Mail-Liste wird nach Batch-Versand automatisch aktualisiert
+
+**Betroffene Dateien:**
+- `src/components/emails/SendEmailsBatchButton.tsx` (erstellt)
+- `src/pages/ProjectEmails.tsx` (Tabs hinzugefügt, Batch-Button integriert)
+- `src/hooks/useEmails.ts` (refetch-Funktion exportiert)
+
+**Checks:**
+- ✅ Multi-Select für E-Mails funktioniert
+- ✅ Select All / Deselect All funktioniert
+- ✅ Nur sendbare E-Mails (draft, ready_to_send) werden angezeigt
+- ✅ Confirmation Dialog öffnet sich vor Batch-Versand
+- ✅ Progress Bar zeigt Fortschritt während Versand
+- ✅ E-Mails werden sequenziell versendet (Rate-Limit-sicher)
+- ✅ Summary Toast zeigt Erfolg/Fehler-Statistik
+- ✅ E-Mail-Liste wird nach Versand aktualisiert
+- ✅ Tab-Navigation funktioniert (Einzelansicht / Batch-Versand)
+
+**Reuse:**
+- 📘 feature/04-ki-integration-pattern (Batch-Workflow, Sequential Processing)
+- 📘 feature/06-ui-ux-pattern (Tabs, Multi-Select, Progress Bar, Dialoge)
 
 ---
 

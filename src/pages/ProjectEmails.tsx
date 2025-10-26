@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -14,6 +15,7 @@ import {
 } from '@/components/ui/table';
 import { useEmails } from '@/hooks/useEmails';
 import { SendEmailButton } from '@/components/emails/SendEmailButton';
+import { SendEmailsBatchButton } from '@/components/emails/SendEmailsBatchButton';
 import { ArrowLeft, Mail, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -28,7 +30,11 @@ const statusMap = {
 export default function ProjectEmails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { emails, isLoading, error } = useEmails(id);
+  const { emails, isLoading, error, refetch } = useEmails(id);
+
+  const handleBatchSuccess = () => {
+    refetch();
+  };
 
   if (isLoading) {
     return (
@@ -112,7 +118,14 @@ export default function ProjectEmails() {
                 </p>
               </div>
             ) : (
-              <Table>
+              <Tabs defaultValue="list" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="list">Einzelansicht</TabsTrigger>
+                  <TabsTrigger value="batch">Batch-Versand</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="list" className="mt-6">
+                  <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Betreff</TableHead>
@@ -157,7 +170,17 @@ export default function ProjectEmails() {
                     </TableRow>
                   ))}
                 </TableBody>
-              </Table>
+                  </Table>
+                </TabsContent>
+
+                <TabsContent value="batch" className="mt-6">
+                  <SendEmailsBatchButton
+                    emails={emails}
+                    projectId={id!}
+                    onSuccess={handleBatchSuccess}
+                  />
+                </TabsContent>
+              </Tabs>
             )}
           </CardContent>
         </Card>
