@@ -25,7 +25,7 @@ export const useOrganizations = () => {
   const queryClient = useQueryClient();
 
   // Fetch all organizations where user is a member
-  const { data: organizations = [], isLoading, error } = useQuery({
+  const { data: organizations = [], isLoading, error, refetch } = useQuery({
     queryKey: ['organizations'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -123,6 +123,7 @@ export const useOrganizations = () => {
     organizations,
     isLoading,
     error,
+    refetch,
     createOrganization: createOrganization.mutate,
     updateOrganization: updateOrganization.mutate,
     deleteOrganization: deleteOrganization.mutate,

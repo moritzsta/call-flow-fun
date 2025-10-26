@@ -2,7 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Building2, Users, ArrowRight, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonCardGrid } from '@/components/ui/skeleton-card';
+import { ErrorStateCard } from '@/components/ui/error-state';
 
 interface Organization {
   id: string;
@@ -14,13 +15,17 @@ interface Organization {
 interface OrganizationCardsProps {
   organizations: Organization[];
   isLoading: boolean;
+  isError?: boolean;
   onCreateNew: () => void;
+  onRetry?: () => void;
 }
 
 export const OrganizationCards = ({
   organizations,
   isLoading,
+  isError = false,
   onCreateNew,
+  onRetry,
 }: OrganizationCardsProps) => {
   const navigate = useNavigate();
 
@@ -28,14 +33,24 @@ export const OrganizationCards = ({
     return (
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-48" />
+          <h2 className="text-2xl font-bold">Meine Organisationen</h2>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-48" />
-          ))}
+        <SkeletonCardGrid count={3} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Meine Organisationen</h2>
         </div>
+        <ErrorStateCard
+          title="Organisationen konnten nicht geladen werden"
+          message="Bitte versuchen Sie es später erneut."
+          onRetry={onRetry}
+        />
       </div>
     );
   }

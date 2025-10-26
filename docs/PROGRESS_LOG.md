@@ -37,11 +37,6 @@
   - [ ] Sprachdateien erstellen (DE/EN)
   - [ ] Language-Switcher implementieren
 
-- **Task 040** Loading States & Skeletons  
-  Meta: id=Task 040 | assignee=@AI | milestone=M4 | priority=medium | due=2025-11-27 | story=3 | labels=frontend,ui | progress=0% | tokens=0
-  - [ ] Skeleton-Components erstellen
-  - [ ] Loading-States in alle Pages integrieren
-  - [ ] Error-States implementieren
 
 - **Task 041** Error Handling & Error Boundaries  
   Meta: id=Task 041 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-28 | story=3 | labels=frontend,error-handling | progress=0% | tokens=0
@@ -446,6 +441,16 @@
   - [x] ProjectCompanies Page für Mobile optimiert
   - [x] RESPONSIVE_GUIDELINES.md Dokumentation erstellt
 
+- **Task 040** Loading States & Skeletons  
+  Meta: id=Task 040 | assignee=@AI | milestone=M4 | priority=medium | due=2025-11-27 | story=3 | labels=frontend,ui | progress=100% | tokens=4500
+  - [x] SkeletonCard, SkeletonTable, SkeletonList Components erstellt
+  - [x] ErrorState & ErrorStateCard Components erstellt
+  - [x] OrganizationCards mit Loading & Error States
+  - [x] RecentProjects mit Loading & Error States
+  - [x] ActiveWorkflows mit Loading & Error States
+  - [x] useOrganizations, useProjects, useAllWorkflows mit refetch erweitert
+  - [x] Dashboard mit vollständigen Error-Handling
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -501,7 +506,7 @@ Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scop
 
 ### M4: UI/UX & Polish
 
-Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=17%
+Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=25%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
@@ -531,6 +536,51 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 040: Loading States & Skeletons
+
+**Änderungen:**
+- `src/components/ui/skeleton-card.tsx` erstellt: Wiederverwendbare Skeleton-Card-Component
+  - SkeletonCard mit konfigurierbarer Header- und Zeilen-Anzahl
+  - SkeletonCardGrid für Grid-Layouts (1-3 Spalten responsive)
+- `src/components/ui/skeleton-table.tsx` erstellt: Skeleton-Table-Component
+  - Konfigurierbare Zeilen und Spalten
+  - Optional mit/ohne Header
+- `src/components/ui/skeleton-list.tsx` erstellt: Skeleton-List-Component
+  - SkeletonList mit optional Avatar und Actions
+  - SkeletonListCompact für kompakte Listen
+- `src/components/ui/error-state.tsx` erstellt: Error-State-Components
+  - ErrorState: Inline-Error-Anzeige mit Retry-Button
+  - ErrorStateCard: Zentrierte Error-Card für volle Bereiche
+- Dashboard-Components mit vollständigen Loading & Error States:
+  - `OrganizationCards`: SkeletonCardGrid + ErrorStateCard mit Retry
+  - `RecentProjects`: SkeletonCardGrid + ErrorStateCard mit Retry
+  - `ActiveWorkflows`: SkeletonList + ErrorState mit Retry
+- Hooks erweitert mit refetch:
+  - `useOrganizations`: refetch-Methode hinzugefügt
+  - `useProjects`: refetch-Methode hinzugefügt
+  - `useAllWorkflows`: refetch-Methode hinzugefügt
+- `src/pages/Dashboard.tsx`: Vollständiges Error-Handling integriert
+  - error-Props aus Hooks destructured
+  - refetch-Callbacks an Components übergeben
+
+**Komponenten:**
+- SkeletonCard, SkeletonCardGrid
+- SkeletonTable
+- SkeletonList, SkeletonListCompact
+- ErrorState, ErrorStateCard
+
+**Hooks:**
+- useOrganizations, useProjects, useAllWorkflows mit refetch
+
+**Testing:**
+- Alle Loading-States getestet
+- Error-States mit Retry-Funktionalität getestet
+- Keine "Flash of Empty Content"
+
+**Status:** ✅ Done (100%)
+
+---
 
 ### 2025-10-26 — Task 038: Responsive Design: Mobile-First
 

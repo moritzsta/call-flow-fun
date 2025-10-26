@@ -13,9 +13,9 @@ export default function Dashboard() {
   const { profile } = useAuth();
   const [createOrgDialogOpen, setCreateOrgDialogOpen] = useState(false);
 
-  const { organizations, isLoading: orgsLoading } = useOrganizations();
-  const { projects, isLoading: projectsLoading } = useProjects();
-  const { workflows, isLoading: workflowsLoading } = useAllWorkflows();
+  const { organizations, isLoading: orgsLoading, error: orgsError, refetch: refetchOrgs } = useOrganizations();
+  const { projects, isLoading: projectsLoading, error: projectsError, refetch: refetchProjects } = useProjects();
+  const { workflows, isLoading: workflowsLoading, error: workflowsError, refetch: refetchWorkflows } = useAllWorkflows();
 
   // Get projects with organization names
   const projectsWithOrgNames = projects.map((project) => {
@@ -92,12 +92,24 @@ export default function Dashboard() {
           <OrganizationCards
             organizations={organizations}
             isLoading={orgsLoading}
+            isError={!!orgsError}
             onCreateNew={() => setCreateOrgDialogOpen(true)}
+            onRetry={refetchOrgs}
           />
 
-          <RecentProjects projects={projectsWithOrgNames} isLoading={projectsLoading} />
+          <RecentProjects
+            projects={projectsWithOrgNames}
+            isLoading={projectsLoading}
+            isError={!!projectsError}
+            onRetry={refetchProjects}
+          />
 
-          <ActiveWorkflows workflows={workflows} isLoading={workflowsLoading} />
+          <ActiveWorkflows
+            workflows={workflows}
+            isLoading={workflowsLoading}
+            isError={!!workflowsError}
+            onRetry={refetchWorkflows}
+          />
         </div>
 
         {/* Create Organization Dialog */}

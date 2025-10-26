@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FolderOpen, ArrowRight, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonCardGrid } from '@/components/ui/skeleton-card';
+import { ErrorStateCard } from '@/components/ui/error-state';
 
 interface Project {
   id: string;
@@ -18,20 +19,40 @@ interface Project {
 interface RecentProjectsProps {
   projects: Project[];
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
 }
 
-export const RecentProjects = ({ projects, isLoading }: RecentProjectsProps) => {
+export const RecentProjects = ({
+  projects,
+  isLoading,
+  isError = false,
+  onRetry,
+}: RecentProjectsProps) => {
   const navigate = useNavigate();
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} className="h-32" />
-          ))}
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Aktuelle Projekte</h2>
         </div>
+        <SkeletonCardGrid count={4} />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Aktuelle Projekte</h2>
+        </div>
+        <ErrorStateCard
+          title="Projekte konnten nicht geladen werden"
+          message="Bitte versuchen Sie es später erneut."
+          onRetry={onRetry}
+        />
       </div>
     );
   }

@@ -28,7 +28,7 @@ export const useProjects = (organizationId?: string) => {
   const queryClient = useQueryClient();
 
   // Fetch all projects for an organization
-  const { data: projects = [], isLoading, error } = useQuery({
+  const { data: projects = [], isLoading, error, refetch } = useQuery({
     queryKey: ['projects', organizationId],
     queryFn: async () => {
       if (!organizationId) return [];
@@ -139,6 +139,7 @@ export const useProjects = (organizationId?: string) => {
     projects,
     isLoading,
     error,
+    refetch,
     createProject: createProject.mutate,
     updateProject: updateProject.mutate,
     archiveProject: archiveProject.mutate,

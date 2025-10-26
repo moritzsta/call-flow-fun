@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { Activity, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
+import { SkeletonList } from '@/components/ui/skeleton-list';
+import { ErrorState } from '@/components/ui/error-state';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 
@@ -20,6 +21,8 @@ interface WorkflowState {
 interface ActiveWorkflowsProps {
   workflows: WorkflowState[];
   isLoading: boolean;
+  isError?: boolean;
+  onRetry?: () => void;
 }
 
 const workflowNameMap: Record<string, string> = {
@@ -29,19 +32,59 @@ const workflowNameMap: Record<string, string> = {
   email_sender: 'E-Mail Versand',
 };
 
-export const ActiveWorkflows = ({ workflows, isLoading }: ActiveWorkflowsProps) => {
+export const ActiveWorkflows = ({
+  workflows,
+  isLoading,
+  isError = false,
+  onRetry,
+}: ActiveWorkflowsProps) => {
   const navigate = useNavigate();
+
+  const recentWorkflows = workflows.slice(0, 5);
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-64" />
+        <h2 className="text-2xl font-bold">Workflow-Status</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Letzte Workflows
+            </CardTitle>
+            <CardDescription>Übersicht über kürzlich ausgeführte Workflows</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SkeletonList items={3} showActions />
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
-  const recentWorkflows = workflows.slice(0, 5);
+  if (isError) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold">Workflow-Status</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Letzte Workflows
+            </CardTitle>
+            <CardDescription>Übersicht über kürzlich ausgeführte Workflows</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ErrorState
+              title="Workflows konnten nicht geladen werden"
+              message="Bitte versuchen Sie es später erneut."
+              onRetry={onRetry}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
