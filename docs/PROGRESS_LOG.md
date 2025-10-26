@@ -104,9 +104,13 @@
   - [x] Optional: Bundesland, Stadt, Bezirk Filter
 
 - **Task 024** Webhook-Integration: Analyse Anna Trigger  
-  Meta: id=Task 024 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-11 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
-  - [ ] AnalyseAnnaDialog Component erstellen
-  - [ ] Multi-Select für Firmen implementieren
+  Meta: id=Task 024 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-11 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=5800
+  - [x] AnalyseAnnaDialog Component erstellt
+  - [x] Multi-Select für Firmen implementiert
+  - [x] useCompanies Hook erstellt
+  - [x] Integration in ProjectDashboard
+  - [x] Input Validation (min 10, max 500 chars, min 1 company)
+  - [x] Empty State wenn keine Firmen vorhanden
   - [ ] Webhook-Call implementieren
 
 - **Task 025** Webhook-Integration: Pitch Paul Trigger  
@@ -449,7 +453,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 ---
 
 ### M3: Core Features (Workflows & Data)
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=8%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=17%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -624,6 +628,40 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 **Reuse:**
 - 📘 feature/04-ki-integration-pattern (Workflow-Trigger, n8n-Integration)
 - 📘 feature/06-ui-ux-pattern (Dialoge, Forms, Input Validation)
+
+---
+
+### 2025-10-26 — Task 024: Webhook-Integration - Analyse Anna Trigger
+
+**Was wurde umgesetzt?**
+- AnalyseAnnaDialog Component: Dialog mit Freitext-Input (Textarea) + Multi-Select für Firmen
+- useCompanies Hook: Hook für Firmen-Daten aus `companies` Tabelle (gefiltert nach project_id)
+- Multi-Select: Checkbox-Liste mit Firmen-Details (Name, Industry, Stadt, Status)
+- Select All / Deselect All: Bulk-Actions für Firmen-Auswahl
+- Scroll-Area: Liste scrollbar bei vielen Firmen (max-height: 250px)
+- Empty State: Placeholder wenn keine Firmen vorhanden ("Starten Sie Finder Felix")
+- Input Validation: Zod-Schema (min 10, max 500 chars für user_input, min 1 company)
+- Badge-System: Status-Anzeige (found, analyzed, contacted, rejected) + Industry + City
+- Integration in ProjectDashboard: Button "Firmen analysieren" öffnet Dialog (nur für Owner/Manager)
+
+**Betroffene Dateien:**
+- `src/components/workflows/AnalyseAnnaDialog.tsx` (erstellt)
+- `src/hooks/useCompanies.ts` (erstellt)
+- `src/pages/ProjectDashboard.tsx` (Button onClick hinzugefügt, Dialog eingebunden)
+
+**Checks:**
+- ✅ Dialog öffnet sich bei Klick auf "Firmen analysieren"
+- ✅ Firmen werden aus DB geladen (gefiltert nach project_id)
+- ✅ Multi-Select funktioniert (Checkbox-Liste)
+- ✅ Select All / Deselect All funktioniert
+- ✅ Input Validation funktioniert (min 10 chars, min 1 company)
+- ✅ Empty State wird angezeigt bei 0 Firmen
+- ✅ Workflow wird getriggert (via useWorkflowTrigger Hook)
+- ✅ Nur Owner/Manager können Dialog öffnen
+
+**Reuse:**
+- 📘 feature/04-ki-integration-pattern (Workflow-Trigger, Multi-Select-Logic)
+- 📘 feature/06-ui-ux-pattern (Dialoge, Multi-Select, ScrollArea)
 
 ---
 

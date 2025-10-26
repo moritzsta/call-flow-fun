@@ -12,6 +12,7 @@ import { useOrganizations } from '@/hooks/useOrganizations';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 import { useAuth } from '@/contexts/AuthContext';
 import { FinderFelixDialog } from '@/components/workflows/FinderFelixDialog';
+import { AnalyseAnnaDialog } from '@/components/workflows/AnalyseAnnaDialog';
 import { 
   ArrowLeft, 
   Building2, 
@@ -28,6 +29,7 @@ export default function ProjectDashboard() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [finderFelixOpen, setFinderFelixOpen] = useState(false);
+  const [analyseAnnaOpen, setAnalyseAnnaOpen] = useState(false);
 
   const { organizations, isLoading: orgsLoading } = useOrganizations();
   
@@ -280,7 +282,12 @@ export default function ProjectDashboard() {
                       KI-gestützte Analyse der Firmen mit Informationen zu Produkten,
                       Services und Ansprechpartnern.
                     </p>
-                    <Button className="w-full" variant="outline" disabled={!canManage}>
+                    <Button 
+                      className="w-full" 
+                      variant="outline" 
+                      disabled={!canManage}
+                      onClick={() => setAnalyseAnnaOpen(true)}
+                    >
                       <BarChart3 className="mr-2 h-4 w-4" />
                       Firmen analysieren
                     </Button>
@@ -361,13 +368,20 @@ export default function ProjectDashboard() {
         </div>
       </div>
 
-      {/* Finder Felix Dialog */}
+      {/* Workflow Dialogs */}
       {id && (
-        <FinderFelixDialog
-          open={finderFelixOpen}
-          onOpenChange={setFinderFelixOpen}
-          projectId={id}
-        />
+        <>
+          <FinderFelixDialog
+            open={finderFelixOpen}
+            onOpenChange={setFinderFelixOpen}
+            projectId={id}
+          />
+          <AnalyseAnnaDialog
+            open={analyseAnnaOpen}
+            onOpenChange={setAnalyseAnnaOpen}
+            projectId={id}
+          />
+        </>
       )}
     </SidebarProvider>
   );
