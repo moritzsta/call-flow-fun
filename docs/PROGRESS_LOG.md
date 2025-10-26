@@ -12,11 +12,6 @@
 
 
 
-- **Task 030** Company Detail View  
-  Meta: id=Task 030 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-17 | story=5 | labels=frontend,companies,ui | progress=0% | tokens=0
-  - [ ] CompanyDetail.tsx Page erstellen
-  - [ ] Analysis-Display implementieren
-  - [ ] Workflow-Trigger implementieren
 
 - **Task 031** Company Import/Export (optional)  
   Meta: id=Task 031 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-18 | story=5 | labels=frontend,companies,import | progress=0% | tokens=0
@@ -403,6 +398,17 @@
   - [x] Status-Badge mit Farben (found=blue, analyzed=purple, contacted=green, rejected=red)
   - [x] Delete & Update Status Mutations implementiert
 
+- **Task 030** Company Detail View  
+  Meta: id=Task 030 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-17 | story=5 | labels=frontend,companies,ui | progress=100% | tokens=7400
+  - [x] CompanyDetail.tsx Page erstellt mit vollständiger Detailansicht
+  - [x] CompanyInfo.tsx Component erstellt (alle Felder mit Icons & Formatierung)
+  - [x] AnalysisDisplay.tsx Component erstellt (JSONB Analysis-Display mit Fallback)
+  - [x] useCompany Hook implementiert (Single Company Query + Status Update)
+  - [x] Status-Dropdown zum Ändern des Firmenstatus
+  - [x] Action-Buttons: "Firma analysieren (Anna)" & "E-Mail generieren (Paul)"
+  - [x] Navigation: Zurück-Button zur vorherigen Seite
+  - [x] Route /companies/:companyId in App.tsx hinzugefügt
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -443,7 +449,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 
 ### M3: Core Features (Workflows & Data)
 
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=58%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=67%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -488,6 +494,51 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 030: Company Detail View
+
+**Was wurde umgesetzt?**
+
+- `src/pages/CompanyDetail.tsx`: Vollständige Detailseite für einzelne Firma
+  - Anzeige aller Firmenfelder (Name, Branche, CEO, Kontaktdaten, Website, Adresse)
+  - Status-Dropdown zum Ändern des Status (found/analyzed/contacted/rejected)
+  - Action-Buttons: "Firma analysieren (Anna)" & "E-Mail generieren (Paul)"
+  - Navigation: Zurück-Button zur vorherigen Seite
+  - Loading-State mit Skeleton, 404-Fallback wenn Firma nicht gefunden
+  - Integration von CompanyInfo und AnalysisDisplay Components
+
+- `src/components/companies/CompanyInfo.tsx`: Firmeninfo-Anzeige
+  - Alle Firmenfelder strukturiert dargestellt
+  - Icons für Kontaktdaten (Mail, Phone, Globe, MapPin, User)
+  - Status-Badge mit Farben
+  - Formatierte Adresse mit Stadt, Bundesland, Bezirk
+  - Timestamps (Erstellt am, Aktualisiert am)
+
+- `src/components/companies/AnalysisDisplay.tsx`: Analysis JSONB Display
+  - Formatierte Darstellung von JSONB Analysis-Daten
+  - Fallback wenn keine Analyse vorhanden (Alert mit Hinweis auf Analyse Anna)
+  - Recursive Rendering von verschachtelten Objekten
+  - Clean Formatting mit uppercase Labels und Code-Blocks
+
+- `src/hooks/useCompany.ts`: Hook für Single Company
+  - Query für einzelne Company mit `.single()`
+  - Status Update Mutation mit Query Invalidierung
+  - Toast-Feedback bei Erfolg/Fehler
+  - Loading & Error States
+
+- Route `/companies/:companyId` in `src/App.tsx` hinzugefügt
+
+**Tests:**
+- ✅ Company Detail View lädt Daten korrekt
+- ✅ Status-Änderung funktioniert (Dropdown)
+- ✅ Workflow-Trigger funktionieren (Anna & Paul Buttons)
+- ✅ Analysis-Display zeigt JSONB korrekt an
+- ✅ Fallback wenn keine Analyse vorhanden
+- ✅ Navigation zurück funktioniert
+
+**Milestone M3**: 67% abgeschlossen (8 von 12 Tasks)
+
+---
 
 ### 2025-10-26 — Task 029: Companies List: Anzeige & Filter
 

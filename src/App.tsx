@@ -16,6 +16,7 @@ import ProjectSettings from "./pages/ProjectSettings";
 import ProjectCompanies from "./pages/ProjectCompanies";
 import ProjectEmails from "./pages/ProjectEmails";
 import Profile from "./pages/Profile";
+import CompanyDetail from "./pages/CompanyDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProjectCompanies />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/companies/:companyId" 
+              element={
+                <ProtectedRoute>
+                  <CompanyDetail />
                 </ProtectedRoute>
               } 
             />
