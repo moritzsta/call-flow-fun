@@ -29,11 +29,6 @@
 
 
 
-- **Task 037** Design System: Theme & HSL-Tokens  
-  Meta: id=Task 037 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-24 | story=3 | labels=frontend,design,ui | progress=0% | tokens=0
-  - [ ] index.css mit HSL-Tokens aktualisieren
-  - [ ] tailwind.config.ts aktualisieren
-  - [ ] Design System dokumentieren
 
 - **Task 038** Responsive Design: Mobile-First  
   Meta: id=Task 038 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-25 | story=5 | labels=frontend,responsive,ui | progress=0% | tokens=0
@@ -436,6 +431,16 @@
   - [x] Alle Toast-Calls in Pages ersetzt (Profile, CompanyDetail, EmailDetail)
   - [x] Alle Toast-Calls in Components ersetzt (SendEmailsBatchButton)
 
+- **Task 037** Design System: Theme & HSL-Tokens  
+  Meta: id=Task 037 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-24 | story=3 | labels=frontend,design,ui | progress=100% | tokens=2800
+  - [x] index.css mit korrekten HSL-Tokens aus STYLE_GUIDE.md aktualisiert
+  - [x] Primary Color: Professional Blue (221, 83%, 53% Light / 60% Dark)
+  - [x] Accent Color: Energetic Orange (25, 95%, 53% Light / 60% Dark)
+  - [x] Status-Farben hinzugefügt: success, warning, info (fehlten komplett)
+  - [x] tailwind.config.ts erweitert mit success, warning, info Mappings
+  - [x] prefers-reduced-motion Media Query für Accessibility hinzugefügt
+  - [x] Alle Farben sind HSL-basiert und semantisch benannt
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -491,7 +496,7 @@ Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scop
 
 ### M4: UI/UX & Polish
 
-Meta: id=M4 | status=planned | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=0%
+Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=8%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
@@ -521,6 +526,28 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 037: Design System: Theme & HSL-Tokens
+
+**Änderungen:**
+- `src/index.css` komplett überarbeitet mit korrekten HSL-Werten aus STYLE_GUIDE.md
+- Primary Color auf Professional Blue umgestellt (221, 83%, 53% Light / 60% Dark) statt dem Standard-shadcn Grau
+- Accent Color auf Energetic Orange umgestellt (25, 95%, 53% Light / 60% Dark)
+- Status-Farben hinzugefügt: `--success`, `--warning`, `--info` (fehlten komplett in der bisherigen Config)
+- `tailwind.config.ts` erweitert mit `success`, `warning`, `info` Farbmappings
+- `prefers-reduced-motion` Media Query hinzugefügt für Accessibility (alle Animationen werden deaktiviert)
+- Alle Farben sind jetzt HSL-basiert und semantisch benannt gemäß Design System
+
+**Resultat:**
+- Design System entspricht jetzt vollständig den Vorgaben aus STYLE_GUIDE.md
+- Light/Dark Mode funktioniert mit konsistenten, professionellen Farben
+- Status-Badges (success, warning, error, info) haben jetzt korrekte Farben
+- Accessibility-konform mit `prefers-reduced-motion` Support
+- Sidebar-Farben sind ebenfalls auf Primary Blue umgestellt
+
+**Nächster Schritt:** Task 038 - Responsive Design: Mobile-First
+
+---
 
 ### 2025-10-26 — Task 036: Notifications & Toast System
 
