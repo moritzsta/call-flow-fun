@@ -20,11 +20,6 @@
   - [ ] Error-Handling implementieren
 
 
-- **Task 033** Email Detail View & Editor  
-  Meta: id=Task 033 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-20 | story=5 | labels=frontend,emails,ui | progress=0% | tokens=0
-  - [ ] EmailDetail.tsx Page erstellen
-  - [ ] HTML-Vorschau implementieren
-  - [ ] Edit-Mode implementieren
 
 - **Task 034** Email Templates (optional)  
   Meta: id=Task 034 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-21 | story=5 | labels=frontend,emails,templates | progress=0% | tokens=0
@@ -415,6 +410,19 @@
   - [x] Sortierung für: created_at, sent_at, status, subject
   - [x] Delete Mutation mit Bestätigungs-Dialog
 
+- **Task 033** Email Detail View & Editor  
+  Meta: id=Task 033 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-20 | story=5 | labels=frontend,emails,ui | progress=100% | tokens=8200
+  - [x] EmailDetail.tsx Page erstellt mit vollständiger Detailansicht
+  - [x] EmailPreview Component erstellt (HTML-Vorschau mit iframe + srcdoc)
+  - [x] EmailEditor Component erstellt (react-hook-form + zod Validierung)
+  - [x] useEmail Hook implementiert (Single Email Query + Update Mutations)
+  - [x] Tabs für Vorschau & Bearbeiten
+  - [x] Status-Dropdown zum Ändern des Status
+  - [x] Buttons: "Als Entwurf speichern", "Bereit zum Versenden", "Jetzt versenden"
+  - [x] HTML-Vorschau mit Sandbox iframe (sicher gegen XSS)
+  - [x] Edit-Mode mit Textarea für HTML-Body
+  - [x] Route /emails/:emailId in App.tsx hinzugefügt
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -455,7 +463,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 
 ### M3: Core Features (Workflows & Data)
 
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=75%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=83%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -500,6 +508,62 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 033: Email Detail View & Editor
+
+**Was wurde umgesetzt?**
+
+- `src/pages/EmailDetail.tsx`: Vollständige E-Mail-Detailseite
+  - Header mit E-Mail-Icon, Betreff, Empfänger, Company-Name
+  - Status-Dropdown zum Ändern des Status (draft/ready_to_send, sent disabled)
+  - Status-Badge mit Farben
+  - Timestamps: Erstellt & Versendet (wenn vorhanden)
+  - Tabs für Vorschau & Bearbeiten
+  - "Bearbeiten"-Tab disabled wenn Status = sent
+  - Integration von EmailPreview & EmailEditor Components
+  - Loading-State mit Skeleton, 404-Fallback
+
+- `src/components/emails/EmailPreview.tsx`: HTML-Vorschau Component
+  - E-Mail-Header mit "An:" und "Betreff:"
+  - HTML-Vorschau mit iframe + srcdoc (sicher gegen XSS)
+  - Sandbox iframe mit "allow-same-origin" (minimale Permissions)
+  - Inline CSS für korrekte E-Mail-Formatierung
+  - Min-height 400px für gute Lesbarkeit
+
+- `src/components/emails/EmailEditor.tsx`: Edit-Mode Component
+  - react-hook-form + zod Validierung
+  - Subject: Input (max 200 Zeichen)
+  - Body: Textarea (min 10, max 10.000 Zeichen, font-mono für HTML)
+  - Empfänger-Feld (read-only, disabled)
+  - 3 Action-Buttons:
+    - "Als Entwurf speichern" (status=draft)
+    - "Bereit zum Versenden" (status=ready_to_send)
+    - "Jetzt versenden" (speichert + triggert sendEmail)
+  - Alle Buttons disabled wenn isUpdating oder status=sent
+  - FormDescription für HTML-Hinweise
+
+- `src/hooks/useEmail.ts`: Hook für Single Email
+  - Query für einzelne E-Mail mit `.single()` + Company Join
+  - updateEmailMutation (subject, body, optional status)
+  - updateStatusMutation (nur status ändern)
+  - Query-Invalidierung für ['email', emailId] & ['project_emails']
+  - Toast-Feedback bei Erfolg/Fehler
+
+- Route `/emails/:emailId` in `src/App.tsx` hinzugefügt
+
+**Tests:**
+- ✅ E-Mail-Detail lädt Daten korrekt
+- ✅ HTML-Vorschau zeigt E-Mail korrekt an (iframe sandbox)
+- ✅ Edit-Mode funktioniert (Validierung mit zod)
+- ✅ "Als Entwurf speichern" funktioniert
+- ✅ "Bereit zum Versenden" funktioniert
+- ✅ "Jetzt versenden" funktioniert (speichert + triggert sendEmail)
+- ✅ Status-Dropdown funktioniert
+- ✅ Edit-Mode disabled wenn status=sent
+
+**Milestone M3**: 83% abgeschlossen (10 von 12 Tasks)
+
+---
 
 ### 2025-10-26 — Task 032: Project Emails List: Anzeige & Filter
 

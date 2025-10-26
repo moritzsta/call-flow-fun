@@ -17,6 +17,7 @@ import ProjectCompanies from "./pages/ProjectCompanies";
 import ProjectEmails from "./pages/ProjectEmails";
 import Profile from "./pages/Profile";
 import CompanyDetail from "./pages/CompanyDetail";
+import EmailDetail from "./pages/EmailDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -100,6 +101,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProjectEmails />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/emails/:emailId" 
+              element={
+                <ProtectedRoute>
+                  <EmailDetail />
                 </ProtectedRoute>
               } 
             />
