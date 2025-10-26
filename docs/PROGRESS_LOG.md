@@ -50,10 +50,16 @@
   - [x] Firmen- und E-Mail-Management dokumentiert
 
 - **Task 047** Documentation: Technical Docs  
-  Meta: id=Task 047 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-04 | story=3 | labels=docs | progress=0% | tokens=0
-  - [ ] API_REFERENCE.md erstellen
-  - [ ] DEPLOYMENT.md erstellen
-  - [ ] SOFTWARE_DOKU.md aktualisieren
+  Meta: id=Task 047 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-04 | story=3 | labels=docs | progress=100% | tokens=8200
+  - [x] API_REFERENCE.md erstellt mit vollständiger API-Dokumentation
+  - [x] DEPLOYMENT.md erstellt mit Deployment-Guide
+  - [x] SOFTWARE_DOKU.md überprüft (bereits vollständig)
+  - [x] Alle Endpunkte dokumentiert (Supabase, Edge Functions, n8n)
+  - [x] React Hooks API vollständig dokumentiert
+  - [x] Type Definitions hinzugefügt
+  - [x] Deployment-Prozess für alle Komponenten beschrieben
+  - [x] Troubleshooting-Sektion hinzugefügt
+  - [x] Rollback-Prozeduren definiert
 
 - **Task 048** Progress Log Setup  
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
@@ -91,7 +97,25 @@
 
 ### Done
 
-- **Task 046** Documentation: User Guide  
+- **Task 047** Documentation: Technical Docs  
+  Meta: id=Task 047 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-04 | story=3 | labels=docs | progress=100% | tokens=8200
+  - [x] API_REFERENCE.md erstellt (vollständige API-Dokumentation)
+  - [x] DEPLOYMENT.md erstellt (Deployment-Guide für alle Komponenten)
+  - [x] SOFTWARE_DOKU.md überprüft (bereits vollständig dokumentiert)
+  - [x] Supabase Client API dokumentiert (Auth, Organizations, Projects, Companies, Emails, Workflows)
+  - [x] Edge Functions API dokumentiert (trigger-n8n-workflow)
+  - [x] n8n Webhooks API dokumentiert (alle 4 Workflows)
+  - [x] Realtime Subscriptions dokumentiert
+  - [x] React Hooks API vollständig dokumentiert (useAuth, useOrganizations, useProjects, etc.)
+  - [x] Type Definitions für alle Entities
+  - [x] Error Handling & Best Practices
+  - [x] Deployment-Prozess für Lovable, Supabase, n8n
+  - [x] Monitoring & Logging Setup
+  - [x] Troubleshooting-Guide mit häufigen Problemen
+  - [x] Rollback-Prozeduren für alle Komponenten
+  - [x] Security & Performance Best Practices
+
+- **Task 046** Documentation: User Guide
   Meta: id=Task 046 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-03 | story=3 | labels=docs | progress=100% | tokens=4200
   - [x] USER_GUIDE.md erstellt (umfassende Benutzer-Dokumentation)
   - [x] Workflows dokumentiert (Finder Felix, Analyse Anna, Pitch Paul)
@@ -540,7 +564,7 @@ Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scop
 
 ### M4: UI/UX & Polish
 
-Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=75%
+Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=83%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
@@ -570,6 +594,147 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 047: Documentation: Technical Docs
+
+**Zeitstempel**: 2025-10-26 13:00 UTC  
+**Tokens**: 8200
+
+**Änderungen**:
+- ✅ **API_REFERENCE.md erstellt** mit vollständiger API-Dokumentation (13 Sektionen)
+  
+  **Supabase Client API** (Sektion 3):
+  - Organizations CRUD (Create, Get, Update, Delete)
+  - Projects CRUD (Create, Get by Org, Archive)
+  - Companies (Get, Filter, Update Status, Pagination)
+  - Project Emails (Get, Update Status)
+  - Workflow States (Get, Create)
+  - Alle Endpoints mit Request/Response-Beispielen
+  
+  **Edge Functions** (Sektion 4):
+  - `trigger-n8n-workflow` vollständig dokumentiert
+  - Request-Format mit TypeScript-Types
+  - Response-Format (Success/Error)
+  - cURL-Beispiele
+  
+  **n8n Webhooks** (Sektion 5):
+  - Webhook-Format und Authentication
+  - Alle 4 Workflows (Finder Felix, Analyse Anna, Pitch Paul, Email Sender)
+  - Request-Payloads mit JSON-Beispielen
+  - Header Auth mit Secret Verification
+  
+  **Realtime Subscriptions** (Sektion 6):
+  - Workflow States Realtime mit Code-Beispiel
+  - Channel-Setup und Cleanup
+  
+  **React Hooks API** (Sektion 7):
+  - `useAuth`: Auth-Context Hook
+  - `useOrganizations`: Organizations CRUD
+  - `useProjects`: Projects CRUD
+  - `useCompanies`: Companies mit Filtering
+  - `useEmails`: Emails mit Pagination
+  - `useWorkflowStatus`: Workflows mit Realtime
+  - Alle Hooks mit TypeScript-Signaturen
+  
+  **Type Definitions** (Sektion 8):
+  - User & Profile Types
+  - Organization & Member Types
+  - Project Types
+  - Company Types (mit Status-Enum)
+  - Email Types (mit Status-Enum)
+  - Workflow Types (mit Status & Name Enums)
+  
+  **Error Handling** (Sektion 9):
+  - Supabase Error-Codes (23505, 23503, 42501, PGRST116)
+  - Retry Logic mit Exponential Backoff
+  
+  **Rate Limits & Best Practices** (Sektionen 10-11):
+  - Supabase & n8n Rate Limits
+  - Error Handling Best Practice
+  - Loading States
+  - Optimistic Updates
+  - Pagination
+
+- ✅ **DEPLOYMENT.md erstellt** mit vollständigem Deployment-Guide (10 Hauptkapitel)
+  
+  **Lokale Entwicklung** (Sektion 3):
+  - Repository Setup
+  - Dependencies installieren (bun/npm)
+  - Environment-Konfiguration
+  - Development Server starten
+  - Lokale Tests (type-check, build, preview)
+  
+  **Supabase Setup** (Sektion 4):
+  - Datenbank-Migrations anwenden (UI & CLI)
+  - RLS-Status prüfen
+  - Realtime aktivieren
+  - Secrets konfigurieren
+  - Edge Functions deployen
+  
+  **n8n Workflows Setup** (Sektion 5):
+  - n8n Instance einrichten (Cloud & Self-Hosted)
+  - Workflows importieren (JSON-Files)
+  - Webhooks konfigurieren (Header Auth)
+  - Supabase Credentials in n8n
+  - Workflows aktivieren
+  
+  **Lovable Deployment** (Sektion 6):
+  - Project Setup
+  - Supabase Integration
+  - Build & Deploy (automatisch & manuell)
+  - Custom Domain konfigurieren
+  
+  **Production Deployment** (Sektion 7):
+  - Pre-Deployment Checklist (11 Punkte)
+  - Deployment-Prozess (4 Schritte)
+  - Post-Deployment Tests:
+    - Smoke Tests (Login, Dashboard, Workflows, Realtime)
+    - Integration Tests (cURL-Beispiele für alle APIs)
+    - Performance Check (Lighthouse, Supabase Metrics, n8n Metrics)
+  
+  **Monitoring & Logging** (Sektion 8):
+  - Supabase Monitoring (Database Logs, Realtime Logs, Edge Function Logs)
+  - n8n Monitoring (Workflow Logs, Webhook Monitoring)
+  - Frontend Monitoring (Console Logs, Custom Logging)
+  
+  **Troubleshooting** (Sektion 9):
+  - 5 häufige Probleme mit Diagnose & Lösung:
+    - App lädt nicht
+    - Login funktioniert nicht
+    - Workflow schlägt fehl
+    - Realtime funktioniert nicht
+    - Edge Function Timeout
+  
+  **Rollback-Prozedur** (Sektion 10):
+  - Frontend Rollback (Lovable UI & Git)
+  - Database Rollback (Point-in-Time Recovery)
+  - n8n Rollback (Workflow History)
+  
+  **Security & Performance** (Bonus-Sektionen):
+  - Security Best Practices (Secrets, RLS, CORS, Rate Limiting)
+  - Performance Optimization (Database, Frontend, Caching)
+
+- ✅ **SOFTWARE_DOKU.md überprüft**
+  - Bereits vollständig dokumentiert (10 Hauptkapitel, 479 Zeilen)
+  - Deckt Architektur, Datenmodell, Schnittstellen, UI/UX ab
+  - Keine Updates erforderlich
+
+**Datei-Änderungen**:
+- Created: `docs/API_REFERENCE.md` (500+ Zeilen)
+- Created: `docs/DEPLOYMENT.md` (800+ Zeilen)
+- Reviewed: `docs/SOFTWARE_DOKU.md` (keine Änderungen)
+- Updated: `docs/PROGRESS_LOG.md` (Task 047 auf 100%, Milestone M4 auf 83%)
+
+**Rationale:**
+- **Vollständige API-Dokumentation**: Alle Endpoints, Hooks und Types dokumentiert
+- **Production-Ready Deployment**: Schritt-für-Schritt Guide für alle Komponenten
+- **Troubleshooting**: Häufige Probleme proaktiv adressiert
+- **Rollback-Ready**: Klare Prozeduren für Notfälle
+- **Best Practices**: Security & Performance Guidelines
+
+**Status**: ✅ Task 047 abgeschlossen
+
+---
 
 ### 2025-10-26 — Task 046: Documentation: User Guide
 
