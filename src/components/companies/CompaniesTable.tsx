@@ -115,7 +115,7 @@ export const CompaniesTable = ({
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" aria-label="Aktionen für Firma anzeigen">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -193,9 +193,10 @@ export const CompaniesTable = ({
                   size="sm"
                   onClick={() => handleSort('company')}
                   className="-ml-3"
+                  aria-label="Nach Firma sortieren"
                 >
                   Firma
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
               <TableHead>
@@ -204,9 +205,10 @@ export const CompaniesTable = ({
                   size="sm"
                   onClick={() => handleSort('industry')}
                   className="-ml-3"
+                  aria-label="Nach Branche sortieren"
                 >
                   Branche
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
               <TableHead>
@@ -215,9 +217,10 @@ export const CompaniesTable = ({
                   size="sm"
                   onClick={() => handleSort('city')}
                   className="-ml-3"
+                  aria-label="Nach Stadt sortieren"
                 >
                   Stadt
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
               <TableHead>Bundesland</TableHead>
@@ -227,9 +230,10 @@ export const CompaniesTable = ({
                   size="sm"
                   onClick={() => handleSort('status')}
                   className="-ml-3"
+                  aria-label="Nach Status sortieren"
                 >
                   Status
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
               <TableHead>
@@ -238,12 +242,13 @@ export const CompaniesTable = ({
                   size="sm"
                   onClick={() => handleSort('created_at')}
                   className="-ml-3"
+                  aria-label="Nach Erstelldatum sortieren"
                 >
                   Erstellt
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[50px]"><span className="sr-only">Aktionen</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -260,7 +265,7 @@ export const CompaniesTable = ({
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label="Aktionen für Firma anzeigen">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

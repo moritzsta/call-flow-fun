@@ -49,7 +49,7 @@ export default function Dashboard() {
                   {orgsLoading ? '-' : organizations.length}
                 </p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center" aria-hidden="true">
                 <span className="text-2xl">🏢</span>
               </div>
             </div>
@@ -63,7 +63,7 @@ export default function Dashboard() {
                   {projectsLoading ? '-' : projects.filter((p) => !p.archived).length}
                 </p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center" aria-hidden="true">
                 <span className="text-2xl">📁</span>
               </div>
             </div>
@@ -80,7 +80,7 @@ export default function Dashboard() {
                         .length}
                 </p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-secondary/50 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-secondary/50 flex items-center justify-center" aria-hidden="true">
                 <span className="text-2xl">⚡</span>
               </div>
             </div>

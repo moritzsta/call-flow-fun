@@ -43,7 +43,11 @@ export const Header = () => {
       <div className="flex items-center gap-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+            <Button 
+              variant="ghost" 
+              className="relative h-10 w-10 rounded-full"
+              aria-label="Benutzermenü öffnen"
+            >
               <Avatar className="h-10 w-10">
                 <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
                 <AvatarFallback className="bg-primary text-primary-foreground">

@@ -123,7 +123,7 @@ export const EmailsTable = ({
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" aria-label="Aktionen für E-Mail anzeigen">
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -193,9 +193,10 @@ export const EmailsTable = ({
                   size="sm"
                   onClick={() => handleSort('subject')}
                   className="-ml-3"
+                  aria-label="Nach Betreff sortieren"
                 >
                   Betreff
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
               <TableHead>Empfänger</TableHead>
@@ -206,9 +207,10 @@ export const EmailsTable = ({
                   size="sm"
                   onClick={() => handleSort('status')}
                   className="-ml-3"
+                  aria-label="Nach Status sortieren"
                 >
                   Status
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
               <TableHead>
@@ -217,9 +219,10 @@ export const EmailsTable = ({
                   size="sm"
                   onClick={() => handleSort('created_at')}
                   className="-ml-3"
+                  aria-label="Nach Erstelldatum sortieren"
                 >
                   Erstellt
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
               <TableHead>
@@ -228,12 +231,13 @@ export const EmailsTable = ({
                   size="sm"
                   onClick={() => handleSort('sent_at')}
                   className="-ml-3"
+                  aria-label="Nach Versanddatum sortieren"
                 >
                   Versendet
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
-              <TableHead className="w-[50px]"></TableHead>
+              <TableHead className="w-[50px]"><span className="sr-only">Aktionen</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -256,7 +260,7 @@ export const EmailsTable = ({
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label="Aktionen für E-Mail anzeigen">
                         <MoreHorizontal className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>

@@ -66,8 +66,11 @@ export const AppSidebar = () => {
                 return (
                   <SidebarMenuItem key={item.name}>
                     <SidebarMenuButton asChild isActive={isActive(item.href)}>
-                      <NavLink to={item.href}>
-                        <Icon className="h-5 w-5" />
+                      <NavLink 
+                        to={item.href}
+                        aria-current={isActive(item.href) ? 'page' : undefined}
+                      >
+                        <Icon className="h-5 w-5" aria-hidden="true" />
                         <span>{item.name}</span>
                       </NavLink>
                     </SidebarMenuButton>
