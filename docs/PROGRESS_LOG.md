@@ -86,10 +86,13 @@
   - [x] Role-Check für Owner/Manager implementiert
 
 - **Task 022** Routing & Navigation Setup  
-  Meta: id=Task 022 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-09 | story=3 | labels=frontend,navigation | progress=0% | tokens=0
-  - [ ] Vollständiges Routing einrichten
-  - [ ] Navigation Component erstellen
-  - [ ] Layout Component erstellen
+  Meta: id=Task 022 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-09 | story=3 | labels=frontend,navigation | progress=100% | tokens=4200
+  - [x] Vollständiges Routing eingerichtet (/profile, /projects/:id/companies, /projects/:id/emails)
+  - [x] Layout Component erstellt (Header + Sidebar Wrapper)
+  - [x] Profile Settings Page erstellt
+  - [x] ProjectCompanies Placeholder erstellt
+  - [x] ProjectEmails Placeholder erstellt
+  - [x] User-Dropdown mit Profil & Einstellungen-Links (Header)
 
 - **Task 023** Webhook-Integration: Finder Felix Trigger  
   Meta: id=Task 023 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-10 | story=5 | labels=frontend,workflows,integration | progress=0% | tokens=0
@@ -430,7 +433,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=90%
+Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=100%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -546,6 +549,47 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 **Reuse:**
 - 📘 feature/05-datenstruktur-pattern (Archive statt Hard Delete)
 - 📘 feature/06-ui-ux-pattern (Tabs, Cards, Alert Dialogs)
+
+---
+
+### 2025-10-26 — Task 022: Routing & Navigation Setup
+
+**Was wurde umgesetzt?**
+- Layout Component: Wiederverwendbare Layout-Component mit SidebarProvider, AppSidebar, Header
+- Profile Page: Profil-Einstellungen mit Full Name, Sprache (DE/EN), Theme (Light/Dark/System)
+- ProjectCompanies Page: Placeholder für Firmen-Verwaltung (Coming soon in Task 028)
+- ProjectEmails Page: Placeholder für E-Mail-Verwaltung (Coming soon in Task 033)
+- Vollständiges Routing: Alle Routes eingerichtet (/profile, /projects/:id/companies, /projects/:id/emails)
+- User-Dropdown: Header enthält Links zu Profil & Einstellungen (bereits vorhanden)
+- Input Validation: Zod-Schema für Profil-Form (min 2, max 100 chars)
+- Profile Update: Speichert Name, Sprache, Theme in profiles Tabelle
+
+**Betroffene Dateien:**
+- `src/components/layout/Layout.tsx` (erstellt)
+- `src/pages/Profile.tsx` (erstellt)
+- `src/pages/ProjectCompanies.tsx` (erstellt)
+- `src/pages/ProjectEmails.tsx` (erstellt)
+- `src/App.tsx` (Routes hinzugefügt)
+
+**Checks:**
+- ✅ Alle Routes sind erreichbar
+- ✅ ProtectedRoutes funktionieren korrekt
+- ✅ Profil-Update funktioniert (Name, Sprache, Theme)
+- ✅ Navigation funktioniert (User-Dropdown mit Profil-Link)
+- ✅ Layout Component kapselt Header + Sidebar korrekt
+
+**Reuse:**
+- 📘 feature/01-auth-profile-pattern (Profile-Update)
+- 📘 feature/06-ui-ux-pattern (Forms, Cards, Layout)
+
+**Milestone M2 abgeschlossen!** 🎉
+- Auth & Org/Projekt-Management vollständig
+- Alle Core-Pages erstellt
+- Routing vollständig eingerichtet
+- Navigation funktioniert
+
+**Next Steps:**
+- Milestone M3: Workflow-Integration (Task 023-036)
 
 ---
 
