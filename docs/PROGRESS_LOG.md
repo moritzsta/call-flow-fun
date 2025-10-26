@@ -67,13 +67,16 @@
   - [x] Organization-Select implementiert
   - [x] Role-Check für Create/Edit (Owner/Manager)
 
-- **Task 020** Project Dashboard: Overview
-  Meta: id=Task 020 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-07 | story=5 | labels=frontend,projects,ui | progress=0% | tokens=0
-  - [ ] ProjectDashboard.tsx erstellen
-  - [ ] KPI-Cards implementieren
-  - [ ] Action-Buttons implementieren
+- **Task 020** Project Dashboard: Overview  
+  Meta: id=Task 020 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-07 | story=5 | labels=frontend,projects,ui | progress=100% | tokens=8200
+  - [x] ProjectDashboard.tsx Page erstellt
+  - [x] KPI-Cards implementiert (Companies, Emails, Workflows)
+  - [x] Action-Buttons für Workflows (Felix, Anna, Paul, Versand)
+  - [x] Project Header mit Org-Name
+  - [x] Role-Check für Actions (Owner/Manager)
+  - [x] Recent Activity Placeholder
 
-- **Task 021** Project Settings: Archive & Delete  
+- **Task 021** Project Settings: Archive & Delete
   Meta: id=Task 021 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-08 | story=3 | labels=frontend,projects | progress=0% | tokens=0
   - [ ] ProjectSettings.tsx erstellen
   - [ ] Archive-Funktion implementieren
@@ -393,6 +396,15 @@
   - [x] Organization-Select implementiert
   - [x] Role-Check für Create/Edit (Owner/Manager)
 
+- **Task 020** Project Dashboard: Overview  
+  Meta: id=Task 020 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-07 | story=5 | labels=frontend,projects,ui | progress=100% | tokens=8200
+  - [x] ProjectDashboard.tsx Page erstellt
+  - [x] KPI-Cards implementiert (Companies, Emails, Workflows)
+  - [x] Action-Buttons für Workflows (Felix, Anna, Paul, Versand)
+  - [x] Project Header mit Org-Name
+  - [x] Role-Check für Actions (Owner/Manager)
+  - [x] Recent Activity Placeholder
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -415,7 +427,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=70%
+Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=80%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -468,6 +480,37 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-25 — Task 020: Project Dashboard - Overview
+
+**Was wurde umgesetzt?**
+- ProjectDashboard.tsx: Dashboard für einzelnes Projekt mit vollständiger Übersicht
+- Project Header: Gradient-Box mit Org-Name, Titel, Beschreibung, Settings-Button
+- KPI-Cards: 3 Cards für Companies, Emails, Workflows (mit Placeholdern "-")
+- Action-Cards: 4 Cards für Workflows (Finder Felix, Analyse Anna, Pitch Paul, E-Mail Versand)
+- Workflow-Integration: Buttons für alle 3 KI-Workflows + Versand (derzeit disabled)
+- Role-Check: Nur Owner/Manager sehen aktive Action-Buttons
+- Recent Activity: Placeholder-Card für zukünftige Aktivitäten-Anzeige
+- Navigation: Zurück-Button zu /projects, Settings-Button (Owner/Manager only)
+- Design: Farbcodierte Cards mit Icons (Primary, Accent, Secondary, Green für Versand)
+- Empty State: "Projekt nicht gefunden" mit Zurück-Button
+
+**Betroffene Dateien:**
+- `src/pages/ProjectDashboard.tsx` (erstellt)
+- `src/App.tsx` (Route /projects/:id hinzugefügt)
+
+**Checks:**
+- ✅ Dashboard zeigt Projekt-Informationen korrekt
+- ✅ KPI-Cards mit Placeholdern vorhanden
+- ✅ Action-Buttons für alle Workflows sichtbar
+- ✅ Role-Check funktioniert (Owner/Manager sehen aktive Buttons)
+- ✅ Navigation funktioniert (Zurück, Settings)
+
+**Reuse:**
+- 📘 feature/06-ui-ux-pattern (Cards, Badges, Layout)
+- 📘 feature/05-datenstruktur-pattern (Project-Hierarchie)
+
+---
 
 ### 2025-10-25 — Task 019: Project Management - Create & List
 
