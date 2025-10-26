@@ -16,124 +16,6 @@
   - [ ] WorkflowStatusBadge Component erstellen
   - [ ] Realtime Subscription einrichten
 
-
-
-
-
-
-
-
-
-
-- **Task 016** Dashboard Skeleton & Layout  
-  Meta: id=Task 016 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-03 | story=3 | labels=frontend,ui,layout | progress=100% | tokens=4500
-  - [x] Dashboard.tsx Page erstellt
-  - [x] Sidebar.tsx Component erstellt
-  - [x] Header.tsx Component erstellt
-  - [x] ProtectedRoute für /dashboard
-  - [x] User-Name aus Profile anzeigen
-  - [x] Navigation zu Orgs/Projects (Placeholder)
-
-- **Task 017** Organization Management: Create & List  
-  Meta: id=Task 017 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-04 | story=5 | labels=frontend,organizations | progress=100% | tokens=6800
-  - [x] Organizations.tsx Page erstellt
-  - [x] useOrganizations Hook implementiert
-  - [x] OrganizationCard Component erstellt
-  - [x] CreateOrganizationDialog Component erstellt
-  - [x] Sidebar mit shadcn Pattern aktualisiert
-  - [x] Owner wird automatisch als Member hinzugefügt
-
-- **Task 018** Organization Members: Invite & Manage  
-  Meta: id=Task 018 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-05 | story=5 | labels=frontend,organizations,members | progress=100% | tokens=7200
-  - [x] OrganizationSettings.tsx Page erstellt
-  - [x] useOrganizationMembers Hook implementiert
-  - [x] InviteMemberDialog Component erstellt
-  - [x] MemberList Component erstellt
-  - [x] Tabs für General & Members
-  - [x] Owner kann Members hinzufügen/entfernen
-  - [x] Owner kann Rollen ändern
-
-- **Task 019** Project Management: Create & List  
-  Meta: id=Task 019 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-06 | story=5 | labels=frontend,projects | progress=100% | tokens=6400
-  - [x] Projects.tsx Page erstellt
-  - [x] useProjects Hook implementiert
-  - [x] ProjectCard Component erstellt
-  - [x] CreateProjectDialog Component erstellt
-  - [x] Organization-Select implementiert
-  - [x] Role-Check für Create/Edit (Owner/Manager)
-
-- **Task 020** Project Dashboard: Overview  
-  Meta: id=Task 020 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-07 | story=5 | labels=frontend,projects,ui | progress=100% | tokens=8200
-  - [x] ProjectDashboard.tsx Page erstellt
-  - [x] KPI-Cards implementiert (Companies, Emails, Workflows)
-  - [x] Action-Buttons für Workflows (Felix, Anna, Paul, Versand)
-  - [x] Project Header mit Org-Name
-  - [x] Role-Check für Actions (Owner/Manager)
-  - [x] Recent Activity Placeholder
-
-- **Task 021** Project Settings: Archive & Delete
-  Meta: id=Task 021 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-08 | story=3 | labels=frontend,projects | progress=100% | tokens=5800
-  - [x] ProjectSettings.tsx erstellen
-  - [x] Archive-Funktion implementieren
-  - [x] Delete-Funktion mit Bestätigung
-  - [x] DangerZone Component erstellt
-  - [x] Tabs für General & Danger Zone
-  - [x] Role-Check für Owner/Manager implementiert
-
-- **Task 022** Routing & Navigation Setup  
-  Meta: id=Task 022 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-09 | story=3 | labels=frontend,navigation | progress=100% | tokens=4200
-  - [x] Vollständiges Routing eingerichtet (/profile, /projects/:id/companies, /projects/:id/emails)
-  - [x] Layout Component erstellt (Header + Sidebar Wrapper)
-  - [x] Profile Settings Page erstellt
-  - [x] ProjectCompanies Placeholder erstellt
-  - [x] ProjectEmails Placeholder erstellt
-  - [x] User-Dropdown mit Profil & Einstellungen-Links (Header)
-
-- **Task 023** Webhook-Integration: Finder Felix Trigger  
-  Meta: id=Task 023 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-10 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=6500
-  - [x] FinderFelixDialog Component erstellt
-  - [x] useWorkflowTrigger Hook implementiert
-  - [x] Webhook-Call implementiert (Edge Function)
-  - [x] Integration in ProjectDashboard
-  - [x] Input Validation (min 10, max 500 chars)
-  - [x] Optional: Bundesland, Stadt, Bezirk Filter
-
-- **Task 024** Webhook-Integration: Analyse Anna Trigger  
-  Meta: id=Task 024 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-11 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=5800
-  - [x] AnalyseAnnaDialog Component erstellt
-  - [x] Multi-Select für Firmen implementiert
-  - [x] useCompanies Hook erstellt
-  - [x] Integration in ProjectDashboard
-  - [x] Input Validation (min 10, max 500 chars, min 1 company)
-  - [x] Empty State wenn keine Firmen vorhanden
-  - [x] Webhook-Call implementiert
-
-- **Task 025** Webhook-Integration: Pitch Paul Trigger  
-  Meta: id=Task 025 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-12 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=6200
-  - [x] PitchPaulDialog Component erstellt
-  - [x] Multi-Select für analysierte Firmen implementiert
-  - [x] Input Validation (min 10, max 500 chars, min 1 company)
-  - [x] Integration in ProjectDashboard (Button + Dialog)
-  - [x] Webhook-Call implementiert (pitch_paul)
-
-- **Task 026** Webhook-Integration: E-Mail Versand (Single)  
-  Meta: id=Task 026 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-13 | story=3 | labels=frontend,emails,integration | progress=100% | tokens=5200
-  - [x] SendEmailButton Component erstellt
-  - [x] Status-Update implementiert
-  - [x] Error-Handling implementiert
-  - [x] useEmails Hook erstellt
-  - [x] ProjectEmails.tsx mit Tabelle implementiert
-  - [x] Confirmation Dialog für E-Mail-Versand
-
-- **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
-  Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=100% | tokens=6800
-  - [x] SendEmailsBatchButton Component erstellt
-  - [x] Multi-Select für E-Mails implementiert
-  - [x] Progress-Anzeige während Versand
-  - [x] Batch-Versand implementiert
-  - [x] Toast mit "X von Y E-Mails versendet"
-  - [x] Integration in ProjectEmails.tsx (Tabs: Einzelansicht / Batch-Versand)
-
 - **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
   Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=0% | tokens=0
   - [ ] SendEmailsBatchButton Component erstellen
@@ -502,11 +384,13 @@
 ## Milestones
 
 ### M1: Backend & Setup
+
 Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[Task 001, Task 002, Task 003, Task 004, Task 005, Task 006, Task 007, Task 008, Task 009, Task 010, Task 011, Task 012, Task 048] | progress=100%
 
 **Beschreibung:** Lovable Cloud aktivieren, Datenbank-Schema erstellen, RLS-Policies setzen, Realtime aktivieren.
 
 **Key Deliverables:**
+
 - Lovable Cloud Backend aktiv
 - Alle Datenbank-Tabellen mit RLS
 - Realtime für Workflow-Status
@@ -515,11 +399,13 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
+
 Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=100%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
 **Key Deliverables:**
+
 - Login & Registrierung funktioniert
 - Organisationen & Projekte können erstellt werden
 - Member-Management mit Rollen
@@ -528,11 +414,13 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 ---
 
 ### M3: Core Features (Workflows & Data)
+
 Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=42%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
 **Key Deliverables:**
+
 - Alle 3 KI-Workflows integriert (Felix, Anna, Paul)
 - Firmen-Liste mit Filter & Detail-View
 - E-Mail-Liste mit Editor & Versand
@@ -541,11 +429,13 @@ Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | sc
 ---
 
 ### M4: UI/UX & Polish
+
 Meta: id=M4 | status=planned | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=0%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
 **Key Deliverables:**
+
 - Design System mit HSL-Tokens
 - Mobile-First Responsive Design
 - A11y-Konform (WCAG AA)
@@ -554,11 +444,13 @@ Meta: id=M4 | status=planned | due=2025-12-04 | owner=@AI | risk=low | scope=[Ta
 ---
 
 ### M5: Testing & Deployment
+
 Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Task 049, Task 050, Task 051, Task 052] | progress=0%
 
 **Beschreibung:** Testing (optional), Production-Deployment, Handover.
 
 **Key Deliverables:**
+
 - App ist live auf Lovable Cloud
 - Alle Features funktionieren in Production
 - Handover-Dokumentation vollständig
@@ -572,6 +464,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-25 — Task 020: Project Dashboard - Overview
 
 **Was wurde umgesetzt?**
+
 - ProjectDashboard.tsx: Dashboard für einzelnes Projekt mit vollständiger Übersicht
 - Project Header: Gradient-Box mit Org-Name, Titel, Beschreibung, Settings-Button
 - KPI-Cards: 3 Cards für Companies, Emails, Workflows (mit Placeholdern "-")
@@ -584,10 +477,12 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Empty State: "Projekt nicht gefunden" mit Zurück-Button
 
 **Betroffene Dateien:**
+
 - `src/pages/ProjectDashboard.tsx` (erstellt)
 - `src/App.tsx` (Route /projects/:id hinzugefügt)
 
 **Checks:**
+
 - ✅ Dashboard zeigt Projekt-Informationen korrekt
 - ✅ KPI-Cards mit Placeholdern vorhanden
 - ✅ Action-Buttons für alle Workflows sichtbar
@@ -595,6 +490,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Navigation funktioniert (Zurück, Settings)
 
 **Reuse:**
+
 - 📘 feature/06-ui-ux-pattern (Cards, Badges, Layout)
 - 📘 feature/05-datenstruktur-pattern (Project-Hierarchie)
 
@@ -603,6 +499,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-26 — Task 021: Project Settings - Archive & Delete
 
 **Was wurde umgesetzt?**
+
 - ProjectSettings.tsx: Settings-Page mit Tabs (General, Danger Zone)
 - DangerZone Component: Component für Archive & Delete mit Bestätigungsdialog
 - General Tab: Titel & Beschreibung bearbeiten (Owner/Manager only)
@@ -614,6 +511,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Route: /projects/:id/settings
 
 **Betroffene Dateien:**
+
 - `src/pages/ProjectSettings.tsx` (erstellt)
 - `src/components/projects/DangerZone.tsx` (erstellt)
 - `src/App.tsx` (Route /projects/:id/settings hinzugefügt, Import hinzugefügt)
@@ -621,6 +519,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - `src/pages/ProjectDashboard.tsx` (Settings-Button-Link korrigiert)
 
 **Checks:**
+
 - ✅ Projekt-Titel & Beschreibung können bearbeitet werden
 - ✅ Archive-Funktion funktioniert (Projekt wird aus Liste ausgeblendet)
 - ✅ Delete-Funktion funktioniert (mit Bestätigungsdialog)
@@ -629,6 +528,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Navigation funktioniert (Zurück, Settings)
 
 **Reuse:**
+
 - 📘 feature/05-datenstruktur-pattern (Archive statt Hard Delete)
 - 📘 feature/06-ui-ux-pattern (Tabs, Cards, Alert Dialogs)
 
@@ -637,6 +537,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-26 — Task 022: Routing & Navigation Setup
 
 **Was wurde umgesetzt?**
+
 - Layout Component: Wiederverwendbare Layout-Component mit SidebarProvider, AppSidebar, Header
 - Profile Page: Profil-Einstellungen mit Full Name, Sprache (DE/EN), Theme (Light/Dark/System)
 - ProjectCompanies Page: Placeholder für Firmen-Verwaltung (Coming soon in Task 028)
@@ -647,6 +548,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Profile Update: Speichert Name, Sprache, Theme in profiles Tabelle
 
 **Betroffene Dateien:**
+
 - `src/components/layout/Layout.tsx` (erstellt)
 - `src/pages/Profile.tsx` (erstellt)
 - `src/pages/ProjectCompanies.tsx` (erstellt)
@@ -654,6 +556,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - `src/App.tsx` (Routes hinzugefügt)
 
 **Checks:**
+
 - ✅ Alle Routes sind erreichbar
 - ✅ ProtectedRoutes funktionieren korrekt
 - ✅ Profil-Update funktioniert (Name, Sprache, Theme)
@@ -661,16 +564,19 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Layout Component kapselt Header + Sidebar korrekt
 
 **Reuse:**
+
 - 📘 feature/01-auth-profile-pattern (Profile-Update)
 - 📘 feature/06-ui-ux-pattern (Forms, Cards, Layout)
 
 **Milestone M2 abgeschlossen!** 🎉
+
 - Auth & Org/Projekt-Management vollständig
 - Alle Core-Pages erstellt
 - Routing vollständig eingerichtet
 - Navigation funktioniert
 
 **Next Steps:**
+
 - Milestone M3: Workflow-Integration (Task 023-036)
 
 ---
@@ -678,6 +584,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-26 — Task 023: Webhook-Integration - Finder Felix Trigger
 
 **Was wurde umgesetzt?**
+
 - FinderFelixDialog Component: Dialog mit Freitext-Input (Textarea), optional: Bundesland, Stadt, Bezirk
 - useWorkflowTrigger Hook: Generic Hook für alle n8n-Workflow-Trigger (finder_felix, analyse_anna, etc.)
 - Edge Function: `trigger-n8n-workflow` ruft n8n Webhooks auf mit Header Auth (X-Webhook-Secret)
@@ -687,12 +594,14 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Integration in ProjectDashboard: Button "Firmen suchen" öffnet Dialog (nur für Owner/Manager)
 
 **Betroffene Dateien:**
+
 - `src/components/workflows/FinderFelixDialog.tsx` (erstellt)
 - `src/hooks/useWorkflowTrigger.ts` (erstellt)
 - `supabase/functions/trigger-n8n-workflow/index.ts` (erstellt)
 - `src/pages/ProjectDashboard.tsx` (Button onClick hinzugefügt, Dialog eingebunden)
 
 **Checks:**
+
 - ✅ Dialog öffnet sich bei Klick auf "Firmen suchen"
 - ✅ Input Validation funktioniert (min 10, max 500 chars)
 - ✅ Workflow State wird in DB erstellt (status: pending)
@@ -701,6 +610,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Nur Owner/Manager können Dialog öffnen
 
 **Reuse:**
+
 - 📘 feature/04-ki-integration-pattern (Workflow-Trigger, n8n-Integration)
 - 📘 feature/06-ui-ux-pattern (Dialoge, Forms, Input Validation)
 
@@ -709,6 +619,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-26 — Task 024: Webhook-Integration - Analyse Anna Trigger
 
 **Was wurde umgesetzt?**
+
 - AnalyseAnnaDialog Component: Dialog mit Freitext-Input (Textarea) + Multi-Select für Firmen
 - useCompanies Hook: Hook für Firmen-Daten aus `companies` Tabelle (gefiltert nach project_id)
 - Multi-Select: Checkbox-Liste mit Firmen-Details (Name, Industry, Stadt, Status)
@@ -720,11 +631,13 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Integration in ProjectDashboard: Button "Firmen analysieren" öffnet Dialog (nur für Owner/Manager)
 
 **Betroffene Dateien:**
+
 - `src/components/workflows/AnalyseAnnaDialog.tsx` (erstellt)
 - `src/hooks/useCompanies.ts` (erstellt)
 - `src/pages/ProjectDashboard.tsx` (Button onClick hinzugefügt, Dialog eingebunden)
 
 **Checks:**
+
 - ✅ Dialog öffnet sich bei Klick auf "Firmen analysieren"
 - ✅ Firmen werden aus DB geladen (gefiltert nach project_id)
 - ✅ Multi-Select funktioniert (Checkbox-Liste)
@@ -735,6 +648,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Nur Owner/Manager können Dialog öffnen
 
 **Reuse:**
+
 - 📘 feature/04-ki-integration-pattern (Workflow-Trigger, Multi-Select-Logic)
 - 📘 feature/06-ui-ux-pattern (Dialoge, Multi-Select, ScrollArea)
 
@@ -743,6 +657,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-26 — Task 025: Webhook-Integration - Pitch Paul Trigger
 
 **Was wurde umgesetzt?**
+
 - PitchPaulDialog Component: Dialog mit Freitext-Input (Textarea) + Multi-Select für analysierte Firmen
 - Filter: Nur Firmen mit Status "analyzed" werden angezeigt
 - Multi-Select: Checkbox-Liste mit Firmen-Details (Name, Industry, Stadt)
@@ -754,10 +669,12 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Integration in ProjectDashboard: Button "E-Mails generieren" öffnet Dialog (nur für Owner/Manager)
 
 **Betroffene Dateien:**
+
 - `src/components/workflows/PitchPaulDialog.tsx` (erstellt)
 - `src/pages/ProjectDashboard.tsx` (Button onClick hinzugefügt, Dialog eingebunden)
 
 **Checks:**
+
 - ✅ Dialog öffnet sich bei Klick auf "E-Mails generieren"
 - ✅ Nur analysierte Firmen werden angezeigt (status: "analyzed")
 - ✅ Multi-Select funktioniert (Checkbox-Liste)
@@ -768,10 +685,12 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Nur Owner/Manager können Dialog öffnen
 
 **Reuse:**
+
 - 📘 feature/04-ki-integration-pattern (Workflow-Trigger, Company-Filter)
 - 📘 feature/06-ui-ux-pattern (Dialoge, Multi-Select, ScrollArea)
 
 **Next Steps:**
+
 - Milestone M3: 42% abgeschlossen (5 von 12 Tasks)
 - Task 028: Workflow-Status: Realtime Updates
 
@@ -780,6 +699,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-26 — Task 027: Webhook-Integration - E-Mail Versand (Batch)
 
 **Was wurde umgesetzt?**
+
 - SendEmailsBatchButton Component: Batch-Versand mit Multi-Select für E-Mails
 - Multi-Select: Checkbox-Liste für alle versandbaren E-Mails (draft, ready_to_send)
 - Select All / Deselect All: Bulk-Actions für E-Mail-Auswahl
@@ -792,11 +712,13 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Auto-Refresh: E-Mail-Liste wird nach Batch-Versand automatisch aktualisiert
 
 **Betroffene Dateien:**
+
 - `src/components/emails/SendEmailsBatchButton.tsx` (erstellt)
 - `src/pages/ProjectEmails.tsx` (Tabs hinzugefügt, Batch-Button integriert)
 - `src/hooks/useEmails.ts` (refetch-Funktion exportiert)
 
 **Checks:**
+
 - ✅ Multi-Select für E-Mails funktioniert
 - ✅ Select All / Deselect All funktioniert
 - ✅ Nur sendbare E-Mails (draft, ready_to_send) werden angezeigt
@@ -808,6 +730,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Tab-Navigation funktioniert (Einzelansicht / Batch-Versand)
 
 **Reuse:**
+
 - 📘 feature/04-ki-integration-pattern (Batch-Workflow, Sequential Processing)
 - 📘 feature/06-ui-ux-pattern (Tabs, Multi-Select, Progress Bar, Dialoge)
 
@@ -816,6 +739,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-26 — Task 026: Webhook-Integration - E-Mail Versand (Single)
 
 **Was wurde umgesetzt?**
+
 - SendEmailButton Component: Button für einzelnen E-Mail-Versand mit Confirmation Dialog
 - useEmails Hook: Hook für E-Mail-Daten aus `project_emails` Tabelle (gefiltert nach project_id)
 - ProjectEmails.tsx: Vollständige E-Mail-Übersicht mit Tabelle (Betreff, Empfänger, Status, Timestamps)
@@ -828,11 +752,13 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Loading States: Skeleton-Loader während Daten geladen werden
 
 **Betroffene Dateien:**
+
 - `src/components/emails/SendEmailButton.tsx` (erstellt)
 - `src/hooks/useEmails.ts` (erstellt)
 - `src/pages/ProjectEmails.tsx` (vollständig implementiert, ersetzt Placeholder)
 
 **Checks:**
+
 - ✅ E-Mail-Liste wird angezeigt (Tabelle mit allen E-Mails)
 - ✅ Status-Badges werden korrekt angezeigt
 - ✅ SendEmailButton nur bei draft/ready_to_send sichtbar
@@ -844,6 +770,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Loading State funktioniert
 
 **Reuse:**
+
 - 📘 feature/04-ki-integration-pattern (Webhook-Trigger, Status-Management)
 - 📘 feature/06-ui-ux-pattern (Tabellen, Badges, Dialoge)
 
@@ -852,6 +779,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-25 — Task 019: Project Management - Create & List
 
 **Was wurde umgesetzt?**
+
 - Projects.tsx: Projekt-Übersichtsseite mit Organization-Select & Grid-Layout
 - useProjects Hook: Create, Update, Archive, Delete mit react-query
 - ProjectCard: Card mit Dropdown-Menü (Settings, Archive, Delete)
@@ -864,6 +792,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Input Validation: Title trim, min 2, max 100 chars; Description max 500 chars
 
 **Betroffene Dateien:**
+
 - `src/pages/Projects.tsx` (erstellt)
 - `src/hooks/useProjects.ts` (erstellt)
 - `src/components/projects/ProjectCard.tsx` (erstellt)
@@ -871,6 +800,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - `src/App.tsx` (Route /projects hinzugefügt)
 
 **Checks:**
+
 - ✅ Projekte werden korrekt erstellt
 - ✅ Nur Projekte der gewählten Organisation werden angezeigt
 - ✅ Manager/Owner können Projekte erstellen/bearbeiten/löschen
@@ -878,6 +808,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Input Validation funktioniert (Zod)
 
 **Reuse:**
+
 - 📘 feature/05-datenstruktur-pattern (Hierarchische Strukturen)
 - 📘 feature/06-ui-ux-pattern (Cards, Dialoge, Select)
 
@@ -886,6 +817,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-25 — Task 018: Organization Members - Invite & Manage
 
 **Was wurde umgesetzt?**
+
 - OrganizationSettings.tsx: Settings-Page mit Tabs (General, Members)
 - useOrganizationMembers Hook: Invite, Update Role, Remove mit react-query
 - InviteMemberDialog: Dialog zum Einladen mit E-Mail, Rolle (Owner/Manager/Read-Only)
@@ -898,6 +830,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Profile-Join: Members werden mit Profil-Daten (Email, Name, Avatar) geladen
 
 **Betroffene Dateien:**
+
 - `src/pages/OrganizationSettings.tsx` (erstellt)
 - `src/hooks/useOrganizationMembers.ts` (erstellt)
 - `src/components/organizations/InviteMemberDialog.tsx` (erstellt)
@@ -905,6 +838,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - `src/App.tsx` (Route /organizations/:id hinzugefügt)
 
 **Checks:**
+
 - ✅ Owner kann Members hinzufügen (via E-Mail)
 - ✅ Rollen-Änderung funktioniert (Select für Owner)
 - ✅ Read-Only Members können nicht bearbeiten
@@ -912,6 +846,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ User sieht eigene Rolle als Badge "Sie"
 
 **Reuse:**
+
 - 📘 feature/08-advanced-sharing-pattern (Member-Management, Rollen)
 - 📘 feature/06-ui-ux-pattern (Tabs, Dialoge, Cards)
 
@@ -920,6 +855,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-25 — Task 017: Organization Management - Create & List
 
 **Was wurde umgesetzt?**
+
 - Organizations.tsx: Vollständige Organisations-Übersichtsseite mit Grid-Layout
 - useOrganizations Hook: Create, Read, Update, Delete mit react-query
 - OrganizationCard: Card-Component mit Owner-Badge, Delete-Dialog (nur für Owner)
@@ -930,6 +866,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Empty State: Placeholder bei 0 Organisationen mit Call-to-Action
 
 **Betroffene Dateien:**
+
 - `src/pages/Organizations.tsx` (erstellt)
 - `src/hooks/useOrganizations.ts` (erstellt)
 - `src/components/organizations/OrganizationCard.tsx` (erstellt)
@@ -940,6 +877,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - `src/App.tsx` (Route /organizations hinzugefügt)
 
 **Checks:**
+
 - ✅ User sieht nur seine Organisationen (RLS korrekt)
 - ✅ Neue Organisation wird erstellt
 - ✅ Owner wird automatisch als Member hinzugefügt
@@ -947,6 +885,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - ✅ Sidebar ist kollabierbar (shadcn Pattern)
 
 **Reuse:**
+
 - 📘 feature/05-datenstruktur-pattern (Hierarchische Strukturen)
 - 📘 feature/06-ui-ux-pattern (Sidebar, Cards, Dialoge)
 
@@ -955,6 +894,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-25 — Task 016: Dashboard Skeleton & Layout
 
 **Was wurde umgesetzt?**
+
 - Dashboard.tsx Page mit Layout (Sidebar + Main Content)
 - Sidebar.tsx mit Navigation (Dashboard, Organisationen, Projekte, Einstellungen)
 - Header.tsx mit User-Avatar, Dropdown-Menü (Profil, Einstellungen, Abmelden)
@@ -965,18 +905,21 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Design-System: Alle Farben über HSL-Tokens (bg-card, text-foreground, border-border)
 
 **Betroffene Dateien:**
+
 - `src/pages/Dashboard.tsx` (erstellt)
 - `src/components/layout/Sidebar.tsx` (erstellt)
 - `src/components/layout/Header.tsx` (erstellt)
 - `src/App.tsx` (Route /dashboard mit ProtectedRoute)
 
 **Checks:**
+
 - ✅ Dashboard nur für authentifizierte User zugänglich
 - ✅ User-Name wird angezeigt (aus Profile)
 - ✅ Sidebar/Navigation sichtbar und funktional
 - ✅ Navigation-Links vorhanden (noch ohne Ziel-Routen)
 
 **Reuse:**
+
 - 📘 feature/01-auth-profile-pattern (Profile-Anzeige im Header)
 - 📘 feature/06-ui-ux-pattern (Sidebar & Navigation)
 
@@ -985,6 +928,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 015: Auth-Pages Login & Registrierung
 
 **Was wurde umgesetzt?**
+
 - Auth.tsx Page mit Tabs (Login/Register)
 - Zod Validation Schemas (loginSchema, registerSchema)
 - Login-Form: Email, Passwort
@@ -997,25 +941,30 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Link zur Auth-Page auf Index-Page
 
 **Betroffene Dateien:**
+
 - `src/lib/validations/auth.ts` (erstellt)
 - `src/pages/Auth.tsx` (erstellt)
 - `src/App.tsx` (Route hinzugefügt)
 - `src/pages/Index.tsx` (Link zur Auth-Page)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 5.200, Kosten: 0,12 EUR
 
 **Checks:**
+
 - ✅ Login funktioniert
 - ✅ Registrierung funktioniert
 - ✅ Validation zeigt Fehler korrekt
 - ✅ Auto-Redirect nach Login
 
 **Hinweis:**
+
 - Email-Bestätigung ist standardmäßig deaktiviert in Supabase
 - User kann jetzt /auth aufrufen für Login/Registrierung
 
 **Next Steps:**
+
 - Task 016: Profile-Settings Page für Profil-Bearbeitung erstellen
 
 ---
@@ -1023,6 +972,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 014: ProtectedRoute Component
 
 **Was wurde umgesetzt?**
+
 - ProtectedRoute Component erstellt
 - Auth-Check mit useAuth Hook
 - Loading-State mit Skeleton während Auth-Check
@@ -1030,17 +980,21 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - replace Flag bei Navigate (verhindert Back-Navigation zur geschützten Seite)
 
 **Betroffene Dateien:**
+
 - `src/components/auth/ProtectedRoute.tsx` (erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 800, Kosten: 0,02 EUR
 
 **Checks:**
+
 - ✅ Loading-State zeigt Skeleton
 - ✅ Redirect zu /auth funktioniert
 - ✅ Geschützte Inhalte werden nur bei Auth gezeigt
 
 **Next Steps:**
+
 - Task 015: Auth-Pages (Login & Registrierung) mit Formular und Validation erstellen
 
 ---
@@ -1048,6 +1002,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 013: AuthContext & AuthProvider
 
 **Was wurde umgesetzt?**
+
 - AuthContext erstellt mit State: user, session, profile, loading
 - Auth-Methoden implementiert: signUp, signIn, signOut, refreshProfile
 - onAuthStateChange Listener mit setTimeout(0) für Profile-Loading (verhindert Deadlock)
@@ -1056,24 +1011,29 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - AuthProvider in App.tsx integriert
 
 **Betroffene Dateien:**
+
 - `src/contexts/AuthContext.tsx` (erstellt)
 - `src/App.tsx` (AuthProvider integriert)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 3.500, Kosten: 0,08 EUR
 
 **Checks:**
+
 - ✅ Complete Session + User State gespeichert
 - ✅ Profile wird automatisch geladen
 - ✅ Deadlock-Prevention durch setTimeout(0)
 - ✅ emailRedirectTo konfiguriert
 
 **Wichtige Patterns:**
+
 - Niemals async in onAuthStateChange
 - Immer setTimeout(0) für Supabase-Calls
 - Complete Session-Object speichern
 
 **Next Steps:**
+
 - Task 014: ProtectedRoute Component für Route-Guards erstellen
 
 ---
@@ -1081,6 +1041,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 012: Realtime für Workflow States
 
 **Was wurde umgesetzt?**
+
 - Realtime für n8n_workflow_states aktiviert (REPLICA IDENTITY FULL)
 - ALTER PUBLICATION supabase_realtime ADD TABLE n8n_workflow_states
 - Dokumentation erstellt (docs/REALTIME_CONFIG.md)
@@ -1088,24 +1049,29 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Use Cases beschrieben (Status Updates, Progress Tracking, Multi-User)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_enable_realtime.sql` (automatisch erstellt)
 - `docs/REALTIME_CONFIG.md` (erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 1.500, Kosten: 0,04 EUR
 
 **Checks:**
+
 - ✅ REPLICA IDENTITY FULL gesetzt
 - ✅ Publication supabase_realtime erweitert
 - ✅ Dokumentation vollständig
 
 **Milestone M1 abgeschlossen!** 🎉
+
 - Alle Datenbank-Tabellen erstellt
 - RLS-Policies gesetzt
 - SECURITY DEFINER Funktionen implementiert
 - Realtime aktiviert
 
 **Next Steps:**
+
 - Milestone M2: Auth & Org/Projekt-Management (Task 013-022)
 
 ---
@@ -1113,25 +1079,30 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 011: Datenbank-Schema User Roles
 
 **Was wurde umgesetzt?**
+
 - user_roles Tabelle (id, user_id, role, created_at)
 - UNIQUE Constraint: (user_id, role)
-- SECURITY DEFINER Funktion: has_role(_user_id, _role)
+- SECURITY DEFINER Funktion: has_role(\_user_id, \_role)
 - RLS Policies: Users können eigene Rollen sehen
 - Keine INSERT/UPDATE/DELETE Policies (Rollen-Management via Edge Functions)
 - Indizes für Performance (user_id, role)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_user_roles.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 1.800, Kosten: 0,04 EUR
 
 **Checks:**
+
 - ✅ RLS aktiviert
 - ✅ has_role() Funktion funktioniert ohne Rekursion
 - ✅ SECURITY DEFINER und set search_path = public gesetzt
 
 **Next Steps:**
+
 - Task 012: Realtime für n8n_workflow_states aktivieren
 
 ---
@@ -1139,23 +1110,28 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 010: Datenbank-Schema Lookup-Tabellen
 
 **Was wurde umgesetzt?**
+
 - RLS aktiviert für german_cities, german_districts, german_companies
 - Public Read Policies erstellt (SELECT für alle User)
 - Lookup-Tabellen sind jetzt gesichert und read-only
 - Alle Security-Warnings behoben ✅
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_secure_lookup_tables.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 900, Kosten: 0,02 EUR
 
 **Checks:**
+
 - ✅ RLS aktiviert für alle drei Tabellen
 - ✅ Public Read funktioniert
 - ✅ Keine Security-Warnings mehr
 
 **Next Steps:**
+
 - Task 011: user_roles Tabelle mit SECURITY DEFINER Funktion erstellen
 
 ---
@@ -1163,6 +1139,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 009: Datenbank-Schema Workflow States
 
 **Was wurde umgesetzt?**
+
 - n8n_workflow_states Tabelle (id, project_id, workflow_name, status, trigger_data, result_summary, started_at, completed_at, user_id, timestamps)
 - CHECK Constraint für workflow_name ('finder_felix', 'analyse_anna', 'pitch_paul', 'email_sender')
 - Enum `workflow_status` für Status-Tracking (pending, running, completed, failed)
@@ -1170,20 +1147,25 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Indizes für Performance (project_id, workflow_name, status, user_id)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_n8n_workflow_states.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 2.500, Kosten: 0,06 EUR
 
 **Checks:**
+
 - ✅ RLS aktiviert
 - ✅ Workflow-Namen validiert (CHECK constraint)
 - ✅ Status-Tracking funktioniert
 
 **Hinweis:**
+
 - Realtime wird in Task 012 aktiviert
 
 **Next Steps:**
+
 - Task 010: Lookup-Tabellen (german_cities, german_districts) mit RLS absichern
 
 ---
@@ -1191,23 +1173,28 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 008: Datenbank-Schema Project Emails
 
 **Was wurde umgesetzt?**
+
 - project_emails Tabelle (id, project_id, company_id, recipient_email, subject, body, status, sent_at, timestamps)
 - Enum `email_status` für E-Mail-Tracking (draft, ready_to_send, sent, failed)
 - RLS Policies: Zugriff über has_project_access()
 - Indizes für Performance (project_id, company_id, status, sent_at)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_project_emails.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 2.200, Kosten: 0,05 EUR
 
 **Checks:**
+
 - ✅ RLS aktiviert
 - ✅ Status-Tracking funktioniert
 - ✅ E-Mails sind projekt-isoliert
 
 **Next Steps:**
+
 - Task 009: n8n_workflow_states Tabelle für Workflow-Tracking erstellen
 
 ---
@@ -1215,6 +1202,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 007: Datenbank-Schema Companies
 
 **Was wurde umgesetzt?**
+
 - companies Tabelle (id, project_id, company, industry, ceo_name, phone, email, website, address, district, city, state, analysis, status, timestamps)
 - JSONB-Feld `analysis` für Analyse Anna Daten
 - Enum `company_status` für Workflow-Tracking (found, analyzed, contacted, qualified, rejected)
@@ -1223,17 +1211,21 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Indizes für Performance (project_id, email, phone, status, city, state)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_companies.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 3.200, Kosten: 0,08 EUR
 
 **Checks:**
+
 - ✅ RLS aktiviert
 - ✅ Projekt-Isolation funktioniert
 - ✅ Status-Updates möglich
 
 **Next Steps:**
+
 - Task 008: Project Emails Tabelle für generierte E-Mails erstellen
 
 ---
@@ -1241,6 +1233,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 006: Datenbank-Schema Projects
 
 **Was wurde umgesetzt?**
+
 - projects Tabelle (id, organization_id, title, description, archived, timestamps)
 - RLS Policies: Rollen-basierter Zugriff
   - Alle Members können Projekte sehen (SELECT)
@@ -1249,17 +1242,21 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Indizes für Performance (organization_id, archived)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_projects.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 2.400, Kosten: 0,06 EUR
 
 **Checks:**
+
 - ✅ RLS aktiviert
 - ✅ Rollen-basierte Policies funktionieren
 - ✅ Projekt-Isolation über Organization
 
 **Next Steps:**
+
 - Task 007: Companies Tabelle mit Projekt-Bezug erstellen
 
 ---
@@ -1267,6 +1264,7 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 005: Datenbank-Schema Organizations
 
 **Was wurde umgesetzt?**
+
 - organizations Tabelle (id, name, description, owner_id, timestamps)
 - organization_members Tabelle (id, organization_id, user_id, role, timestamps)
 - UNIQUE Constraint: (organization_id, user_id)
@@ -1275,18 +1273,22 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 - Indizes für Performance (owner_id, organization_id, user_id)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_organizations.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - Fortsetzung → Tokens: 3.800, Kosten: 0,09 EUR
 
 **Checks:**
+
 - ✅ RLS aktiviert für beide Tabellen
 - ✅ SECURITY DEFINER Funktionen gegen Rekursion geschützt
 - ✅ Owner können Members verwalten
 - ✅ Members sehen nur ihre Organisationen
 
 **Next Steps:**
+
 - Task 006: Projects Tabelle mit Organisations-Bezug erstellen
 
 ---
@@ -1294,26 +1296,32 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 004: Datenbank-Schema Profiles
 
 **Was wurde umgesetzt?**
+
 - profiles Tabelle erstellt (id, email, full_name, avatar_url, preferred_language, theme, timestamps)
 - Trigger `handle_new_user()` für automatische Profil-Erstellung bei User-Registrierung
 - Trigger `update_updated_at_column()` für automatische Timestamp-Updates
 - RLS Policies: Owner-only Zugriff (SELECT, UPDATE, INSERT)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_profiles.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - "Perfekt. Dann bitte nach den Vorgaben in deinem Knowledge fortfahren!" → Tokens: 2.100, Kosten: 0,05 EUR
 
 **Checks:**
+
 - ✅ Tabelle mit RLS aktiviert
 - ✅ Trigger funktionieren (handle_new_user, update_updated_at)
 - ✅ SECURITY DEFINER und set search_path = public gesetzt
 
 **Hinweis:**
-- ⚠️ Bestehende Tabellen ohne RLS (german_*) → Task 010
+
+- ⚠️ Bestehende Tabellen ohne RLS (german\_\*) → Task 010
 
 **Next Steps:**
+
 - Task 005: Organizations Tabelle erstellen
 
 ---
@@ -1321,25 +1329,31 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 003: Datenbank-Schema Enums
 
 **Was wurde umgesetzt?**
+
 - Enums erstellt: `app_role` (owner, manager, read_only)
 - Enums erstellt: `company_status` (found, analyzed, contacted, qualified, rejected)
 - Enums erstellt: `email_status` (draft, ready_to_send, sent, failed)
 - Enums erstellt: `workflow_status` (pending, running, completed, failed)
 
 **Betroffene Dateien:**
+
 - `supabase/migrations/*_create_enums.sql` (automatisch erstellt)
 
 **Lovable Prompts verwendet:**
+
 - "Perfekt. Dann bitte nach den Vorgaben in deinem Knowledge fortfahren!" → Tokens: 1.200, Kosten: 0,03 EUR
 
 **Checks:**
+
 - ✅ Enums sind in Supabase verfügbar
 - ✅ Können in zukünftigen Tabellen verwendet werden
 
 **Hinweis:**
+
 - ⚠️ Bestehende Tabellen (german_cities, german_companies, german_districts) ohne RLS → wird in Task 010 adressiert
 
 **Next Steps:**
+
 - Task 004: Profiles Tabelle mit Trigger erstellen
 
 ---
@@ -1347,19 +1361,23 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-01-24 — Task 002: Environment & Secrets Setup
 
 **Was wurde umgesetzt?**
+
 - Supabase Secrets konfiguriert: N8N_WEBHOOK_BASE_URL, N8N_WEBHOOK_SECRET, OPENAI_API_KEY
 - Webhook-Dokumentation erstellt (docs/N8N_WEBHOOKS.md)
 - Header Auth Konfiguration dokumentiert für n8n Webhooks
 - Geplante Workflows dokumentiert: Smart Upload, Smart Improve
 
 **Betroffene Dateien:**
+
 - `docs/N8N_WEBHOOKS.md` (erstellt)
 - Supabase Secrets (3 Secrets hinzugefügt)
 
 **Lovable Prompts verwendet:**
+
 - "Stelle mir bitte nocheinmal die Eingabemaske für die secrets zur Verfügung" → Tokens: 2.800, Kosten: 0,06 EUR
 
 **Checks:**
+
 - [x] Secrets in Supabase hinterlegt (N8N_WEBHOOK_BASE_URL, N8N_WEBHOOK_SECRET, OPENAI_API_KEY)
 - [x] Dokumentation in docs/N8N_WEBHOOKS.md erstellt
 - [x] Webhook-URL Format dokumentiert
@@ -1370,21 +1388,25 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-25 14:30 UTC — Task 001: Repository Setup & Projektstruktur
 
 **Was wurde umgesetzt?**
+
 - Bestehende Supabase-Datenbank verbunden (externe Instanz, Projekt: fttdfvnhghbgtawkslau)
 - PROJECT_STRUCTURE.md erstellt mit vollständiger Verzeichnisstruktur
 - Dependencies geprüft: @supabase/supabase-js, @tanstack/react-query, zod (alle vorhanden)
 - Architektur-Übersicht, Sicherheitskonzept, Datenmodell dokumentiert
 
 **Betroffene Dateien:**
+
 - `docs/PROJECT_STRUCTURE.md` (erstellt)
 - `docs/PROGRESS_LOG.md` (aktualisiert)
 - `supabase/config.toml` (bereits vorhanden mit project_id)
 - `src/integrations/supabase/client.ts` (bereits vorhanden)
 
 **Lovable Prompts verwendet:**
+
 - "Beginne mit Umsetzung des Projekts" → Tokens: 4.200, Kosten: 0,08 EUR
 
 **Checks:**
+
 - [x] Supabase-Datenbank verbunden (externe Instanz)
 - [x] Supabase-Credentials verfügbar (.env, client.ts)
 - [x] Dependencies installiert (@supabase/supabase-js, @tanstack/react-query, zod)
@@ -1395,18 +1417,22 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 ### 2025-10-25 00:00 UTC — Task 048: Progress Log Setup
 
 **Was wurde umgesetzt?**
+
 - PROGRESS_LOG.md initialisiert
 - Status Board mit allen 52 Tasks gefüllt
 - 5 Milestones definiert (M1-M5)
 - Parser-kompatibles Format implementiert
 
 **Betroffene Dateien:**
+
 - `docs/PROGRESS_LOG.md` (erstellt)
 
 **Lovable Prompts verwendet:**
+
 - "Erstelle PROGRESS_LOG.md nach Parser-Schema" → Tokens: 3.500, Kosten: 0,07 EUR
 
 **Checks:**
+
 - [x] PROGRESS_LOG.md ist erstellt
 - [x] Status Board ist gefüllt
 - [x] Milestones sind definiert
@@ -1454,6 +1480,7 @@ Meta: id=ISS-001 | severity=medium | status=open | owner=@AI | related_tasks=[Ta
 **Details:** Die Workflow-Integration (Tasks 023-027) erfordert funktionierende n8n-Webhooks. Diese müssen parallel zum Frontend-Development eingerichtet werden. Webhook-URLs müssen in Task 002 dokumentiert werden.
 
 **Maßnahmen:**
+
 - Task 002: N8N_WEBHOOKS.md dokumentieren
 - Webhook-URLs als Secrets in Lovable Cloud hinterlegen
 - Test-Endpoints für lokale Entwicklung bereitstellen
@@ -1492,6 +1519,7 @@ Meta: id=ISS-001 | severity=medium | status=open | owner=@AI | related_tasks=[Ta
 **Ungefähre Kosten (EUR):** ~0,15 EUR (bisher) / ~3,00 EUR (gesamt bei 0,00002 EUR/Token)
 
 **Breakdown (High-Cost Tasks - Schätzung):**
+
 - Task 023-027 (Workflow-Integration): ~8.000 Tokens pro Task = 40.000 Tokens
 - Task 029-030 (Companies Management): ~8.000 Tokens
 - Task 032-033 (Email Management): ~8.000 Tokens
