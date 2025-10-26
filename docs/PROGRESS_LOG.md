@@ -77,10 +77,13 @@
   - [x] Recent Activity Placeholder
 
 - **Task 021** Project Settings: Archive & Delete
-  Meta: id=Task 021 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-08 | story=3 | labels=frontend,projects | progress=0% | tokens=0
-  - [ ] ProjectSettings.tsx erstellen
-  - [ ] Archive-Funktion implementieren
-  - [ ] Delete-Funktion mit Bestätigung
+  Meta: id=Task 021 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-08 | story=3 | labels=frontend,projects | progress=100% | tokens=5800
+  - [x] ProjectSettings.tsx erstellen
+  - [x] Archive-Funktion implementieren
+  - [x] Delete-Funktion mit Bestätigung
+  - [x] DangerZone Component erstellt
+  - [x] Tabs für General & Danger Zone
+  - [x] Role-Check für Owner/Manager implementiert
 
 - **Task 022** Routing & Navigation Setup  
   Meta: id=Task 022 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-09 | story=3 | labels=frontend,navigation | progress=0% | tokens=0
@@ -427,7 +430,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=80%
+Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=90%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -509,6 +512,40 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 **Reuse:**
 - 📘 feature/06-ui-ux-pattern (Cards, Badges, Layout)
 - 📘 feature/05-datenstruktur-pattern (Project-Hierarchie)
+
+---
+
+### 2025-10-26 — Task 021: Project Settings - Archive & Delete
+
+**Was wurde umgesetzt?**
+- ProjectSettings.tsx: Settings-Page mit Tabs (General, Danger Zone)
+- DangerZone Component: Component für Archive & Delete mit Bestätigungsdialog
+- General Tab: Titel & Beschreibung bearbeiten (Owner/Manager only)
+- Danger Zone Tab: Archive & Delete-Buttons (nur für Owner/Manager sichtbar)
+- Archive-Funktion: Setzt `archived=true`, navigiert zurück zu /projects
+- Delete-Funktion: Mit AlertDialog-Bestätigung, löscht Projekt permanent
+- Role-Check: Nur Owner/Manager sehen Danger Zone Tab und können editieren
+- Navigation: Back-Button, Settings-Links in ProjectCard & ProjectDashboard
+- Route: /projects/:id/settings
+
+**Betroffene Dateien:**
+- `src/pages/ProjectSettings.tsx` (erstellt)
+- `src/components/projects/DangerZone.tsx` (erstellt)
+- `src/App.tsx` (Route /projects/:id/settings hinzugefügt, Import hinzugefügt)
+- `src/components/projects/ProjectCard.tsx` (Settings-Link korrigiert)
+- `src/pages/ProjectDashboard.tsx` (Settings-Button-Link korrigiert)
+
+**Checks:**
+- ✅ Projekt-Titel & Beschreibung können bearbeitet werden
+- ✅ Archive-Funktion funktioniert (Projekt wird aus Liste ausgeblendet)
+- ✅ Delete-Funktion funktioniert (mit Bestätigungsdialog)
+- ✅ Read-Only Member sehen keine Danger Zone
+- ✅ Owner/Manager können Projekt archivieren & löschen
+- ✅ Navigation funktioniert (Zurück, Settings)
+
+**Reuse:**
+- 📘 feature/05-datenstruktur-pattern (Archive statt Hard Delete)
+- 📘 feature/06-ui-ux-pattern (Tabs, Cards, Alert Dialogs)
 
 ---
 

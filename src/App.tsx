@@ -12,6 +12,7 @@ import Organizations from "./pages/Organizations";
 import OrganizationSettings from "./pages/OrganizationSettings";
 import Projects from "./pages/Projects";
 import ProjectDashboard from "./pages/ProjectDashboard";
+import ProjectSettings from "./pages/ProjectSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProjectDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/settings" 
+              element={
+                <ProtectedRoute>
+                  <ProjectSettings />
                 </ProtectedRoute>
               } 
             />
