@@ -39,17 +39,6 @@
 
 
 
-- **Task 044** Landing Page (Public)
-  Meta: id=Task 043 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-30 | story=5 | labels=frontend,accessibility | progress=0% | tokens=0
-  - [ ] A11y-Audit durchführen
-  - [ ] aria-labels hinzufügen
-  - [ ] Keyboard-Navigation testen
-
-- **Task 044** Landing Page (Public)  
-  Meta: id=Task 044 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-01 | story=5 | labels=frontend,landing,ui | progress=0% | tokens=0
-  - [ ] Landing.tsx Page erstellen
-  - [ ] Hero-Sektion implementieren
-  - [ ] Features-Sektion implementieren
 
 - **Task 045** SEO & Meta Tags  
   Meta: id=Task 045 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-02 | story=2 | labels=seo | progress=0% | tokens=0
@@ -105,7 +94,17 @@
 
 ### Done
 
-- **Task 001** Repository Setup & Projektstruktur  
+- **Task 044** Landing Page (Public)  
+  Meta: id=Task 044 | assignee=@AI | milestone=M4 | priority=medium | due=2025-12-01 | story=5 | labels=frontend,landing,ui | progress=100% | tokens=6800
+  - [x] Landing.tsx Page erstellt mit Hero, Features, Footer
+  - [x] Hero-Sektion implementiert (Headline, CTA, Stats)
+  - [x] Features-Sektion implementiert (Felix, Anna, Paul)
+  - [x] Footer-Sektion implementiert (Links, Legal)
+  - [x] "So funktioniert's" Section hinzugefügt
+  - [x] Responsive Design mit Mobile-First Ansatz
+  - [x] CTA-Button zu /auth implementiert
+
+- **Task 001** Repository Setup & Projektstruktur
   Meta: id=Task 001 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-26 | story=2 | labels=setup,backend | progress=100% | tokens=4200
   - [x] Supabase-Datenbank verbunden
   - [x] PROJECT_STRUCTURE.md erstellt
@@ -521,7 +520,7 @@ Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scop
 
 ### M4: UI/UX & Polish
 
-Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=50%
+Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=58%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
@@ -551,6 +550,67 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 044: Landing Page (Public)
+
+**Änderungen:**
+- **src/pages/Index.tsx** komplett überarbeitet:
+  - Hero-, Features- und Footer-Komponenten integriert
+  - Minimale vorherige Version durch vollständige Landing Page ersetzt
+  
+- **src/components/landing/Hero.tsx** erstellt:
+  - Hero-Sektion mit Gradient-Background
+  - Badge "KI-gestützte Kaltakquise" mit Sparkles-Icon
+  - Headline mit Gradient-Text-Effekt (Primary-Color)
+  - Subtitle erklärt die drei KI-Workflows
+  - CTA-Buttons: "Kostenlos starten" (zu /auth) + "Mehr erfahren" (zu #features)
+  - Stats-Sektion: 3 KI-Workflows, 100% Automatisiert, 24/7 Verfügbar
+  - Responsive Design: stacked Buttons auf Mobile, row auf Desktop
+  
+- **src/components/landing/Features.tsx** erstellt:
+  - Section Header mit Titel und Beschreibung
+  - Drei Feature-Cards für Felix, Anna und Paul:
+    - **Finder Felix**: Search Icon, Blue Theme, Webscraping erklärt
+    - **Analyse Anna**: Brain Icon, Purple Theme, Website-Analyse erklärt
+    - **Pitch Paul**: Mail Icon, Green Theme, E-Mail-Generierung erklärt
+  - "So funktioniert's" Section mit 4 Schritten:
+    - Projekt erstellen → Felix starten → Anna analysieren → Paul versenden
+  - Responsive Grid-Layout (1 Spalte Mobile, 3 Spalten Desktop)
+  
+- **src/components/landing/Footer.tsx** erstellt:
+  - Brand Section mit Cold Calling Logo und Beschreibung
+  - Produkt Links (Features, Anmelden, Registrieren)
+  - Ressourcen Links (Dokumentation, Support, FAQ)
+  - Legal Links (Impressum, Datenschutz, AGB)
+  - Bottom Section mit Copyright und "Powered by Lovable"
+  - Responsive Grid-Layout (1 Spalte Mobile, 4 Spalten Desktop)
+
+**Rationale:**
+- **Public Landing Page**: Erste Anlaufstelle für neue User
+- **Features-Erklärung**: Verständliche Darstellung der drei KI-Workflows
+- **CTA zu /auth**: Klarer Conversion-Funnel
+- **Professional Design**: Gradient-Effekte, Icons, responsive Layout
+- **Footer**: Vollständige Navigation und Legal-Links
+
+**Features:**
+- Hero mit Gradient-Background und Animated CTA-Button
+- Feature-Cards mit farbcodierten Icons (Blue/Purple/Green)
+- "So funktioniert's" Workflow-Erklärung mit nummerierten Schritten
+- Footer mit vollständiger Navigation
+- Responsive Design (Mobile-First)
+- SEO-ready (semantic HTML, H1, meta-description ready)
+
+**Testing:**
+- Landing Page ist öffentlich zugänglich (/)
+- CTA-Button führt zu /auth
+- Features sind verständlich erklärt
+- Responsive auf allen Breakpoints
+- Hover-Effekte funktionieren
+- Smooth-Scroll zu #features funktioniert
+
+**Status:** ✅ Done (100%)
+
+---
 
 ### 2025-10-26 — Task 043: Accessibility (A11y) Check
 
