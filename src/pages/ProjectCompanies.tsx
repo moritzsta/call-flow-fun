@@ -8,10 +8,12 @@ import { ArrowLeft, Building2, RefreshCw } from 'lucide-react';
 import { useCompanies, CompanyFilters as Filters, CompanySortConfig } from '@/hooks/useCompanies';
 import { CompanyFilters } from '@/components/companies/CompanyFilters';
 import { CompaniesTable } from '@/components/companies/CompaniesTable';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function ProjectCompanies() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const [filters, setFilters] = useState<Filters>({});
   const [sortConfig, setSortConfig] = useState<CompanySortConfig>({
@@ -54,21 +56,21 @@ export default function ProjectCompanies() {
         </Button>
 
         <div className="mb-8">
-          <div className="flex items-start justify-between">
+          <div className={`flex items-start ${isMobile ? 'flex-col gap-4' : 'justify-between'}`}>
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <Building2 className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">Firmen</h1>
-                  <p className="text-muted-foreground">
+                  <h1 className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}>Firmen</h1>
+                  <p className="text-muted-foreground text-sm">
                     {companies.length} {companies.length === 1 ? 'Firma' : 'Firmen'} gefunden
                   </p>
                 </div>
               </div>
             </div>
-            <Button variant="outline" onClick={() => refetch()}>
+            <Button variant="outline" onClick={() => refetch()} className={isMobile ? 'w-full' : ''}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Aktualisieren
             </Button>

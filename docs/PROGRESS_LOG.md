@@ -30,11 +30,6 @@
 
 
 
-- **Task 038** Responsive Design: Mobile-First  
-  Meta: id=Task 038 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-25 | story=5 | labels=frontend,responsive,ui | progress=0% | tokens=0
-  - [ ] Mobile-Kompatibilität prüfen
-  - [ ] use-mobile Hook erstellen
-  - [ ] Adaptive Components implementieren
 
 - **Task 039** Internationalisierung (i18n) Setup (optional)  
   Meta: id=Task 039 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-26 | story=5 | labels=frontend,i18n | progress=0% | tokens=0
@@ -441,6 +436,16 @@
   - [x] prefers-reduced-motion Media Query für Accessibility hinzugefügt
   - [x] Alle Farben sind HSL-basiert und semantisch benannt
 
+- **Task 038** Responsive Design: Mobile-First  
+  Meta: id=Task 038 | assignee=@AI | milestone=M4 | priority=high | due=2025-11-25 | story=5 | labels=frontend,responsive,ui | progress=100% | tokens=5200
+  - [x] use-mobile Hook geprüft (bereits vorhanden und funktional)
+  - [x] ResponsiveTable Component erstellt (mit Mobile Card-View)
+  - [x] AdaptiveDialog Component erstellt (Dialog → Sheet auf Mobile)
+  - [x] CompaniesTable responsive gemacht (Card-View auf Mobile)
+  - [x] EmailsTable responsive gemacht (Card-View auf Mobile)
+  - [x] ProjectCompanies Page für Mobile optimiert
+  - [x] RESPONSIVE_GUIDELINES.md Dokumentation erstellt
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -496,7 +501,7 @@ Meta: id=M3 | status=completed | due=2025-11-23 | owner=@AI | risk=medium | scop
 
 ### M4: UI/UX & Polish
 
-Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=8%
+Meta: id=M4 | status=in_progress | due=2025-12-04 | owner=@AI | risk=low | scope=[Task 031, Task 034, Task 037, Task 038, Task 039, Task 040, Task 041, Task 042, Task 043, Task 044, Task 045, Task 046, Task 047] | progress=17%
 
 **Beschreibung:** Design System, Responsive Design, Accessibility, Dokumentation.
 
@@ -526,6 +531,51 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 038: Responsive Design: Mobile-First
+
+**Änderungen:**
+- `src/components/ui/responsive-table.tsx` erstellt: Wrapper-Component für responsive Tabellen
+  - Desktop: Standard-Tabelle
+  - Mobile: Card-View mit wichtigsten Infos oder horizontal scrollable
+- `src/components/ui/adaptive-dialog.tsx` erstellt: Adaptive Dialog-Component
+  - Desktop: Standard Dialog
+  - Mobile: Bottom-Sheet mit max-height 85vh
+- `src/components/companies/CompaniesTable.tsx` für Mobile optimiert:
+  - Card-View auf Mobile mit Firma, Branche, Ort, Status
+  - Touch-optimierte Buttons und Dropdown-Menüs
+  - Horizontal scroll als Fallback
+- `src/components/emails/EmailsTable.tsx` für Mobile optimiert:
+  - Card-View mit Betreff, Empfänger, Firma, Status, Datum
+  - Kompakte Darstellung mit Icons
+- `src/pages/ProjectCompanies.tsx` responsive gemacht:
+  - Header-Layout flexibel (stacked auf Mobile, row auf Desktop)
+  - Buttons full-width auf Mobile
+- `docs/RESPONSIVE_GUIDELINES.md` erstellt:
+  - Dokumentation aller Breakpoints (sm: 640px, md: 768px, etc.)
+  - Best Practices für Responsive Design
+  - Testing-Checklist für verschiedene Devices
+  - DOs & DON'Ts für Mobile-First Entwicklung
+
+**Hook:**
+- `useIsMobile()` Hook war bereits vorhanden (768px Breakpoint)
+
+**Components:**
+- ResponsiveTable: Adaptive Tabellen mit Mobile Card-View
+- MobileCard: Touch-optimierte Card-Component
+- AdaptiveDialog: Dialog/Sheet basierend auf Screen-Size
+
+**Docs:**
+- RESPONSIVE_GUIDELINES.md mit vollständiger Dokumentation
+
+**Testing:**
+- Alle Tabellen sind auf Mobile nutzbar
+- Navigation funktioniert touch-optimiert
+- Dialoge als Bottom-Sheets auf Mobile
+
+**Status:** ✅ Done (100%)
+
+---
 
 ### 2025-10-26 — Task 037: Design System: Theme & HSL-Tokens
 

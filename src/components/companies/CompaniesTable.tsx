@@ -25,9 +25,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Company, CompanySortConfig } from '@/hooks/useCompanies';
-import { MoreHorizontal, ArrowUpDown, Trash2, Eye } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Trash2, Eye, MapPin, Building } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ResponsiveTable, MobileCard } from '@/components/ui/responsive-table';
 
 interface CompaniesTableProps {
   companies: Company[];
@@ -83,6 +85,8 @@ export const CompaniesTable = ({
     );
   };
 
+  const isMobile = useIsMobile();
+
   if (companies.length === 0) {
     return (
       <div className="text-center py-12">
@@ -94,10 +98,93 @@ export const CompaniesTable = ({
     );
   }
 
+  const mobileView = (
+    <div className="space-y-3">
+      {companies.map((company) => (
+        <MobileCard key={company.id} onClick={() => navigate(`/companies/${company.id}`)}>
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg">{company.company}</h3>
+                {company.industry && (
+                  <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                    <Building className="h-3 w-3" />
+                    {company.industry}
+                  </p>
+                )}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/companies/${company.id}`);
+                  }}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Details anzeigen
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onStatusChange(company.id, 'analyzed');
+                  }}>
+                    Status: Analysiert
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onStatusChange(company.id, 'contacted');
+                  }}>
+                    Status: Kontaktiert
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    onStatusChange(company.id, 'rejected');
+                  }}>
+                    Status: Abgelehnt
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick(company);
+                    }}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Löschen
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="flex flex-wrap gap-2 text-sm">
+              {(company.city || company.state) && (
+                <div className="flex items-center gap-1 text-muted-foreground">
+                  <MapPin className="h-3 w-3" />
+                  {[company.city, company.state].filter(Boolean).join(', ')}
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between">
+              {getStatusBadge(company.status)}
+              <span className="text-xs text-muted-foreground">
+                {new Date(company.created_at).toLocaleDateString('de-DE')}
+              </span>
+            </div>
+          </div>
+        </MobileCard>
+      ))}
+    </div>
+  );
+
   return (
     <>
-      <div className="rounded-md border">
-        <Table>
+      <ResponsiveTable mobileView={mobileView}>
+        <div className="rounded-md border">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>
@@ -205,7 +292,8 @@ export const CompaniesTable = ({
             ))}
           </TableBody>
         </Table>
-      </div>
+        </div>
+      </ResponsiveTable>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>

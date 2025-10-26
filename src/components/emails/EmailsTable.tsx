@@ -25,11 +25,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ProjectEmail, EmailSortConfig } from '@/hooks/useEmails';
-import { MoreHorizontal, ArrowUpDown, Trash2, Eye, Send } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Trash2, Eye, Send, Mail, Building } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ResponsiveTable, MobileCard } from '@/components/ui/responsive-table';
 
 interface EmailsTableProps {
   emails: ProjectEmail[];
@@ -87,6 +89,8 @@ export const EmailsTable = ({
     );
   };
 
+  const isMobile = useIsMobile();
+
   if (emails.length === 0) {
     return (
       <div className="text-center py-12">
@@ -98,10 +102,89 @@ export const EmailsTable = ({
     );
   }
 
+  const mobileView = (
+    <div className="space-y-3">
+      {emails.map((email) => (
+        <MobileCard key={email.id} onClick={() => navigate(`/emails/${email.id}`)}>
+          <div className="space-y-3">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-base line-clamp-2">{email.subject}</h3>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                  <Mail className="h-3 w-3" />
+                  {email.recipient_email}
+                </div>
+                {email.company_name && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                    <Building className="h-3 w-3" />
+                    {email.company_name}
+                  </div>
+                )}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/emails/${email.id}`);
+                    }}
+                  >
+                    <Eye className="mr-2 h-4 w-4" />
+                    Details anzeigen
+                  </DropdownMenuItem>
+                  {(email.status === 'draft' || email.status === 'ready_to_send') && (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log('Send email', email.id);
+                      }}
+                    >
+                      <Send className="mr-2 h-4 w-4" />
+                      Versenden
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick(email);
+                    }}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Löschen
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            <div className="flex items-center justify-between">
+              {getStatusBadge(email.status)}
+              <div className="text-xs text-muted-foreground">
+                {format(new Date(email.created_at), 'dd.MM.yy HH:mm', { locale: de })}
+              </div>
+            </div>
+
+            {email.sent_at && (
+              <div className="text-xs text-muted-foreground">
+                Versendet: {format(new Date(email.sent_at), 'dd.MM.yy HH:mm', { locale: de })}
+              </div>
+            )}
+          </div>
+        </MobileCard>
+      ))}
+    </div>
+  );
+
   return (
     <>
-      <div className="rounded-md border">
-        <Table>
+      <ResponsiveTable mobileView={mobileView}>
+        <div className="rounded-md border">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>
@@ -209,7 +292,8 @@ export const EmailsTable = ({
             ))}
           </TableBody>
         </Table>
-      </div>
+        </div>
+      </ResponsiveTable>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
