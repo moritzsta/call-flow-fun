@@ -8,6 +8,8 @@ import { ArrowLeft, Building2, RefreshCw } from 'lucide-react';
 import { useCompanies, CompanyFilters as Filters, CompanySortConfig } from '@/hooks/useCompanies';
 import { CompanyFilters } from '@/components/companies/CompanyFilters';
 import { CompaniesTable } from '@/components/companies/CompaniesTable';
+import { ImportCompaniesButton } from '@/components/companies/ImportCompaniesButton';
+import { ExportCompaniesButton } from '@/components/companies/ExportCompaniesButton';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function ProjectCompanies() {
@@ -85,7 +87,13 @@ export default function ProjectCompanies() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <CompanyFilters filters={filters} onFiltersChange={setFilters} />
+            <div className="flex flex-col sm:flex-row justify-between gap-4">
+              <CompanyFilters filters={filters} onFiltersChange={setFilters} />
+              <div className="flex gap-2">
+                <ImportCompaniesButton projectId={id!} />
+                <ExportCompaniesButton projectId={id!} />
+              </div>
+            </div>
             <CompaniesTable
               companies={companies}
               onDelete={deleteCompany}

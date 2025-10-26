@@ -14,10 +14,11 @@
 
 
 - **Task 031** Company Import/Export (optional)  
-  Meta: id=Task 031 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-18 | story=5 | labels=frontend,companies,import | progress=0% | tokens=0
-  - [ ] CSV-Import implementieren
-  - [ ] CSV-Export implementieren
-  - [ ] Error-Handling implementieren
+  Meta: id=Task 031 | assignee=@AI | milestone=M4 | priority=low | due=2025-11-18 | story=5 | labels=frontend,companies,import | progress=100% | tokens=2200
+  - [x] CSV-Import implementieren (ImportCompaniesButton.tsx)
+  - [x] CSV-Export implementieren (ExportCompaniesButton.tsx)
+  - [x] Error-Handling implementieren
+  - [x] Integration in ProjectCompanies.tsx
 
 
 
