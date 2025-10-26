@@ -14,6 +14,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { FinderFelixDialog } from '@/components/workflows/FinderFelixDialog';
 import { AnalyseAnnaDialog } from '@/components/workflows/AnalyseAnnaDialog';
 import { PitchPaulDialog } from '@/components/workflows/PitchPaulDialog';
+import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
+import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { 
   ArrowLeft, 
   Building2, 
@@ -53,6 +55,9 @@ export default function ProjectDashboard() {
   const organization = organizations.find(
     (org) => org.id === project?.organization_id
   );
+
+  // Workflow Status
+  const { counts: workflowCounts, isLoading: workflowsLoading } = useWorkflowStatus(id || '');
 
   if (orgsLoading || membersLoading) {
     return (
@@ -213,14 +218,29 @@ export default function ProjectDashboard() {
                   <CardContent>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-3xl font-bold text-foreground">-</p>
-                        <div className="flex gap-2 mt-2">
-                          <Badge variant="secondary" className="text-xs">
-                            Running: -
-                          </Badge>
-                          <Badge variant="secondary" className="text-xs">
-                            Completed: -
-                          </Badge>
+                        <p className="text-3xl font-bold text-foreground">
+                          {workflowsLoading ? '-' : workflowCounts.total}
+                        </p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {workflowCounts.running > 0 && (
+                            <WorkflowStatusBadge 
+                              status="running" 
+                              showIcon={false}
+                              className="text-xs"
+                            />
+                          )}
+                          {workflowCounts.completed > 0 && (
+                            <Badge variant="secondary" className="text-xs">
+                              Completed: {workflowCounts.completed}
+                            </Badge>
+                          )}
+                          {workflowCounts.failed > 0 && (
+                            <WorkflowStatusBadge 
+                              status="failed" 
+                              showIcon={false}
+                              className="text-xs"
+                            />
+                          )}
                         </div>
                       </div>
                       <div className="h-12 w-12 rounded-full bg-secondary/50 flex items-center justify-center">

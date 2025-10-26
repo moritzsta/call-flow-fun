@@ -10,23 +10,6 @@
 
 ### Backlog
 
-- **Task 028** Workflow-Status: Realtime Updates  
-  Meta: id=Task 028 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-15 | story=5 | labels=frontend,workflows,realtime | progress=0% | tokens=0
-  - [ ] useWorkflowStatus Hook implementieren
-  - [ ] WorkflowStatusBadge Component erstellen
-  - [ ] Realtime Subscription einrichten
-
-- **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
-  Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=0% | tokens=0
-  - [ ] SendEmailsBatchButton Component erstellen
-  - [ ] Batch-Versand implementieren
-  - [ ] Progress-Anzeige implementieren
-
-- **Task 028** Workflow-Status: Realtime Updates  
-  Meta: id=Task 028 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-15 | story=5 | labels=frontend,workflows,realtime | progress=0% | tokens=0
-  - [ ] useWorkflowStatus Hook implementieren
-  - [ ] WorkflowStatusBadge Component erstellen
-  - [ ] Realtime Subscription einrichten
 
 - **Task 029** Companies List: Anzeige & Filter  
   Meta: id=Task 029 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-16 | story=5 | labels=frontend,companies,ui | progress=0% | tokens=0
@@ -347,6 +330,38 @@
   - [x] Webhook-Call implementiert
 
 - **Task 025** Webhook-Integration: Pitch Paul Trigger  
+  Meta: id=Task 025 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-12 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=5200
+  - [x] PitchPaulDialog Component erstellt
+  - [x] Multi-Select für Firmen implementiert
+  - [x] Integration in ProjectDashboard
+  - [x] Input Validation implementiert
+  - [x] Webhook-Call implementiert
+
+- **Task 026** Webhook-Integration: E-Mail Versand (Single)  
+  Meta: id=Task 026 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-13 | story=5 | labels=frontend,emails,integration | progress=100% | tokens=4800
+  - [x] SendEmailButton Component erstellt
+  - [x] useEmails Hook implementiert
+  - [x] ProjectEmails.tsx Page implementiert
+  - [x] Confirmation Dialog implementiert
+  - [x] Webhook-Call implementiert
+
+- **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
+  Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=100% | tokens=6200
+  - [x] SendEmailsBatchButton Component erstellt
+  - [x] Multi-Select funktionalität implementiert
+  - [x] Progress-Anzeige implementiert
+  - [x] Batch-Versand-Logik implementiert
+  - [x] Tab-Ansicht für Single/Batch implementiert
+
+- **Task 028** Workflow-Status: Realtime Updates  
+  Meta: id=Task 028 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-15 | story=5 | labels=frontend,workflows,realtime | progress=100% | tokens=4500
+  - [x] useWorkflowStatus Hook implementiert mit Realtime Subscription
+  - [x] WorkflowStatusBadge Component erstellt mit Farb-Varianten
+  - [x] Integration in ProjectDashboard KPI Card
+  - [x] Realtime Updates funktionieren (INSERT & UPDATE)
+  - [x] Cleanup-Logik implementiert
+
+- **Task 025** Webhook-Integration: Pitch Paul Trigger (DUPLICATE - IGNORE)
   Meta: id=Task 025 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-12 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=6200
   - [x] PitchPaulDialog Component erstellt
   - [x] Multi-Select für analysierte Firmen implementiert
@@ -373,6 +388,15 @@
   - [x] Integration in ProjectEmails.tsx (Tabs: Einzelansicht / Batch-Versand)
   - [x] Project Header mit Org-Name
   - [x] Role-Check für Actions (Owner/Manager)
+
+- **Task 028** Workflow-Status: Realtime Updates  
+  Meta: id=Task 028 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-15 | story=5 | labels=frontend,workflows,realtime | progress=100% | tokens=4500
+  - [x] useWorkflowStatus Hook implementiert mit Realtime Subscription
+  - [x] WorkflowStatusBadge Component erstellt mit Farb-Varianten (pending=yellow, running=blue, completed=green, failed=red)
+  - [x] Integration in ProjectDashboard KPI Card
+  - [x] Realtime Updates für INSERT & UPDATE Events
+  - [x] Cleanup-Logik mit removeChannel()
+  - [x] Auto-Berechnung der Workflow Counts
   - [x] Recent Activity Placeholder
 
 - **Task 048** Progress Log Setup
@@ -415,7 +439,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 
 ### M3: Core Features (Workflows & Data)
 
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=42%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=50%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -460,6 +484,43 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 028: Workflow-Status: Realtime Updates
+
+**Was wurde umgesetzt?**
+
+- `src/hooks/useWorkflowStatus.ts`: Custom Hook für Workflow-State-Management
+  - Supabase Realtime Subscription auf `n8n_workflow_states` Tabelle
+  - Filter: `project_id=eq.${projectId}` für Projekt-spezifische Updates
+  - Events: INSERT (neue Workflows) & UPDATE (Status-Änderungen)
+  - Auto-Berechnung von Workflow Counts (pending, running, completed, failed, total)
+  - Proper Cleanup mit `supabase.removeChannel(channel)` in useEffect
+- `src/components/workflows/WorkflowStatusBadge.tsx`: Status-Badge Component
+  - 4 Status-Varianten mit Farben: pending (yellow), running (blue), completed (green), failed (red)
+  - Icons: Clock, Loader2 (animated), CheckCircle2, XCircle
+  - Optional Icon-Display via Props
+  - HSL-basierte Farben aus Design System
+- `src/pages/ProjectDashboard.tsx`: Integration in Workflows KPI Card
+  - useWorkflowStatus Hook eingebunden
+  - Dynamische Anzeige der Workflow Counts
+  - Badge-Display nur für non-zero Counts (running, failed)
+  - Loading-State während Daten-Fetch
+- `docs/PROGRESS_LOG.md`: Status-Update
+  - Task 028 in Done Section verschoben (100%)
+  - M3 Progress: 42% → 50%
+
+**Technische Details:**
+
+- Realtime Channel-Name: `workflow-states:${projectId}`
+- Query Key: `['workflow-states', projectId]`
+- React Query Cache-Updates für INSERT & UPDATE Events
+- Logging für Debugging: `[useWorkflowStatus]` Prefix
+
+📘 Reuse: feature/07-communication-realtime-pattern
+
+**Next Task**: 029 - Companies List: Anzeige & Filter
+
+---
 
 ### 2025-10-25 — Task 020: Project Dashboard - Overview
 
