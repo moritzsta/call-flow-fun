@@ -11,11 +11,6 @@
 ### Backlog
 
 
-- **Task 029** Companies List: Anzeige & Filter  
-  Meta: id=Task 029 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-16 | story=5 | labels=frontend,companies,ui | progress=0% | tokens=0
-  - [ ] ProjectCompanies.tsx Page erstellen
-  - [ ] useCompanies Hook implementieren
-  - [ ] Filter & Sortierung implementieren
 
 - **Task 030** Company Detail View  
   Meta: id=Task 030 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-17 | story=5 | labels=frontend,companies,ui | progress=0% | tokens=0
@@ -399,6 +394,15 @@
   - [x] Auto-Berechnung der Workflow Counts
   - [x] Recent Activity Placeholder
 
+- **Task 029** Companies List: Anzeige & Filter  
+  Meta: id=Task 029 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-16 | story=5 | labels=frontend,companies,ui | progress=100% | tokens=7200
+  - [x] ProjectCompanies.tsx Page vollständig implementiert
+  - [x] useCompanies Hook erweitert (Filter, Sortierung, Mutations)
+  - [x] CompanyFilters Component erstellt (Status, Branche, Stadt, Bundesland, Search)
+  - [x] CompaniesTable Component erstellt (Sortierung, Actions, Delete-Dialog)
+  - [x] Status-Badge mit Farben (found=blue, analyzed=purple, contacted=green, rejected=red)
+  - [x] Delete & Update Status Mutations implementiert
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -439,7 +443,7 @@ Meta: id=M2 | status=completed | due=2025-11-09 | owner=@AI | risk=low | scope=[
 
 ### M3: Core Features (Workflows & Data)
 
-Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=50%
+Meta: id=M3 | status=in_progress | due=2025-11-23 | owner=@AI | risk=medium | scope=[Task 023, Task 024, Task 025, Task 026, Task 027, Task 028, Task 029, Task 030, Task 032, Task 033, Task 035, Task 036] | progress=58%
 
 **Beschreibung:** Workflow-Integration (Felix, Anna, Paul), Firmen- und E-Mail-Management, Dashboard.
 
@@ -484,6 +488,56 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-26 — Task 029: Companies List: Anzeige & Filter
+
+**Was wurde umgesetzt?**
+
+- `src/hooks/useCompanies.ts`: Hook erweitert mit Filter & Sortierung
+  - CompanyFilters Interface: status, industry, city, state, search
+  - CompanySortConfig Interface: field, ascending
+  - Filter-Logik mit .ilike() für Text-Suche und .eq() für exakte Matches
+  - OR-Filter für Search (company, email, phone)
+  - Sortierung für: company, industry, city, status, created_at
+  - Delete Mutation mit Toast-Feedback
+  - Update Status Mutation
+  - Query-Invalidierung nach Mutations
+- `src/components/companies/CompanyFilters.tsx`: Filter-Component
+  - Search-Input mit Icon (Firma, E-Mail, Telefon)
+  - Status-Select mit 5 Optionen (Alle, found, analyzed, contacted, rejected)
+  - Industry, City, State Input-Filter
+  - "Filter zurücksetzen" Button (nur bei aktiven Filtern)
+  - Responsive Grid-Layout (1/2/5 Spalten)
+- `src/components/companies/CompaniesTable.tsx`: Tabellen-Component
+  - 7 Spalten: Firma, Branche, Stadt, Bundesland, Status, Erstellt, Actions
+  - Sortierung per Button mit ArrowUpDown Icon
+  - Status-Badges mit Farben (found=blue, analyzed=purple, contacted=green, rejected=red)
+  - DropdownMenu für Actions: Details, Status ändern, Löschen
+  - AlertDialog für Delete-Bestätigung
+  - Empty State wenn keine Firmen vorhanden
+- `src/pages/ProjectCompanies.tsx`: Vollständige Page
+  - Header mit Building2 Icon und Company-Count
+  - Refresh-Button für manuelles Reload
+  - Integration von Filter & Table Components
+  - Loading-State mit Skeleton
+  - Responsive Layout
+- `docs/PROGRESS_LOG.md`: Status-Update
+  - Task 029 in Done Section verschoben (100%)
+  - M3 Progress: 50% → 58%
+
+**Technische Details:**
+
+- Filter-State Management mit useState
+- Sort-State mit SortConfig Object
+- React Query für Data Fetching & Mutations
+- Optimistic UI Updates via Query Invalidation
+- TypeScript Type-Safety für Status & Sort Fields
+
+📘 Reuse: feature/05-datenstruktur-pattern
+
+**Next Task**: 030 - Company Detail View
+
+---
 
 ### 2025-10-26 — Task 028: Workflow-Status: Realtime Updates
 

@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 export interface Company {
   id: string;
@@ -20,17 +21,63 @@ export interface Company {
   updated_at: string;
 }
 
-export const useCompanies = (projectId?: string) => {
-  const { data: companies = [], isLoading, error } = useQuery({
-    queryKey: ['companies', projectId],
+export interface CompanyFilters {
+  status?: string;
+  industry?: string;
+  city?: string;
+  state?: string;
+  search?: string;
+}
+
+export interface CompanySortConfig {
+  field: 'company' | 'status' | 'created_at' | 'industry' | 'city';
+  ascending: boolean;
+}
+
+export const useCompanies = (
+  projectId?: string,
+  filters?: CompanyFilters,
+  sortConfig?: CompanySortConfig
+) => {
+  const queryClient = useQueryClient();
+
+  const { data: companies = [], isLoading, error, refetch } = useQuery({
+    queryKey: ['companies', projectId, filters, sortConfig],
     queryFn: async () => {
       if (!projectId) return [];
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('companies')
         .select('*')
-        .eq('project_id', projectId)
-        .order('created_at', { ascending: false });
+        .eq('project_id', projectId);
+
+      // Apply filters
+      if (filters?.status) {
+        query = query.eq('status', filters.status as Company['status']);
+      }
+      if (filters?.industry) {
+        query = query.ilike('industry', `%${filters.industry}%`);
+      }
+      if (filters?.city) {
+        query = query.ilike('city', `%${filters.city}%`);
+      }
+      if (filters?.state) {
+        query = query.eq('state', filters.state);
+      }
+      if (filters?.search) {
+        query = query.or(
+          `company.ilike.%${filters.search}%,email.ilike.%${filters.search}%,phone.ilike.%${filters.search}%`
+        );
+      }
+
+      // Apply sorting
+      if (sortConfig) {
+        query = query.order(sortConfig.field, { ascending: sortConfig.ascending });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as Company[];
@@ -38,9 +85,57 @@ export const useCompanies = (projectId?: string) => {
     enabled: !!projectId,
   });
 
+  // Delete company mutation
+  const deleteCompany = useMutation({
+    mutationFn: async (companyId: string) => {
+      const { error } = await supabase
+        .from('companies')
+        .delete()
+        .eq('id', companyId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companies', projectId] });
+      toast.success('Firma wurde gelöscht');
+    },
+    onError: (error: Error) => {
+      toast.error(`Fehler beim Löschen: ${error.message}`);
+    },
+  });
+
+  // Update company status mutation
+  const updateCompanyStatus = useMutation({
+    mutationFn: async ({
+      companyId,
+      status,
+    }: {
+      companyId: string;
+      status: Company['status'];
+    }) => {
+      const { error } = await supabase
+        .from('companies')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', companyId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companies', projectId] });
+      toast.success('Status aktualisiert');
+    },
+    onError: (error: Error) => {
+      toast.error(`Fehler beim Aktualisieren: ${error.message}`);
+    },
+  });
+
   return {
     companies,
     isLoading,
     error,
+    refetch,
+    deleteCompany: deleteCompany.mutate,
+    updateCompanyStatus: (companyId: string, status: Company['status']) =>
+      updateCompanyStatus.mutate({ companyId, status }),
   };
 };

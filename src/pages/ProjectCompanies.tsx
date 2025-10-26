@@ -1,13 +1,45 @@
-import { useParams } from 'react-router-dom';
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, Building2, RefreshCw } from 'lucide-react';
+import { useCompanies, CompanyFilters as Filters, CompanySortConfig } from '@/hooks/useCompanies';
+import { CompanyFilters } from '@/components/companies/CompanyFilters';
+import { CompaniesTable } from '@/components/companies/CompaniesTable';
 
 export default function ProjectCompanies() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const [filters, setFilters] = useState<Filters>({});
+  const [sortConfig, setSortConfig] = useState<CompanySortConfig>({
+    field: 'created_at',
+    ascending: false,
+  });
+
+  const {
+    companies,
+    isLoading,
+    refetch,
+    deleteCompany,
+    updateCompanyStatus,
+  } = useCompanies(id, filters, sortConfig);
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container max-w-7xl py-8">
+          <Skeleton className="h-10 w-32 mb-6" />
+          <div className="space-y-4">
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-96 w-full" />
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -22,23 +54,43 @@ export default function ProjectCompanies() {
         </Button>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Firmen</h1>
-          <p className="text-muted-foreground">
-            Verwalten Sie die Firmen für dieses Projekt
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Building2 className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold">Firmen</h1>
+                  <p className="text-muted-foreground">
+                    {companies.length} {companies.length === 1 ? 'Firma' : 'Firmen'} gefunden
+                  </p>
+                </div>
+              </div>
+            </div>
+            <Button variant="outline" onClick={() => refetch()}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Aktualisieren
+            </Button>
+          </div>
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle>Firmen-Liste</CardTitle>
             <CardDescription>
-              Diese Seite wird später mit der Firmen-Verwaltung implementiert
+              Filtern, sortieren und verwalten Sie die Firmen dieses Projekts
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <p className="text-center text-muted-foreground py-8">
-              Coming soon... (Task 028)
-            </p>
+          <CardContent className="space-y-6">
+            <CompanyFilters filters={filters} onFiltersChange={setFilters} />
+            <CompaniesTable
+              companies={companies}
+              onDelete={deleteCompany}
+              onStatusChange={updateCompanyStatus}
+              sortConfig={sortConfig}
+              onSortChange={setSortConfig}
+            />
           </CardContent>
         </Card>
       </div>
