@@ -32,24 +32,36 @@ export interface EmailSortConfig {
   ascending: boolean;
 }
 
+export interface PaginationConfig {
+  page: number;
+  pageSize: number;
+}
+
 export const useEmails = (
   projectId?: string,
   filters?: EmailFilters,
-  sortConfig?: EmailSortConfig
+  sortConfig?: EmailSortConfig,
+  pagination?: PaginationConfig
 ) => {
   const queryClient = useQueryClient();
+  const defaultPagination = { page: 0, pageSize: 50 };
 
-  const { data: emails = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['project_emails', projectId, filters, sortConfig],
+  const { data: result, isLoading, error, refetch } = useQuery({
+    queryKey: ['project_emails', projectId, filters, sortConfig, pagination],
     queryFn: async () => {
-      if (!projectId) return [];
+      if (!projectId) return { data: [], count: 0 };
 
+      const paginationConfig = pagination || defaultPagination;
+      const from = paginationConfig.page * paginationConfig.pageSize;
+      const to = from + paginationConfig.pageSize - 1;
+
+      // Select only needed fields for better performance
       let query = supabase
         .from('project_emails')
         .select(`
-          *,
+          id, project_id, company_id, subject, body, recipient_email, status, sent_at, created_at, updated_at,
           companies!project_emails_company_id_fkey(company)
-        `)
+        `, { count: 'exact' })
         .eq('project_id', projectId);
 
       // Apply filters
@@ -72,19 +84,27 @@ export const useEmails = (
         query = query.order('created_at', { ascending: false });
       }
 
-      const { data, error } = await query;
+      // Apply pagination
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
 
       // Flatten the company name
-      return (data || []).map((email: any) => ({
+      const emails = (data || []).map((email: any) => ({
         ...email,
         company_name: email.companies?.company || null,
         companies: undefined,
       })) as ProjectEmail[];
+
+      return { data: emails, count: count || 0 };
     },
     enabled: !!projectId,
   });
+
+  const emails = result?.data || [];
+  const totalCount = result?.count || 0;
 
   const sendEmailMutation = useMutation({
     mutationFn: async ({ emailId, userId }: { emailId: string; userId: string }) => {
@@ -165,6 +185,7 @@ export const useEmails = (
 
   return {
     emails,
+    totalCount,
     isLoading,
     error,
     refetch,

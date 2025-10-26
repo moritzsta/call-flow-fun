@@ -38,21 +38,33 @@ export interface CompanySortConfig {
   ascending: boolean;
 }
 
+export interface PaginationConfig {
+  page: number;
+  pageSize: number;
+}
+
 export const useCompanies = (
   projectId?: string,
   filters?: CompanyFilters,
-  sortConfig?: CompanySortConfig
+  sortConfig?: CompanySortConfig,
+  pagination?: PaginationConfig
 ) => {
   const queryClient = useQueryClient();
+  const defaultPagination = { page: 0, pageSize: 50 };
 
-  const { data: companies = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['companies', projectId, filters, sortConfig],
+  const { data: result, isLoading, error, refetch } = useQuery({
+    queryKey: ['companies', projectId, filters, sortConfig, pagination],
     queryFn: async () => {
-      if (!projectId) return [];
+      if (!projectId) return { data: [], count: 0 };
 
+      const paginationConfig = pagination || defaultPagination;
+      const from = paginationConfig.page * paginationConfig.pageSize;
+      const to = from + paginationConfig.pageSize - 1;
+
+      // Select only needed fields for better performance
       let query = supabase
         .from('companies')
-        .select('*')
+        .select('id, project_id, company, industry, ceo_name, email, phone, website, address, city, state, district, status, created_at, updated_at', { count: 'exact' })
         .eq('project_id', projectId);
 
       // Apply filters
@@ -81,13 +93,19 @@ export const useCompanies = (
         query = query.order('created_at', { ascending: false });
       }
 
-      const { data, error } = await query;
+      // Apply pagination
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
-      return data as Company[];
+      return { data: data as Company[], count: count || 0 };
     },
     enabled: !!projectId,
   });
+
+  const companies = result?.data || [];
+  const totalCount = result?.count || 0;
 
   // Delete company mutation
   const deleteCompany = useMutation({
@@ -135,6 +153,7 @@ export const useCompanies = (
 
   return {
     companies,
+    totalCount,
     isLoading,
     error,
     refetch,

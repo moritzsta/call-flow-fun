@@ -26,10 +26,11 @@ export const useAllWorkflows = () => {
     queryFn: async () => {
       if (!user?.id) return [];
 
+      // Select only needed fields for better performance
       const { data, error } = await supabase
         .from('n8n_workflow_states')
         .select(`
-          *,
+          id, project_id, user_id, workflow_name, status, trigger_data, result_summary, started_at, completed_at, created_at, updated_at,
           projects!n8n_workflow_states_project_id_fkey (
             title,
             organizations!projects_organization_id_fkey (
