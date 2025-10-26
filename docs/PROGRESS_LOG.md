@@ -58,13 +58,16 @@
   - [x] Owner kann Members hinzufügen/entfernen
   - [x] Owner kann Rollen ändern
 
-- **Task 019** Project Management: Create & List
-  Meta: id=Task 019 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-06 | story=5 | labels=frontend,projects | progress=0% | tokens=0
-  - [ ] Projects.tsx Page erstellen
-  - [ ] useProjects Hook implementieren
-  - [ ] ProjectCard Component erstellen
+- **Task 019** Project Management: Create & List  
+  Meta: id=Task 019 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-06 | story=5 | labels=frontend,projects | progress=100% | tokens=6400
+  - [x] Projects.tsx Page erstellt
+  - [x] useProjects Hook implementiert
+  - [x] ProjectCard Component erstellt
+  - [x] CreateProjectDialog Component erstellt
+  - [x] Organization-Select implementiert
+  - [x] Role-Check für Create/Edit (Owner/Manager)
 
-- **Task 020** Project Dashboard: Overview  
+- **Task 020** Project Dashboard: Overview
   Meta: id=Task 020 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-07 | story=5 | labels=frontend,projects,ui | progress=0% | tokens=0
   - [ ] ProjectDashboard.tsx erstellen
   - [ ] KPI-Cards implementieren
@@ -381,6 +384,15 @@
   - [x] Owner kann Members hinzufügen/entfernen
   - [x] Owner kann Rollen ändern
 
+- **Task 019** Project Management: Create & List  
+  Meta: id=Task 019 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-06 | story=5 | labels=frontend,projects | progress=100% | tokens=6400
+  - [x] Projects.tsx Page erstellt
+  - [x] useProjects Hook implementiert
+  - [x] ProjectCard Component erstellt
+  - [x] CreateProjectDialog Component erstellt
+  - [x] Organization-Select implementiert
+  - [x] Role-Check für Create/Edit (Owner/Manager)
+
 - **Task 048** Progress Log Setup
   Meta: id=Task 048 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-25 | story=1 | labels=setup,docs | progress=100% | tokens=3500
   - [x] PROGRESS_LOG.md erstellt
@@ -403,7 +415,7 @@ Meta: id=M1 | status=completed | due=2025-10-31 | owner=@AI | risk=low | scope=[
 ---
 
 ### M2: Auth & Org/Projekt-Management
-Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=60%
+Meta: id=M2 | status=in_progress | due=2025-11-09 | owner=@AI | risk=low | scope=[Task 013, Task 014, Task 015, Task 016, Task 017, Task 018, Task 019, Task 020, Task 021, Task 022] | progress=70%
 
 **Beschreibung:** Authentifizierung, Organisations- und Projekt-Management implementieren.
 
@@ -456,6 +468,40 @@ Meta: id=M5 | status=planned | due=2025-12-08 | owner=@AI | risk=low | scope=[Ta
 %%%%%%%%%%%%
 
 ## Change Log
+
+### 2025-10-25 — Task 019: Project Management - Create & List
+
+**Was wurde umgesetzt?**
+- Projects.tsx: Projekt-Übersichtsseite mit Organization-Select & Grid-Layout
+- useProjects Hook: Create, Update, Archive, Delete mit react-query
+- ProjectCard: Card mit Dropdown-Menü (Settings, Archive, Delete)
+- CreateProjectDialog: Dialog mit Form (Titel, Beschreibung) und Zod-Validation (max 100/500 chars)
+- Organization-Select: User wählt Organisation aus, sieht nur deren Projekte
+- Role-Check: Nur Owner/Manager können Projekte erstellen/bearbeiten/löschen
+- Auto-Select: Erste Organisation wird automatisch ausgewählt
+- Empty State: Placeholder bei 0 Projekten mit Call-to-Action (nur für Owner/Manager)
+- RLS-Check: User sieht nur Projekte von Organisationen, bei denen er Member ist
+- Input Validation: Title trim, min 2, max 100 chars; Description max 500 chars
+
+**Betroffene Dateien:**
+- `src/pages/Projects.tsx` (erstellt)
+- `src/hooks/useProjects.ts` (erstellt)
+- `src/components/projects/ProjectCard.tsx` (erstellt)
+- `src/components/projects/CreateProjectDialog.tsx` (erstellt)
+- `src/App.tsx` (Route /projects hinzugefügt)
+
+**Checks:**
+- ✅ Projekte werden korrekt erstellt
+- ✅ Nur Projekte der gewählten Organisation werden angezeigt
+- ✅ Manager/Owner können Projekte erstellen/bearbeiten/löschen
+- ✅ Read-Only Member können nicht erstellen/bearbeiten
+- ✅ Input Validation funktioniert (Zod)
+
+**Reuse:**
+- 📘 feature/05-datenstruktur-pattern (Hierarchische Strukturen)
+- 📘 feature/06-ui-ux-pattern (Cards, Dialoge, Select)
+
+---
 
 ### 2025-10-25 — Task 018: Organization Members - Invite & Manage
 
