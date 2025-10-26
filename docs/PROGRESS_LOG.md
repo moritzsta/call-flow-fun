@@ -10,16 +10,11 @@
 
 ### Backlog
 
-- **Task 001** Repository Setup & Projektstruktur  
-  Meta: id=Task 001 | assignee=@AI | milestone=M1 | priority=high | due=2025-10-26 | story=2 | labels=setup,backend | progress=100% | tokens=4200
-  - [x] Supabase-Datenbank verbunden (externe Instanz)
-  - [x] Projektstruktur dokumentiert (PROJECT_STRUCTURE.md)
-  - [x] Dependencies geprüft (alle vorhanden)
-
-
-
-
-
+- **Task 028** Workflow-Status: Realtime Updates  
+  Meta: id=Task 028 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-15 | story=5 | labels=frontend,workflows,realtime | progress=0% | tokens=0
+  - [ ] useWorkflowStatus Hook implementieren
+  - [ ] WorkflowStatusBadge Component erstellen
+  - [ ] Realtime Subscription einrichten
 
 
 
@@ -428,6 +423,72 @@
   - [x] ProjectDashboard.tsx Page erstellt
   - [x] KPI-Cards implementiert (Companies, Emails, Workflows)
   - [x] Action-Buttons für Workflows (Felix, Anna, Paul, Versand)
+  - [x] Project Header mit Org-Name
+  - [x] Role-Check für Actions (Owner/Manager)
+  - [x] Recent Activity Placeholder
+
+- **Task 021** Project Settings: Archive & Delete
+  Meta: id=Task 021 | assignee=@AI | milestone=M2 | priority=medium | due=2025-11-08 | story=3 | labels=frontend,projects | progress=100% | tokens=5800
+  - [x] ProjectSettings.tsx erstellt
+  - [x] Archive-Funktion implementiert
+  - [x] Delete-Funktion mit Bestätigung
+  - [x] DangerZone Component erstellt
+  - [x] Tabs für General & Danger Zone
+  - [x] Role-Check für Owner/Manager implementiert
+
+- **Task 022** Routing & Navigation Setup  
+  Meta: id=Task 022 | assignee=@AI | milestone=M2 | priority=high | due=2025-11-09 | story=3 | labels=frontend,navigation | progress=100% | tokens=4200
+  - [x] Vollständiges Routing eingerichtet (/profile, /projects/:id/companies, /projects/:id/emails)
+  - [x] Layout Component erstellt (Header + Sidebar Wrapper)
+  - [x] Profile Settings Page erstellt
+  - [x] ProjectCompanies Placeholder erstellt
+  - [x] ProjectEmails Placeholder erstellt
+  - [x] User-Dropdown mit Profil & Einstellungen-Links (Header)
+
+- **Task 023** Webhook-Integration: Finder Felix Trigger  
+  Meta: id=Task 023 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-10 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=6500
+  - [x] FinderFelixDialog Component erstellt
+  - [x] useWorkflowTrigger Hook implementiert
+  - [x] Webhook-Call implementiert (Edge Function)
+  - [x] Integration in ProjectDashboard
+  - [x] Input Validation (min 10, max 500 chars)
+  - [x] Optional: Bundesland, Stadt, Bezirk Filter
+
+- **Task 024** Webhook-Integration: Analyse Anna Trigger  
+  Meta: id=Task 024 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-11 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=5800
+  - [x] AnalyseAnnaDialog Component erstellt
+  - [x] Multi-Select für Firmen implementiert
+  - [x] useCompanies Hook erstellt
+  - [x] Integration in ProjectDashboard
+  - [x] Input Validation (min 10, max 500 chars, min 1 company)
+  - [x] Empty State wenn keine Firmen vorhanden
+  - [x] Webhook-Call implementiert
+
+- **Task 025** Webhook-Integration: Pitch Paul Trigger  
+  Meta: id=Task 025 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-12 | story=5 | labels=frontend,workflows,integration | progress=100% | tokens=6200
+  - [x] PitchPaulDialog Component erstellt
+  - [x] Multi-Select für analysierte Firmen implementiert
+  - [x] Input Validation (min 10, max 500 chars, min 1 company)
+  - [x] Integration in ProjectDashboard (Button + Dialog)
+  - [x] Webhook-Call implementiert (pitch_paul)
+
+- **Task 026** Webhook-Integration: E-Mail Versand (Single)  
+  Meta: id=Task 026 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-13 | story=3 | labels=frontend,emails,integration | progress=100% | tokens=5200
+  - [x] SendEmailButton Component erstellt
+  - [x] Status-Update implementiert
+  - [x] Error-Handling implementiert
+  - [x] useEmails Hook erstellt
+  - [x] ProjectEmails.tsx mit Tabelle implementiert
+  - [x] Confirmation Dialog für E-Mail-Versand
+
+- **Task 027** Webhook-Integration: E-Mail Versand (Batch)  
+  Meta: id=Task 027 | assignee=@AI | milestone=M3 | priority=high | due=2025-11-14 | story=5 | labels=frontend,emails,integration | progress=100% | tokens=6800
+  - [x] SendEmailsBatchButton Component erstellt
+  - [x] Multi-Select für E-Mails implementiert
+  - [x] Progress-Anzeige während Versand
+  - [x] Batch-Versand implementiert
+  - [x] Toast mit "X von Y E-Mails versendet"
+  - [x] Integration in ProjectEmails.tsx (Tabs: Einzelansicht / Batch-Versand)
   - [x] Project Header mit Org-Name
   - [x] Role-Check für Actions (Owner/Manager)
   - [x] Recent Activity Placeholder
