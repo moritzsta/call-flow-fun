@@ -213,8 +213,10 @@ export type Database = {
       n8n_workflow_states: {
         Row: {
           completed_at: string | null
+          conversation_active: boolean | null
           created_at: string
           id: string
+          last_message_at: string | null
           project_id: string
           result_summary: Json | null
           started_at: string
@@ -226,8 +228,10 @@ export type Database = {
         }
         Insert: {
           completed_at?: string | null
+          conversation_active?: boolean | null
           created_at?: string
           id?: string
+          last_message_at?: string | null
           project_id: string
           result_summary?: Json | null
           started_at?: string
@@ -239,8 +243,10 @@ export type Database = {
         }
         Update: {
           completed_at?: string | null
+          conversation_active?: boolean | null
           created_at?: string
           id?: string
+          last_message_at?: string | null
           project_id?: string
           result_summary?: Json | null
           started_at?: string
@@ -467,6 +473,51 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      workflow_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          project_id: string
+          role: string
+          workflow_state_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id: string
+          role: string
+          workflow_state_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id?: string
+          role?: string
+          workflow_state_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_messages_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_messages_workflow_state_id_fkey"
+            columns: ["workflow_state_id"]
+            isOneToOne: false
+            referencedRelation: "n8n_workflow_states"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

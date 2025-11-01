@@ -11,9 +11,6 @@ import { useProjects } from '@/hooks/useProjects';
 import { useOrganizations } from '@/hooks/useOrganizations';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 import { useAuth } from '@/contexts/AuthContext';
-import { FinderFelixDialog } from '@/components/workflows/FinderFelixDialog';
-import { AnalyseAnnaDialog } from '@/components/workflows/AnalyseAnnaDialog';
-import { PitchPaulDialog } from '@/components/workflows/PitchPaulDialog';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { 
@@ -276,10 +273,10 @@ export default function ProjectDashboard() {
                     <Button 
                       className="w-full" 
                       disabled={!canManage}
-                      onClick={() => setFinderFelixOpen(true)}
+                      onClick={() => navigate(`/projects/${id}/finder-felix`)}
                     >
                       <Search className="mr-2 h-4 w-4" />
-                      Firmen suchen
+                      Mit Felix chatten
                     </Button>
                   </CardContent>
                 </Card>
@@ -308,10 +305,10 @@ export default function ProjectDashboard() {
                       className="w-full" 
                       variant="outline" 
                       disabled={!canManage}
-                      onClick={() => setAnalyseAnnaOpen(true)}
+                      onClick={() => navigate(`/projects/${id}/analyse-anna`)}
                     >
                       <BarChart3 className="mr-2 h-4 w-4" />
-                      Firmen analysieren
+                      Mit Anna chatten
                     </Button>
                   </CardContent>
                 </Card>
@@ -340,10 +337,10 @@ export default function ProjectDashboard() {
                       className="w-full" 
                       variant="outline" 
                       disabled={!canManage}
-                      onClick={() => setPitchPaulOpen(true)}
+                      onClick={() => navigate(`/projects/${id}/pitch-paul`)}
                     >
                       <Mail className="mr-2 h-4 w-4" />
-                      E-Mails generieren
+                      Mit Paul chatten
                     </Button>
                   </CardContent>
                 </Card>
@@ -395,26 +392,7 @@ export default function ProjectDashboard() {
         </div>
       </div>
 
-      {/* Workflow Dialogs */}
-      {id && (
-        <>
-          <FinderFelixDialog
-            open={finderFelixOpen}
-            onOpenChange={setFinderFelixOpen}
-            projectId={id}
-          />
-          <AnalyseAnnaDialog
-            open={analyseAnnaOpen}
-            onOpenChange={setAnalyseAnnaOpen}
-            projectId={id}
-          />
-          <PitchPaulDialog
-            open={pitchPaulOpen}
-            onOpenChange={setPitchPaulOpen}
-            projectId={id}
-          />
-        </>
-      )}
+      {/* Workflow Dialogs - Removed, now using dedicated pages */}
     </SidebarProvider>
   );
 }

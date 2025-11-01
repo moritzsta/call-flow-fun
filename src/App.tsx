@@ -22,6 +22,9 @@ import CompanyDetail from "./pages/CompanyDetail";
 import EmailDetail from "./pages/EmailDetail";
 import EmailTemplates from "./pages/EmailTemplates";
 import NotFound from "./pages/NotFound";
+import WorkflowFinderFelix from "./pages/WorkflowFinderFelix";
+import WorkflowAnalyseAnna from "./pages/WorkflowAnalyseAnna";
+import WorkflowPitchPaul from "./pages/WorkflowPitchPaul";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +84,30 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProjectSettings />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/finder-felix" 
+              element={
+                <ProtectedRoute>
+                  <WorkflowFinderFelix />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/analyse-anna" 
+              element={
+                <ProtectedRoute>
+                  <WorkflowAnalyseAnna />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/pitch-paul" 
+              element={
+                <ProtectedRoute>
+                  <WorkflowPitchPaul />
                 </ProtectedRoute>
               } 
             />

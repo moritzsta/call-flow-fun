@@ -1,1 +1,7 @@
 project_id = "fttdfvnhghbgtawkslau"
+
+[functions.trigger-n8n-workflow]
+verify_jwt = true
+
+[functions.save-workflow-message]
+verify_jwt = false
