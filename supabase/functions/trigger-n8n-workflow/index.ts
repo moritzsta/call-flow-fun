@@ -51,12 +51,15 @@ serve(async (req) => {
     const n8nUrl = `${N8N_WEBHOOK_BASE_URL}${webhookPath}`;
     console.log(`[trigger-n8n-workflow] Calling n8n: ${n8nUrl}`);
 
+    const headerName = Deno.env.get('N8N_WEBHOOK_HEADER_NAME') || 'X-Webhook-Secret';
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    headers[headerName] = N8N_WEBHOOK_SECRET;
+
     const n8nResponse = await fetch(n8nUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Webhook-Secret': N8N_WEBHOOK_SECRET,
-      },
+      headers,
       body: JSON.stringify({
         workflow_id,
         project_id,
@@ -66,13 +69,14 @@ serve(async (req) => {
     });
 
     if (!n8nResponse.ok) {
+      const errorText = await n8nResponse.text().catch(() => '');
       if (n8nResponse.status === 401) {
-        throw new Error('Webhook authentication failed');
+        throw new Error(`Webhook authentication failed - ${errorText}`);
       }
       if (n8nResponse.status === 429) {
         throw new Error('Rate limit exceeded. Please try again later.');
       }
-      throw new Error(`Webhook failed: ${n8nResponse.statusText}`);
+      throw new Error(`Webhook failed: ${n8nResponse.status} ${n8nResponse.statusText} - ${errorText}`);
     }
 
     const n8nData = await n8nResponse.json();
