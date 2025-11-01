@@ -165,7 +165,7 @@
     },
     {
       "parameters": {
-        "tableId": "companies",
+        "tableId": "german_companies",
         "fieldsUi": {
           "fieldValues": [
             {
@@ -199,10 +199,6 @@
             {
               "fieldId": "district",
               "fieldValue": "={{ $('Loop Over Items').item.json.district }}"
-            },
-            {
-              "fieldId": "project_id",
-              "fieldValue": "={{ $('Parse Webhook Input').item.json.project_id }}"
             }
           ]
         }
