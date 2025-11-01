@@ -1,0 +1,704 @@
+{
+  "name": "Pitch-Paul [Vertriebler]",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        180,
+        420
+      ],
+      "id": "cf231e54-e173-49b1-a672-5cde7babeea1",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "45g4ECqy31QqrTa5",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Message Paul').item.json.message.chat.id }}",
+        "text": "={{ $json.output.pitchPaulAnswer }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        160
+      ],
+      "id": "f2c22115-4f60-4b08-94cf-b9c28dda5032",
+      "name": "Answer User",
+      "webhookId": "06135021-087d-4558-be06-94de90f2f053",
+      "credentials": {
+        "telegramApi": {
+          "id": "Ey2xr6zKd3cLHzlh",
+          "name": "Pitch Paul Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"userMessage\": \"<verstandene Nutzereingabe>\",\n  \"pitchPaulAnswer\": \"<deine charismatische Antwort>\",\n  \"emails\": [\n    \"email1@example.com\",\n    \"email2@example.com\"\n  ],\n  \"userGoal\": \"<konkret erfasstes Ziel>\",\n  \"startPitch\": true\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        820,
+        420
+      ],
+      "id": "d289f195-5a3e-4d44-ab97-1ff4a9788650",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "german_companies",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "state",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        300,
+        520
+      ],
+      "id": "f4ee0144-cad9-441c-98c4-adf6b5aea979",
+      "name": "Get_Companies_By_State",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "german_companies",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "city",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        500,
+        520
+      ],
+      "id": "361c73f3-d2fc-4868-afc3-30087a9d226d",
+      "name": "Get_Companies_By_City",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "german_companies",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "district",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        700,
+        520
+      ],
+      "id": "f73b98b4-1945-4e7d-809a-2090521f4b7a",
+      "name": "Get_Companies_By_District",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "german_companies",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "industry",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        600,
+        360
+      ],
+      "id": "a0bc9cbe-d84c-4d2b-9e3b-5eb3a932baa0",
+      "name": "Get_Companies_By_Industry",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "german_companies",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "company",
+              "condition": "ilike",
+              "keyValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('conditions0_Field_Value', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        400,
+        360
+      ],
+      "id": "3dff2c07-d615-4da6-8011-f19bdfbd0a22",
+      "name": "Get_Companies_By_Name",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "userMessage"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "1ad056f5-0ee9-41ad-abc6-35a37ef4051b",
+      "name": "Team Leader"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Rolle: Pitch Paul 🎯\n\nDu bist **Pitch Paul**, der weltbeste E-Mail-Vertriebler für Kaltaquise.  \nVerkaufen liegt dir im Blut – aber nie plump, sondern **smart, charmant und zielsicher**.\n\nDein Revier: der deutschsprachige Markt.  \nDeine Spezialität: **zielgerichtete E-Mail-Kampagnen**, die öffnen, klicken und antworten auslösen.\n\nDu sprichst den Nutzer wie ein guter Verkäufer an: direkt, kompetent, mit einem Hauch Selbstironie – aber **immer professionell**.\n\n---\n\n## 🎯 Dein Auftrag\n\nBasierend auf der Nutzereingabe startest du eine gezielte E-Mail-Kampagne.  \nDu brauchst dazu:\n\n1. **Zielgruppe**:  \n   - Entweder ein **konkreter Firmenname**,  \n   - oder ein **Branchenbegriff** (z. B. „Solarfirmen“),  \n   - oder ein **Ort** (z. B. Stadt, Bezirk oder Bundesland).  \n   \n2. **Ziel der Kampagne**:  \n   - Was genau willst du erreichen? Z. B. Produkt verkaufen, Kontakt aufbauen, Bedarf prüfen etc.\n\n---\n\n## 🔧 Tools\n\nNutze **immer das passende Tool** basierend auf der Zielgruppeneingabe:\n\n- `Get_Companies_By_Name` – für einen einzelnen Firmennamen  \n- `Get_Companies_By_Industry` – für eine Branche  \n- `Get_Companies_By_State` – für ein Bundesland  \n- `Get_Companies_By_City` – für eine Stadt  \n- `Get_Companies_By_District` – für einen Stadtteil  \n\nWenn die Eingabe **nicht eindeutig** ist: Frag **freundlich, aber bestimmt** nach.\n\n---\n\n## 🧠 Deine Aufgabe Schritt für Schritt\n\n1. **Verstehe die Eingabe**: Zielgruppe & Ziel der Kampagne identifizieren  \n2. **Wähle das passende Tool** zur Datenabfrage  \n3. **Hole passende Firmen + E-Mail-Adressen aus der Datenbank**  \n4. **Erzeuge ein Array mit gültigen E-Mail-Adressen**  \n5. Setze `startPitch = true` **nur, wenn Ziel + E-Mail-Adressen vollständig sind**\n\n---\n\n## 💬 Antwortstil\n\nDu bist **selbstbewusst, erfahren und ein bisschen druckvoll**, aber nie unangenehm.  \nSprich den Nutzer ruhig auch direkt an – du bist schließlich Paul, der Pitch-Profi!\n\n### Beispiele für deinen Ton:\n\n> „Chef, das riecht nach einer heißen Branche. Ich zieh mir mal die passenden Firmen rein und bereite den Pitch vor.“  \n> „Scharfes Ziel, starke Richtung – ich checke die passenden Adressen und melde mich mit Kugelschreiber in der Hand.“  \n> „Solarfirmen in Brandenburg? Sag nicht mehr. Ich bin schon unterwegs mit dem Akquise-Scooter.“\n\n---\n\n## 🛑 Sonderfall: Smalltalk oder irrelevante Nachricht\n\nWenn die Eingabe **nicht kampagnenrelevant** ist, antworte locker – aber charmant:\n\n> „Schön, dass du fragst – aber mich juckt’s in den Fingern, ein paar Deals einzutüten. Wer darf heute gepitcht werden?“\n\n---\n\n## 🧾 Output-Format\n\n{\n  \"userMessage\": \"<verstandene Nutzereingabe>\",\n  \"pitchPaulAnswer\": \"<deine charismatische Antwort>\",\n  \"emails\": [\n    \"email1@example.com\",\n    \"email2@example.com\"\n  ],\n  \"userGoal\": \"<konkret erfasstes Ziel>\",\n  \"startPitch\": true\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        380,
+        160
+      ],
+      "id": "9a4bdea7-d683-404a-bce7-714460722ef7",
+      "name": "Pitch-Paul"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        160
+      ],
+      "id": "5c976f61-753d-45fb-8e93-811e6a9db138",
+      "name": "Message Paul",
+      "webhookId": "d7f347dd-476e-414b-a30c-357b366ce6d0",
+      "credentials": {
+        "telegramApi": {
+          "id": "Ey2xr6zKd3cLHzlh",
+          "name": "Pitch Paul Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1260,
+        160
+      ],
+      "id": "2ab45f9f-7cd8-4987-b215-e1ac1c8e21d5",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Input:\n1. Firma (JSON oder Objekt):\n{{ $('Get General Info').all().toJsonString() }}\n\n2. Initiale Anfrage:\n{{ $('Pitch-Paul').item.json.output.userMessage }}\n\n3. Angebot für den Pitch\n{{ $('Define Offer').item.json.offer }}\n\n4. Antwort von Pitch Paul (Pitchbeispiel):\n{{ $('Pitch-Paul').item.json.output.pitchPaulAnswer }}\n\nOutput:\nDie E-Mail wird im HTML-Format erstellt und soll folgende Eigenschaften haben:\n\n1. **Anrede:**  \n   - Falls ein Ansprechpartner existiert, wird der Name des Ansprechpartners verwendet (\"Sehr geehrter Herr Mustermann\").  \n   - Falls kein Ansprechpartner existiert, wird \"Sehr geehrte Damen und Herren\" verwendet.\n\n2. **Pitch:**  \n   - Die E-Mail sollte ein überzeugendes Verkaufsargument enthalten, das sich auf die Anfrage und die spezifischen Anforderungen des Unternehmens bezieht.\n   - Die Lösung muss klar und einfach erklärt werden, dabei aber auch deren einzigartige Stärken und Vorteile hervorheben.\n   - Es soll verdeutlicht werden, dass diese Lösung der ideale Partner für das Unternehmen ist.\n\n3. **Call-to-Action (CTA):**  \n   - Ein klarer Call-to-Action, z.B. ein Vorschlag für einen Gesprächstermin oder eine Demo, um die Lösung weiter zu erläutern und die Zusammenarbeit zu fördern.\n\n4. **Abschluss:**  \n   - Freundliche und professionelle Verabschiedung\n   - Kontaktinformationen (Name, Position, Telefonnummer, E-Mail)\n   - Hinweis auf Website und gegebenenfalls ein Angebot für einen ersten Termin\n\nBeispiel einer perfekten Verkaufs-E-Mail im HTML-Format:\n\n\n```html\n<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Antwort auf Ihre Anfrage</title>\n</head>\n<body style=\"font-family: Arial, sans-serif; color: #333333; background-color: #f9f9f9; padding: 20px;\">\n    <div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);\">\n        <p>Sehr geehrter Herr Mustermann,</p>\n        \n        <p>vielen Dank für Ihre Anfrage bezüglich unserer <strong>Softwarelösung zur Automatisierung Ihrer internen Prozesse</strong>. Wir freuen uns, Ihnen mitteilen zu können, dass unsere Lösung genau die Anforderungen erfüllt, die Sie an eine moderne, einfach zu implementierende und benutzerfreundliche Software stellen.</p>\n\n        <p><strong>Warum unsere Lösung perfekt für Ihr Unternehmen ist:</strong></p>\n        <ul>\n            <li>Nahtlose Integration in Ihre bestehenden Systeme – keine Umstellung nötig.</li>\n            <li>Automatisiert Ihre Prozesse effizient, was Ihre internen Abläufe enorm beschleunigt und Kosten spart.</li>\n            <li>Benutzerfreundlich und einfach in der Bedienung, ohne dass Ihre Mitarbeiter zusätzliche Schulungen benötigen.</li>\n            <li>Skalierbar, sodass Sie mit uns wachsen können, ganz nach Ihren Bedürfnissen.</li>\n        </ul>\n\n        <p>Unser Team hat umfassende Erfahrung mit Unternehmen Ihrer Branche und hat bereits zahlreiche erfolgreiche Implementierungen abgeschlossen. Wir sind überzeugt, dass auch Ihre Prozesse von unserer Lösung enorm profitieren werden.</p>\n\n        <p>Gerne möchten wir Ihnen die Software in einer persönlichen Demo vorstellen und gemeinsam besprechen, wie wir Ihre Automatisierungsziele umsetzen können. Wie wäre es mit einem unverbindlichen Termin? Wir sind flexibel und richten uns nach Ihrem Zeitplan.</p>\n\n        <p>Ich freue mich auf Ihre Rückmeldung und darauf, Sie bald persönlich kennenzulernen.</p>\n\n        <p>Mit freundlichen Grüßen,<br>\n        Sebastian Claes<br><br>\n        Claes & Herrmann KI-Agenten GmbH<br>\n        Brückenstraße 4, 14913 Jüterbog<br>\n        +49 176 614 759 65<br>\n        🌐 https://www.ki-business-agenten.de<br>\n        🎬 https://youtube.com/@claes-work</p>\n</body>\n</html>\n```\n\n# Output JSON\n\n{\n  \"subject\": \"...\",\n  \"emailText\": \"...\"\n}",
+              "role": "system"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        1620,
+        280
+      ],
+      "id": "f357d4ed-81a8-49c7-ba1e-5eb991da6134",
+      "name": "Write Email",
+      "credentials": {
+        "openAiApi": {
+          "id": "73blkhCZavmm8Roy",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "emails[0]",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1080,
+        160
+      ],
+      "id": "7cf255e0-504c-42f1-84c4-e04fb710dadc",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9b6d1cee-2d0f-42ca-9f3b-269396eedf86",
+              "name": "emails",
+              "value": "={{ $('Pitch-Paul').item.json.output.emails }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        900,
+        160
+      ],
+      "id": "49c01c03-578b-4073-b929-06fc821d9b2d",
+      "name": "Split Out Emails"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "german_companies",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $json['emails[0]'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        280
+      ],
+      "id": "79e5a02e-554a-4d20-90d6-0cf910166cbc",
+      "name": "Get General Info",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.message.content.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.message.content.emailText }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1980,
+        280
+      ],
+      "id": "602a3b41-a6bd-492b-96a3-491a86615c57",
+      "name": "Gmail",
+      "webhookId": "c7e327f5-5ae1-444a-9425-bc4a6e9d6ff6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "iKiwpf6soSUP1H8i",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a54faf43-594c-4dc8-9fec-6cf5e34a7290",
+              "name": "offer",
+              "value": "KI-Automatisierung für Unternehmen – Effizienz steigern und Kosten senke. Wir bieten maßgeschneiderte Automatisierungsdienstleistungen mit Künstlicher Intelligenz, die speziell darauf ausgerichtet sind, Ihre Geschäftsprozesse effizienter zu gestalten und Ihre Kosten zu senken. Unser Fokus liegt auf der Entwicklung von KI-Agenten, die für eine Vielzahl von Anwendungen optimiert sind, einschließlich Datenanalyse und KI-Telefonagenten.  Mit unserer Expertise können wir ganze Prozessketten automatisieren und so nicht nur Zeit, sondern auch Ressourcen für Ihr Unternehmen sparen. Wir arbeiten eng mit Unternehmen zusammen, um intelligente Automatisierungslösungen zu entwickeln, die einen echten Mehrwert bieten und die Leistung Ihrer Geschäftsprozesse steigern.  Unsere Community aus KI-Automatisierungsexperten ist ein wertvolles Netzwerk, in dem Fachwissen geteilt und neue Lösungen entwickelt werden. Darüber hinaus bieten wir auf unserem großen YouTube-Kanal wertvolle Inhalte zu KI-Automatisierung und deren Einsatzmöglichkeiten. Hier teilen wir unser Wissen und unterstützen Unternehmen dabei, in der Welt der KI-Automatisierung durchzustarten.",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        200,
+        160
+      ],
+      "id": "d90e0ff4-9ba5-448e-ae14-ffd538626bb4",
+      "name": "Define Offer"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Message Paul').item.json.message.chat.id }}",
+        "text": "Ich habe Ihnen einen entsprechenden Email Entwurf fertiggestellt.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1620,
+        80
+      ],
+      "id": "26df905f-0302-476d-a5ca-4552ad4610c0",
+      "name": "Telegram",
+      "webhookId": "8e75eec2-12ee-4452-ac72-d6176d375908",
+      "credentials": {
+        "telegramApi": {
+          "id": "Ey2xr6zKd3cLHzlh",
+          "name": "Pitch Paul Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Just needed to run Once for all items in order to prevent multiple Telegram messages\n\nreturn {\n  \n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        80
+      ],
+      "id": "29d58738-e49c-472f-a991-b45f537c1792",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Companies_By_State": {
+      "ai_tool": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Companies_By_City": {
+      "ai_tool": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Companies_By_District": {
+      "ai_tool": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Companies_By_Industry": {
+      "ai_tool": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get_Companies_By_Name": {
+      "ai_tool": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Team Leader": {
+      "main": [
+        [
+          {
+            "node": "Define Offer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pitch-Paul": {
+      "main": [
+        [
+          {
+            "node": "Answer User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Paul": {
+      "main": [
+        [
+          {
+            "node": "Define Offer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer User": {
+      "main": [
+        [
+          {
+            "node": "Split Out Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get General Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Emails": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get General Info": {
+      "main": [
+        [
+          {
+            "node": "Write Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Email": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Offer": {
+      "main": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4fe58b06-cca0-4b1f-abde-877db127551a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4dc98704a4616234de87c1cb6ff7236d4d1b984366e9f95722bf9c5c7ee8edbb"
+  },
+  "id": "OlduD1ybWPziiCED",
+  "tags": []
+}
