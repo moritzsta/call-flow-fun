@@ -21,8 +21,8 @@ serve(async (req) => {
   }
 
   try {
-    const { workflow_name, workflow_id, project_id, user_id, trigger_data }: WorkflowRequest =
-      await req.json();
+    const reqBody: any = await req.json();
+    const { workflow_name, workflow_id, project_id, user_id, trigger_data, message } = reqBody as any;
 
     console.log(`[trigger-n8n-workflow] Starting ${workflow_name} for project ${project_id}`);
 
@@ -64,7 +64,8 @@ serve(async (req) => {
         workflow_id,
         project_id,
         user_id,
-        ...trigger_data,
+        ...(trigger_data || {}),
+        ...(message ? { message } : {}),
       }),
     });
 
