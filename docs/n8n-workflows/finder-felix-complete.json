@@ -71,7 +71,8 @@
       "parameters": {
         "sessionIdType": "customKey",
         "sessionKey": "={{ $('Parse Webhook Input').item.json.workflow_id }}",
-        "contextWindowLength": 5
+        "contextWindowLength": 5,
+        "inputKey": "input"
       },
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
