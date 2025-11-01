@@ -1,0 +1,332 @@
+{
+  "name": "Analyse-Anna [Webhook]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "analyse-anna",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger-anna",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "analyse-anna-webhook",
+      "credentials": {
+        "headerAuth": {
+          "id": "1",
+          "name": "Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse incoming webhook data\nconst body = $input.item.json.body;\n\nreturn {\n  workflow_id: body.workflow_id,\n  project_id: body.project_id,\n  user_id: body.user_id,\n  user_input: body.trigger_data?.user_input || '',\n  company_id: body.trigger_data?.company_id || null,\n  analysis_type: body.trigger_data?.analysis_type || 'full'\n};"
+      },
+      "id": "parse-webhook-input-anna",
+      "name": "Parse Webhook Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "research-goal",
+              "name": "research_goal",
+              "value": "={{ $json.user_input }}",
+              "type": "string"
+            },
+            {
+              "id": "project-id",
+              "name": "project_id",
+              "value": "={{ $json.project_id }}",
+              "type": "string"
+            },
+            {
+              "id": "company-id",
+              "name": "company_id",
+              "value": "={{ $json.company_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-analysis-input",
+      "name": "Prepare Analysis Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "companies",
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "project_id",
+              "keyValue": "={{ $json.project_id }}"
+            },
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.company_id }}"
+            }
+          ]
+        }
+      },
+      "id": "get-company-data",
+      "name": "Get Company",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "=Du bist Analyse-Anna, eine Expertin für Unternehmensanalysen.\n\nAnalysiere die Firma: {{ $json.company }}\nWebsite: {{ $json.website }}\n\nRecherche-Ziel: {{ $('Prepare Analysis Input').item.json.research_goal }}\n\nNutze Firecrawl um die Website zu analysieren und erstelle eine strukturierte Analyse.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist Anna, eine professionelle Datenanalystin mit Fokus auf Firmenrecherche."
+        }
+      },
+      "id": "ai-agent-anna",
+      "name": "Analyse Anna Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/scrape",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "firecrawlApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_FIRECRAWL_API_KEY"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Get Company').item.json.website }}"
+            },
+            {
+              "name": "formats",
+              "value": "[\"markdown\", \"html\"]"
+            }
+          ]
+        }
+      },
+      "id": "fetch-website-data",
+      "name": "Fetch Website (Firecrawl)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Build analysis from Firecrawl result and AI insights\nconst firecrawlData = $input.item.json;\nconst companyData = $('Get Company').item.json;\nconst aiAnalysis = $('Analyse Anna Agent').item.json;\n\nconst analysis = {\n  ceo_name: aiAnalysis.ceo_name || null,\n  email: aiAnalysis.email || companyData.email,\n  analysis: {\n    website_content: firecrawlData.markdown || '',\n    key_findings: aiAnalysis.key_findings || [],\n    business_model: aiAnalysis.business_model || '',\n    target_market: aiAnalysis.target_market || '',\n    analyzed_at: new Date().toISOString()\n  }\n};\n\nreturn analysis;"
+      },
+      "id": "build-analysis-result",
+      "name": "Build Analysis",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "companies",
+        "filterType": "manual",
+        "matchBy": "id",
+        "matchValue": "={{ $('Get Company').item.json.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "ceo_name",
+              "fieldValue": "={{ $json.ceo_name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "analysis",
+              "fieldValue": "={{ $json.analysis }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "analyzed"
+            }
+          ]
+        }
+      },
+      "id": "update-company-analysis",
+      "name": "Save Analysis",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1780, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "n8n_workflow_states",
+        "filterType": "manual",
+        "matchBy": "id",
+        "matchValue": "={{ $('Parse Webhook Input').item.json.workflow_id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "completed"
+            },
+            {
+              "fieldId": "completed_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "result_summary",
+              "fieldValue": "={{ { company_analyzed: $('Get Company').item.json.company, ceo_found: !!$json.ceo_name } }}"
+            }
+          ]
+        }
+      },
+      "id": "update-workflow-state-anna",
+      "name": "Update Workflow State",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2000, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Input": {
+      "main": [
+        [
+          {
+            "node": "Prepare Analysis Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Analysis Input": {
+      "main": [
+        [
+          {
+            "node": "Get Company",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Company": {
+      "main": [
+        [
+          {
+            "node": "Analyse Anna Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyse Anna Agent": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website (Firecrawl)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website (Firecrawl)": {
+      "main": [
+        [
+          {
+            "node": "Build Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Analysis": {
+      "main": [
+        [
+          {
+            "node": "Save Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Analysis": {
+      "main": [
+        [
+          {
+            "node": "Update Workflow State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-26T12:00:00.000Z",
+  "versionId": "1"
+}

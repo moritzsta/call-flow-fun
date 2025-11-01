@@ -1,0 +1,284 @@
+{
+  "name": "Email-Sender [Webhook]",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "email-sender",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "webhook-trigger-sender",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "email-sender-webhook",
+      "credentials": {
+        "headerAuth": {
+          "id": "1",
+          "name": "Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse incoming webhook data\nconst body = $input.item.json.body;\n\nreturn {\n  workflow_id: body.workflow_id,\n  project_id: body.project_id,\n  user_id: body.user_id,\n  email_ids: body.trigger_data?.email_ids || [],\n  send_mode: body.trigger_data?.send_mode || 'single' // 'single' or 'batch'\n};"
+      },
+      "id": "parse-webhook-input-sender",
+      "name": "Parse Webhook Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Convert email_ids array to individual items\nconst emailIds = $input.item.json.email_ids;\nconst projectId = $input.item.json.project_id;\n\nif (!emailIds || emailIds.length === 0) {\n  throw new Error('No email IDs provided');\n}\n\nreturn emailIds.map(id => ({\n  json: {\n    email_id: id,\n    project_id: projectId\n  }\n}));"
+      },
+      "id": "split-email-ids",
+      "name": "Split Email IDs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "project_emails",
+        "filterType": "manual",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "keyValue": "={{ $json.email_id }}"
+            },
+            {
+              "keyName": "project_id",
+              "keyValue": "={{ $json.project_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "draft"
+            }
+          ]
+        }
+      },
+      "id": "get-email-data",
+      "name": "Get Email",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "messageType": "html",
+        "toList": "={{ $json.recipient_email }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "send-email-gmail",
+      "name": "Send via Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1120, 300],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "4",
+          "name": "Gmail OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "project_emails",
+        "filterType": "manual",
+        "matchBy": "id",
+        "matchValue": "={{ $('Get Email').item.json.id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "sent"
+            },
+            {
+              "fieldId": "sent_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            }
+          ]
+        }
+      },
+      "id": "update-email-status",
+      "name": "Mark as Sent",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1340, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "companies",
+        "filterType": "manual",
+        "matchBy": "id",
+        "matchValue": "={{ $('Get Email').item.json.company_id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "contacted"
+            }
+          ]
+        }
+      },
+      "id": "update-company-status",
+      "name": "Update Company Status",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1560, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "n8n_workflow_states",
+        "filterType": "manual",
+        "matchBy": "id",
+        "matchValue": "={{ $('Parse Webhook Input').item.json.workflow_id }}",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "completed"
+            },
+            {
+              "fieldId": "completed_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "result_summary",
+              "fieldValue": "={{ { emails_sent: $items('Mark as Sent').length } }}"
+            }
+          ]
+        }
+      },
+      "id": "update-workflow-state-sender",
+      "name": "Update Workflow State",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1780, 300],
+      "credentials": {
+        "supabaseApi": {
+          "id": "2",
+          "name": "Supabase"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Input": {
+      "main": [
+        [
+          {
+            "node": "Split Email IDs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Email IDs": {
+      "main": [
+        [
+          {
+            "node": "Get Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email": {
+      "main": [
+        [
+          {
+            "node": "Send via Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send via Gmail": {
+      "main": [
+        [
+          {
+            "node": "Mark as Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Sent": {
+      "main": [
+        [
+          {
+            "node": "Update Company Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Company Status": {
+      "main": [
+        [
+          {
+            "node": "Update Workflow State",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-26T12:00:00.000Z",
+  "versionId": "1"
+}

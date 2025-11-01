@@ -4,6 +4,15 @@
 
 This document describes the n8n workflows integrated with the Cold Calling App and their webhook configurations.
 
+## Workflow Files
+
+The updated n8n workflows are located in `docs/n8n-workflows/`:
+
+- **finder-felix-webhook.json** - Company search workflow
+- **analyse-anna-webhook.json** - Company analysis workflow
+- **pitch-paul-webhook.json** - Email draft generation workflow
+- **email-sender-webhook.json** - Email sending workflow (NEW)
+
 ## Environment Variables
 
 The following secrets are configured in Supabase:
@@ -34,82 +43,134 @@ const response = await fetch(`${N8N_WEBHOOK_BASE_URL}/your-workflow-path`, {
 });
 ```
 
-## Planned Workflows
+## Active Workflows
 
-### 1. Smart Upload (OCR + Metadata Extraction)
+### 1. Finder Felix (Company Search)
 
-**Purpose**: Extract metadata from uploaded documents using OCR and AI.
+**Purpose**: Search for companies based on location and industry criteria.
 
-**Webhook Path**: `/smart-upload`
+**Webhook Path**: `/finder-felix`
 
 **Input Payload**:
 ```json
 {
-  "file_url": "https://storage.supabase.co/...",
+  "workflow_id": "uuid",
+  "workflow_name": "finder_felix",
+  "project_id": "uuid",
   "user_id": "uuid",
-  "mime_type": "application/pdf"
-}
-```
-
-**Output**:
-```json
-{
-  "title": "Extracted title",
-  "metadata": {
-    "category": "contracts",
-    "tags": ["sales", "legal"]
-  },
-  "suggested_path": "contracts/2025/client-name"
-}
-```
-
-### 2. Smart Improve (Prompt Enhancement)
-
-**Purpose**: Enhance user prompts with contextual questions and improvements.
-
-**Webhook Paths**:
-- `/smart-improve-questions` - Generate clarifying questions
-- `/smart-improve-generate` - Generate improved prompt
-
-**Input (questions)**:
-```json
-{
-  "prompt": "User's original prompt",
-  "user_id": "uuid"
-}
-```
-
-**Output (questions)**:
-```json
-{
-  "questions": [
-    {
-      "id": "q1",
-      "question": "What is the target audience?",
-      "type": "text"
+  "trigger_data": {
+    "user_input": "Finde Bäckereien in München",
+    "search_params": {
+      "state": "Bayern",
+      "city": "München",
+      "industry": "Bäckerei"
     }
-  ]
+  }
 }
 ```
 
-**Input (generate)**:
+**Output** (via Workflow State):
 ```json
 {
-  "original_prompt": "User's original prompt",
-  "answers": [
-    {
-      "question_id": "q1",
-      "answer": "B2B sales professionals"
-    }
-  ],
-  "user_id": "uuid"
+  "status": "completed",
+  "result_summary": {
+    "companies_found": 15
+  }
 }
 ```
 
-**Output (generate)**:
+### 2. Analyse Anna (Company Analysis)
+
+**Purpose**: Analyze company websites and extract key information (CEO, email, business model).
+
+**Webhook Path**: `/analyse-anna`
+
+**Input Payload**:
 ```json
 {
-  "improved_prompt": "Enhanced prompt with context"
+  "workflow_id": "uuid",
+  "workflow_name": "analyse_anna",
+  "project_id": "uuid",
+  "user_id": "uuid",
+  "trigger_data": {
+    "user_input": "Analysiere die Website auf Geschäftsführer und E-Mail",
+    "company_id": "uuid",
+    "analysis_type": "full"
+  }
+}
+```
+
+**Output** (via Workflow State):
+```json
+{
+  "status": "completed",
+  "result_summary": {
+    "company_analyzed": "Beispiel GmbH",
+    "ceo_found": true
+  }
+}
+```
+
+### 3. Pitch Paul (Email Draft Generation)
+
+**Purpose**: Generate personalized sales emails for analyzed companies.
+
+**Webhook Path**: `/pitch-paul`
+
+**Input Payload**:
+```json
+{
+  "workflow_id": "uuid",
+  "workflow_name": "pitch_paul",
+  "project_id": "uuid",
+  "user_id": "uuid",
+  "trigger_data": {
+    "user_input": "Erstelle Sales-E-Mails für alle analysierten Firmen",
+    "offer": "Wir bieten professionelle SEO-Optimierung...",
+    "target_companies": []
+  }
+}
+```
+
+**Output** (via Workflow State):
+```json
+{
+  "status": "completed",
+  "result_summary": {
+    "emails_created": 8
+  }
+}
+```
+
+**Important**: This workflow creates email **drafts** in the `project_emails` table. It does NOT send emails directly.
+
+### 4. Email Sender (NEW)
+
+**Purpose**: Send draft emails via Gmail and update status.
+
+**Webhook Path**: `/email-sender`
+
+**Input Payload**:
+```json
+{
+  "workflow_id": "uuid",
+  "workflow_name": "email_sender",
+  "project_id": "uuid",
+  "user_id": "uuid",
+  "trigger_data": {
+    "email_ids": ["uuid1", "uuid2"],
+    "send_mode": "batch"
+  }
+}
+```
+
+**Output** (via Workflow State):
+```json
+{
+  "status": "completed",
+  "result_summary": {
+    "emails_sent": 2
+  }
 }
 ```
 
