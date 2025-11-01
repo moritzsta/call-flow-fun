@@ -17,7 +17,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const body = $input.item.json.body;\n\nreturn {\n  workflow_id: body.workflow_id,\n  project_id: body.project_id,\n  user_id: body.user_id,\n  message: {\n    text: body.message || body.trigger_data?.user_input || ''\n  }\n};"
+        "jsCode": "const body = $input.item.json.body;\n\nreturn {\n  workflow_id: body.workflow_id,\n  project_id: body.project_id,\n  user_id: body.user_id,\n  message: {\n    text: typeof body.message === 'string' ? body.message : (body.message?.text || body.trigger_data?.initial_message || '')\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
