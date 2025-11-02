@@ -79,11 +79,13 @@ const response = await fetch(`${N8N_WEBHOOK_BASE_URL}/your-workflow-path`, {
 }
 ```
 
-### 2. Analyse Anna (Company Analysis)
+### 2. Analyse Anna (Company Analysis) - Chat-Enabled ✅
 
-**Purpose**: Analyze company websites and extract key information (CEO, email, business model).
+**Purpose**: Analyze company websites through conversational AI and extract key information (CEO, email, business model).
 
 **Webhook Path**: `/analyse-anna`
+
+**Type**: Chat-based workflow with conversational memory
 
 **Input Payload**:
 ```json
@@ -92,21 +94,31 @@ const response = await fetch(`${N8N_WEBHOOK_BASE_URL}/your-workflow-path`, {
   "workflow_name": "analyse_anna",
   "project_id": "uuid",
   "user_id": "uuid",
-  "trigger_data": {
-    "user_input": "Analysiere die Website auf Geschäftsführer und E-Mail",
-    "company_id": "uuid",
-    "analysis_type": "full"
-  }
+  "message": "Analysiere alle Solartechnik-Firmen in Berlin auf Wärmepumpen-Angebote"
 }
 ```
+
+**Workflow Features**:
+- **Conversational Memory**: Maintains context across multiple messages using `workflow_id`
+- **Company Search Tools**: Search companies by name, industry, city, district, or state
+- **Firecrawl Integration**: Scrapes company websites and extracts structured data
+- **Batch Processing**: Analyzes multiple companies in one request
+- **Real-time Updates**: Sends progress updates via `workflow_messages` table
+
+**Chat Flow**:
+1. User sends analysis request (e.g., "Analysiere Solartechnik-Firmen in Brandenburg")
+2. Anna responds with confirmation and asks for analysis goal if needed
+3. User clarifies goal (e.g., "Finde CEO und Kontaktdaten")
+4. Anna triggers Firecrawl research for all matching companies
+5. Results are stored in `companies.analysis` JSONB field
+6. Anna sends completion message with count of analyzed companies
 
 **Output** (via Workflow State):
 ```json
 {
   "status": "completed",
   "result_summary": {
-    "company_analyzed": "Beispiel GmbH",
-    "ceo_found": true
+    "companies_analysed": 8
   }
 }
 ```
