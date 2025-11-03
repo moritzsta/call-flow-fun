@@ -141,7 +141,7 @@ export const EmailsTable = ({
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Send email', email.id);
+                        onSend(email.id, 'current-user-id');
                       }}
                     >
                       <Send className="mr-2 h-4 w-4" />
@@ -274,8 +274,7 @@ export const EmailsTable = ({
                       {(email.status === 'draft' || email.status === 'ready_to_send') && (
                         <DropdownMenuItem
                           onClick={() => {
-                            // TODO: Get user ID from context
-                            console.log('Send email', email.id);
+                            onSend(email.id, 'current-user-id');
                           }}
                         >
                           <Send className="mr-2 h-4 w-4" />

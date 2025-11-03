@@ -123,11 +123,13 @@ const response = await fetch(`${N8N_WEBHOOK_BASE_URL}/your-workflow-path`, {
 }
 ```
 
-### 3. Pitch Paul (Email Draft Generation)
+### 3. Pitch Paul (Email Draft Generation) - Chat-Enabled ✅
 
-**Purpose**: Generate personalized sales emails for analyzed companies.
+**Purpose**: Generate personalized sales emails through conversational AI for selected companies.
 
 **Webhook Path**: `/pitch-paul`
+
+**Type**: Chat-based workflow with conversational memory
 
 **Input Payload**:
 ```json
@@ -136,13 +138,23 @@ const response = await fetch(`${N8N_WEBHOOK_BASE_URL}/your-workflow-path`, {
   "workflow_name": "pitch_paul",
   "project_id": "uuid",
   "user_id": "uuid",
-  "trigger_data": {
-    "user_input": "Erstelle Sales-E-Mails für alle analysierten Firmen",
-    "offer": "Wir bieten professionelle SEO-Optimierung...",
-    "target_companies": []
-  }
+  "message": "Erstelle Sales-E-Mails für alle analysierten Firmen in Berlin"
 }
 ```
+
+**Workflow Features**:
+- **Conversational Memory**: Maintains context using `workflow_id` (Simple Memory node)
+- **Company Selection**: User can specify which companies to target
+- **Personalization**: Emails are tailored based on company analysis
+- **Draft Storage**: Saves emails to `project_emails` table with status `draft`
+- **Chat Responses Saved**: All assistant responses are stored in `workflow_messages`
+
+**Chat Flow**:
+1. User requests email generation (e.g., "Erstelle Pitch-E-Mails für Solarfirmen")
+2. Paul asks for offer/pitch details if needed
+3. User provides pitch content
+4. Paul confirms company selection and generates emails
+5. Emails are stored in `project_emails` table
 
 **Output** (via Workflow State):
 ```json
@@ -154,37 +166,69 @@ const response = await fetch(`${N8N_WEBHOOK_BASE_URL}/your-workflow-path`, {
 }
 ```
 
-**Important**: This workflow creates email **drafts** in the `project_emails` table. It does NOT send emails directly.
+**Important**: This workflow creates email **drafts** only. Use "Sende Susan" to send them.
 
-### 4. Email Sender (NEW)
+### 4. Sende Susan (Email Sender) - No Chat ⚡
 
-**Purpose**: Send draft emails via Gmail and update status.
+**Purpose**: Send draft emails via Gmail and update email status to `sent`.
 
-**Webhook Path**: `/email-sender`
+**Webhook Path**: `/sende-susan`
 
-**Input Payload**:
+**Type**: Batch processing workflow (no chat interaction)
+
+**Input Payload (Single Email)**:
 ```json
 {
-  "workflow_id": "uuid",
   "workflow_name": "email_sender",
+  "workflow_id": "uuid",
   "project_id": "uuid",
   "user_id": "uuid",
   "trigger_data": {
-    "email_ids": ["uuid1", "uuid2"],
-    "send_mode": "batch"
+    "email_id": "uuid"
   }
 }
 ```
+
+**Input Payload (All Emails)**:
+```json
+{
+  "workflow_name": "email_sender",
+  "workflow_id": "uuid",
+  "project_id": "uuid",
+  "user_id": "uuid",
+  "trigger_data": {
+    "project_id": "uuid",
+    "send_all": true
+  }
+}
+```
+
+**Workflow Features**:
+- **Gmail Integration**: Uses Gmail OAuth2 to send emails
+- **Batch Processing**: Can send multiple emails in one workflow run
+- **Status Updates**: Marks emails as `sent` in `project_emails` table
+- **Rate Limiting**: Implements delay between emails to avoid Gmail rate limits
+
+**Gmail OAuth Setup**:
+1. In n8n, create Gmail OAuth2 credentials
+2. Required scopes: `https://www.googleapis.com/auth/gmail.send`
+3. Authorize with your sending Gmail account
 
 **Output** (via Workflow State):
 ```json
 {
   "status": "completed",
   "result_summary": {
-    "emails_sent": 2
+    "emails_sent": 2,
+    "errors": []
   }
 }
 ```
+
+**Important**: 
+- Only emails with status `draft` or `ready_to_send` are sent
+- Gmail has daily sending limits (500/day for free accounts)
+- Emails are sent via Gmail API, not SMTP
 
 ## Rate Limiting & Cost Tracking
 

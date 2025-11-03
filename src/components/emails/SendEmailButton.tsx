@@ -33,7 +33,7 @@ export const SendEmailButton = ({
 
   const handleSend = () => {
     if (!user) return;
-    sendEmail({ emailId, userId: user.id });
+    sendEmail({ emailId, projectId, userId: user.id });
     setShowConfirmDialog(false);
   };
 

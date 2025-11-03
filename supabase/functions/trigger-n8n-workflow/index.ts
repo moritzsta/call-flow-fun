@@ -57,16 +57,25 @@ serve(async (req) => {
     };
     headers[headerName] = N8N_WEBHOOK_SECRET;
 
+    // Build the request body
+    const requestBody: any = {
+      workflow_id,
+      project_id,
+      user_id,
+      ...(trigger_data || {}),
+      ...(message ? { message } : {}),
+    };
+
+    // Special handling for email_sender workflow
+    if (workflow_name === 'email_sender' && trigger_data) {
+      requestBody.email_id = trigger_data.email_id;
+      requestBody.send_all = trigger_data.send_all || false;
+    }
+
     const n8nResponse = await fetch(n8nUrl, {
       method: 'POST',
       headers,
-      body: JSON.stringify({
-        workflow_id,
-        project_id,
-        user_id,
-        ...(trigger_data || {}),
-        ...(message ? { message } : {}),
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!n8nResponse.ok) {

@@ -45,7 +45,7 @@ export default function EmailDetail() {
       return;
     }
 
-    sendEmail({ emailId, userId });
+    sendEmail({ emailId, projectId: email.project_id, userId });
   };
 
   if (isLoading) {

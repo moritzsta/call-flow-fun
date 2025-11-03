@@ -1,0 +1,406 @@
+{
+  "name": "Pitch Paul - Chat Enabled",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pitch-paul",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "pitch-paul-webhook",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1.1,
+      "position": [240, 300],
+      "webhookId": "pitch-paul-webhook",
+      "credentials": {
+        "headerAuth": {
+          "id": "1",
+          "name": "Header Auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const workflow_id = $input.item.json.workflow_id;\nconst project_id = $input.item.json.project_id;\nconst user_id = $input.item.json.user_id;\nconst message = $input.item.json.message;\n\nreturn {\n  workflow_id,\n  project_id,\n  user_id,\n  input: message\n};"
+      },
+      "id": "parse-paul",
+      "name": "Parse Webhook Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "database",
+        "operation": "get",
+        "tableId": "project_id",
+        "returnAll": false,
+        "limit": 10
+      },
+      "id": "env-paul",
+      "name": "ENV",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "message-only",
+              "name": "input",
+              "value": "={{ $json.input }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "message-only",
+      "name": "Message Only",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "sessionKey": "={{ $('Parse Webhook Input').item.json.workflow_id }}",
+        "contextWindowLength": 10,
+        "inputKey": "input"
+      },
+      "id": "simple-memory",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1-preview",
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "id": "openrouter-chat",
+      "name": "OpenRouter Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [1340, 480],
+      "credentials": {
+        "openRouterApi": {
+          "id": "2",
+          "name": "OpenRouter API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"analyseAnnaAnswer\": \"Gerne! Bitte teile mir mit, welches Angebot oder welche Dienstleistung du pitchen möchtest.\",\n  \"userGoal\": \"Verstehe das Angebot des Users\",\n  \"startPitch\": false\n}",
+        "options": {}
+      },
+      "id": "structured-output",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1,
+      "position": [1340, 660]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Du bist Paul, ein erfahrener Sales-Experte. Deine Aufgabe ist es, personalisierte Sales-E-Mails für analysierte Firmen zu erstellen.\n\n**Workflow:**\n1. Frage den User nach dem Angebot/Pitch, falls noch nicht angegeben\n2. Bestätige die Ziel-Firmen (aus `project_id`)\n3. Setze `startPitch: true`, wenn User bestätigt\n4. Antworte freundlich und professionell\n\n**Wichtig:**\n- `startPitch` nur auf `true` setzen, wenn User explizit bestätigt\n- `userGoal` immer befüllen (aktuelles Ziel des Gesprächs)\n- `analyseAnnaAnswer` enthält deine Antwort an den User\n\n**Output-Format:**\n```json\n{\n  \"analyseAnnaAnswer\": \"Deine Antwort hier\",\n  \"userGoal\": \"Aktuelles Ziel\",\n  \"startPitch\": false\n}\n```",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Du bist ein hilfreicher Sales-Assistent."
+        }
+      },
+      "id": "pitch-paul-agent",
+      "name": "Pitch-Paul",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.4,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "url": "=https://fttdfvnhghbgtawkslau.supabase.co/functions/v1/save-workflow-message",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "supabaseApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0dGRmdm5oZ2hiZ3Rhd2tzbGF1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEyNTA2NTgsImV4cCI6MjA3NjgyNjY1OH0.6Wdk__nMLGVoSQN6dMHqM-EP3SWJxHp3f81AOCGUry0"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"workflow_state_id\": \"{{ $('Parse Webhook Input').item.json.workflow_id }}\",\n  \"project_id\": \"{{ $('Parse Webhook Input').item.json.project_id }}\",\n  \"role\": \"assistant\",\n  \"content\": \"{{ $('Pitch-Paul').item.json.output }}\",\n  \"metadata\": {}\n}",
+        "options": {}
+      },
+      "id": "save-response",
+      "name": "Save Response to DB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Pitch-Paul').item.json.output.startPitch }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "start-pitch-if",
+      "name": "Start Pitch IF-Node",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {},
+      "id": "split-emails",
+      "name": "Split Out Emails",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [2000, 180]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "loop-companies",
+      "name": "Loop Over Companies",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [2220, 180]
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1-preview",
+        "options": {
+          "temperature": 0.8
+        }
+      },
+      "id": "write-email-chat",
+      "name": "Write Email (GPT-4.1)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [2440, 360]
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "tableId": "project_emails",
+        "fieldsToSend": "defineBelow",
+        "fields": {
+          "mappings": [
+            {
+              "fieldId": "project_id",
+              "fieldValue": "={{ $('Parse Webhook Input').item.json.project_id }}"
+            },
+            {
+              "fieldId": "company_id",
+              "fieldValue": "={{ $json.company_id }}"
+            },
+            {
+              "fieldId": "recipient_email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.subject }}"
+            },
+            {
+              "fieldId": "body",
+              "fieldValue": "={{ $json.body }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "draft"
+            }
+          ]
+        }
+      },
+      "id": "save-email",
+      "name": "Save Email to DB",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [2660, 180],
+      "credentials": {
+        "supabaseApi": {
+          "id": "3",
+          "name": "Supabase API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Input": {
+      "main": [
+        [
+          {
+            "node": "ENV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ENV": {
+      "main": [
+        [
+          {
+            "node": "Message Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Only": {
+      "main": [
+        [
+          {
+            "node": "Simple Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "main": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pitch-Paul": {
+      "main": [
+        [
+          {
+            "node": "Save Response to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Response to DB": {
+      "main": [
+        [
+          {
+            "node": "Start Pitch IF-Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Pitch IF-Node": {
+      "main": [
+        [
+          {
+            "node": "Split Out Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Emails": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Companies": {
+      "main": [
+        [
+          {
+            "node": "Write Email (GPT-4.1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Email (GPT-4.1)": {
+      "main": [
+        [
+          {
+            "node": "Save Email to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Email to DB": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

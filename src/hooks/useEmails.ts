@@ -107,32 +107,76 @@ export const useEmails = (
   const totalCount = result?.count || 0;
 
   const sendEmailMutation = useMutation({
-    mutationFn: async ({ emailId, userId }: { emailId: string; userId: string }) => {
-      // 1. Call n8n webhook via Edge Function
-      const { data: webhookResponse, error: functionError } = await supabase.functions.invoke(
+    mutationFn: async ({ 
+      emailId, 
+      projectId, 
+      userId 
+    }: { 
+      emailId: string; 
+      projectId: string;
+      userId: string;
+    }) => {
+      const { data, error } = await supabase.functions.invoke(
         'trigger-n8n-workflow',
         {
           body: {
             workflow_name: 'email_sender',
-            project_email_id: emailId,
+            workflow_id: crypto.randomUUID(),
+            project_id: projectId,
             user_id: userId,
-          },
+            trigger_data: {
+              email_id: emailId,
+              send_all: false
+            }
+          }
         }
       );
 
-      if (functionError) {
-        throw new Error(`Webhook Error: ${functionError.message}`);
-      }
-
-      return webhookResponse;
+      if (error) throw new Error(`Webhook Error: ${error.message}`);
+      return data;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: () => {
       notifyEmailSent();
       queryClient.invalidateQueries({ queryKey: ['project_emails', projectId] });
     },
     onError: (error: Error) => {
       notifyEmailSendError(error.message);
+    }
+  });
+
+  const sendAllEmailsMutation = useMutation({
+    mutationFn: async ({ 
+      projectId, 
+      userId 
+    }: { 
+      projectId: string;
+      userId: string;
+    }) => {
+      const { data, error } = await supabase.functions.invoke(
+        'trigger-n8n-workflow',
+        {
+          body: {
+            workflow_name: 'email_sender',
+            workflow_id: crypto.randomUUID(),
+            project_id: projectId,
+            user_id: userId,
+            trigger_data: {
+              send_all: true
+            }
+          }
+        }
+      );
+
+      if (error) throw new Error(`Webhook Error: ${error.message}`);
+      return data;
     },
+    onSuccess: () => {
+      notifyEmailSent();
+      queryClient.invalidateQueries({ queryKey: ['project_emails', projectId] });
+    },
+    onError: (error: Error) => {
+      notifyEmailSendError(error.message);
+    }
   });
 
   const updateEmailStatusMutation = useMutation({
@@ -191,6 +235,8 @@ export const useEmails = (
     refetch,
     sendEmail: sendEmailMutation.mutate,
     isSending: sendEmailMutation.isPending,
+    sendAllEmails: sendAllEmailsMutation.mutate,
+    isSendingAll: sendAllEmailsMutation.isPending,
     updateEmailStatus: updateEmailStatusMutation.mutate,
     deleteEmail: deleteEmailMutation.mutate,
   };

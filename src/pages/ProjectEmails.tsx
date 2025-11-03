@@ -4,14 +4,16 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Mail, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Mail, RefreshCw, Send } from 'lucide-react';
 import { useEmails, EmailFilters as Filters, EmailSortConfig } from '@/hooks/useEmails';
 import { EmailFilters } from '@/components/emails/EmailFilters';
 import { EmailsTable } from '@/components/emails/EmailsTable';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProjectEmails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [filters, setFilters] = useState<Filters>({});
   const [sortConfig, setSortConfig] = useState<EmailSortConfig>({
@@ -25,7 +27,13 @@ export default function ProjectEmails() {
     refetch,
     deleteEmail,
     sendEmail,
+    sendAllEmails,
+    isSendingAll,
   } = useEmails(id, filters, sortConfig);
+
+  const readyToSendCount = emails.filter(
+    e => e.status === 'draft' || e.status === 'ready_to_send'
+  ).length;
 
   if (isLoading) {
     return (
@@ -68,10 +76,21 @@ export default function ProjectEmails() {
                 </div>
               </div>
             </div>
-            <Button variant="outline" onClick={() => refetch()}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Aktualisieren
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => refetch()}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Aktualisieren
+              </Button>
+              
+              <Button
+                variant="default"
+                onClick={() => sendAllEmails({ projectId: id!, userId: user?.id! })}
+                disabled={isSendingAll || readyToSendCount === 0}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {isSendingAll ? 'Versende...' : `Alle versenden (${readyToSendCount})`}
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -88,7 +107,7 @@ export default function ProjectEmails() {
               emails={emails}
               projectId={id!}
               onDelete={deleteEmail}
-              onSend={(emailId, userId) => sendEmail({ emailId, userId })}
+              onSend={(emailId) => sendEmail({ emailId, projectId: id!, userId: user?.id! })}
               sortConfig={sortConfig}
               onSortChange={setSortConfig}
             />
