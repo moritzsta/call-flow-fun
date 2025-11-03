@@ -1,0 +1,445 @@
+{
+  "name": "Pitch-Paul (Webhook -> Emails speichern)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pitch-paul",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -2800,
+        0
+      ],
+      "id": "webhook-pitch-paul",
+      "name": "Webhook Trigger",
+      "webhookId": "pitch-paul-webhook",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CE0Gh6v865OGseDN",
+          "name": "Lovable Header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.item.json.body;\n\nreturn {\n  workflow_id: body.workflow_id,\n  project_id: body.project_id,\n  user_id: body.user_id,\n  message: {\n    text: typeof body.message === 'string' ? body.message : (body.message?.text || body.trigger_data?.initial_message || '')\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2600,
+        0
+      ],
+      "id": "parse-pitch-paul",
+      "name": "Parse Webhook Input"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "project_id",
+              "value": "={{ $json.project_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "workflow_id",
+              "value": "={{ $json.workflow_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "message",
+              "value": "={{ $json.message }}",
+              "type": "json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2400,
+        0
+      ],
+      "id": "env-pitch-paul",
+      "name": "ENV"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4",
+              "name": "input",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2200,
+        0
+      ],
+      "id": "message-only-pitch",
+      "name": "Message Only"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Message Only').item.json.input }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=# Rolle: Pitch Paul \ud83c\udfaf\n\nDu bist **Pitch Paul**, der weltbeste E-Mail-Vertriebler f\u00fcr Kaltaquise.",
+          "model": "openai/gpt-4.1"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -1800,
+        0
+      ],
+      "id": "agent-pitch-paul",
+      "name": "Pitch-Paul"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4.1",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -1800,
+        260
+      ],
+      "id": "openrouter-pitch",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "45g4ECqy31QqrTa5",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"userMessage\": \"...\",\n  \"pitchPaulAnswer\": \"...\",\n  \"emails\": [\"email@example.com\"],\n  \"userGoal\": \"...\",\n  \"startPitch\": true\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -1600,
+        260
+      ],
+      "id": "structured-parser-pitch",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "emails-out",
+              "name": "emails",
+              "value": "={{ $('Pitch-Paul').item.json.output.emails }}",
+              "type": "array"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1400,
+        0
+      ],
+      "id": "split-out-emails",
+      "name": "Split Out Emails"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "emails[0]"
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        0
+      ],
+      "id": "split-out-pitch",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1000,
+        0
+      ],
+      "id": "loop-over-emails",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "german_companies",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $json['emails[0]'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        120
+      ],
+      "id": "get-general-info",
+      "name": "Get General Info",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Generate email from company + user message"
+            }
+          ]
+        },
+        "jsonOutput": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -600,
+        120
+      ],
+      "id": "write-email",
+      "name": "Write Email",
+      "credentials": {
+        "openAiApi": {
+          "id": "73blkhCZavmm8Roy",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert",
+        "tableId": "project_emails",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "project_id",
+              "fieldValue": "={{ $('Parse Webhook Input').item.json.project_id }}"
+            },
+            {
+              "fieldId": "to_email",
+              "fieldValue": "={{ $json['emails[0]'] }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.message.content.subject }}"
+            },
+            {
+              "fieldId": "body",
+              "fieldValue": "={{ $json.message.content.emailText }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "draft"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        120
+      ],
+      "id": "save-email-db",
+      "name": "Save Email to DB",
+      "credentials": {
+        "supabaseApi": {
+          "id": "njlilkJflmADhYzM",
+          "name": "Supabase Kundenaquise"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Input": {
+      "main": [
+        [
+          {
+            "node": "ENV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ENV": {
+      "main": [
+        [
+          {
+            "node": "Message Only",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Only": {
+      "main": [
+        [
+          {
+            "node": "Pitch-Paul",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pitch-Paul": {
+      "main": [
+        [
+          {
+            "node": "Split Out Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "ai_languageModel": [
+        [
+          {
+            "node": "OpenRouter Chat Model",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ],
+      "ai_outputParser": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Emails": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Get General Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get General Info": {
+      "main": [
+        [
+          {
+            "node": "Write Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Email": {
+      "main": [
+        [
+          {
+            "node": "Save Email to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Email to DB": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false
+}
