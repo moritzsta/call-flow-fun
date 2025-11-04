@@ -72,6 +72,11 @@ serve(async (req) => {
       requestBody.send_all = trigger_data.send_all || false;
     }
 
+    // Special handling for finder_felix workflow - check for duplicates
+    if (workflow_name === 'finder_felix' && trigger_data) {
+      requestBody.check_duplicates = true;
+    }
+
     const n8nResponse = await fetch(n8nUrl, {
       method: 'POST',
       headers,

@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.save-workflow-message]
 verify_jwt = false
+
+[functions.upsert-company]
+verify_jwt = false
