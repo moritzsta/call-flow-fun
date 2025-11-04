@@ -14,7 +14,14 @@ export default function WorkflowFinderFelix() {
   const navigate = useNavigate();
   const { companies, isLoading } = useCompanies(id || '');
 
-  const foundCompanies = companies.filter((c) => c.status === 'found');
+  // Deduplicate companies by ID and filter by status
+  const foundCompanies = Array.from(
+    new Map(
+      companies
+        .filter((c) => c.status === 'found')
+        .map((company) => [company.id, company])
+    ).values()
+  );
 
   return (
     <SidebarProvider>

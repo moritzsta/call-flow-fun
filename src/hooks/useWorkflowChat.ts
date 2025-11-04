@@ -27,6 +27,31 @@ export const useWorkflowChat = ({
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
 
+  // Load existing workflow state on mount
+  useEffect(() => {
+    if (initialWorkflowStateId || !projectId || !user) return;
+
+    const loadExistingWorkflowState = async () => {
+      const { data, error } = await supabase
+        .from('n8n_workflow_states')
+        .select('id')
+        .eq('project_id', projectId)
+        .eq('workflow_name', workflowName)
+        .eq('user_id', user.id)
+        .eq('conversation_active', true)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!error && data) {
+        console.log(`[useWorkflowChat] Loaded existing workflow state: ${data.id}`);
+        setWorkflowStateId(data.id);
+      }
+    };
+
+    loadExistingWorkflowState();
+  }, [projectId, workflowName, user, initialWorkflowStateId]);
+
   // Fetch initial messages when workflowStateId is available
   useEffect(() => {
     if (!workflowStateId) return;
@@ -67,7 +92,14 @@ export const useWorkflowChat = ({
         },
         (payload) => {
           const newMessage = payload.new as WorkflowMessage;
-          setMessages((prev) => [...prev, newMessage]);
+          
+          // Prevent duplicates by checking if message already exists
+          setMessages((prev) => {
+            if (prev.some((msg) => msg.id === newMessage.id)) {
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
           
           // Stop loading when assistant responds
           if (newMessage.role === 'assistant') {
