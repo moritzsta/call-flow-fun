@@ -4,13 +4,19 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Building2, RefreshCw } from 'lucide-react';
-import { useCompanies, CompanyFilters as Filters, CompanySortConfig } from '@/hooks/useCompanies';
+import { ArrowLeft, Building2, RefreshCw, Search } from 'lucide-react';
+import { useCompanies, CompanyFilters as Filters, CompanySortConfig, Company } from '@/hooks/useCompanies';
 import { CompanyFilters } from '@/components/companies/CompanyFilters';
 import { CompaniesTable } from '@/components/companies/CompaniesTable';
 import { ImportCompaniesButton } from '@/components/companies/ImportCompaniesButton';
 import { ExportCompaniesButton } from '@/components/companies/ExportCompaniesButton';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { CompanyStats } from '@/components/companies/CompanyStats';
+import { BulkActions } from '@/components/companies/BulkActions';
+import { ViewControls, ViewMode, Density, VisibleColumns } from '@/components/companies/ViewControls';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import Papa from 'papaparse';
 
 export default function ProjectCompanies() {
   const { id } = useParams<{ id: string }>();
@@ -22,14 +28,94 @@ export default function ProjectCompanies() {
     field: 'created_at',
     ascending: false,
   });
+  const [selectedCompanies, setSelectedCompanies] = useState<Company[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
+  const [density, setDensity] = useState<Density>('comfortable');
+  const [visibleColumns, setVisibleColumns] = useState<VisibleColumns>({
+    company: true,
+    industry: true,
+    ceo: false,
+    city: true,
+    state: true,
+    email: false,
+    phone: false,
+    website: false,
+    address: false,
+    district: false,
+    dataTags: true,
+    status: true,
+    created: true,
+  });
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 50;
 
   const {
     companies,
+    totalCount,
     isLoading,
     refetch,
     deleteCompany,
     updateCompanyStatus,
-  } = useCompanies(id, filters, sortConfig);
+  } = useCompanies(id, filters, sortConfig, { page: currentPage, pageSize });
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // Bulk Actions Handlers
+  const handleBulkStatusChange = async (status: Company['status']) => {
+    try {
+      await Promise.all(
+        selectedCompanies.map((company) =>
+          supabase
+            .from('companies')
+            .update({ status, updated_at: new Date().toISOString() })
+            .eq('id', company.id)
+        )
+      );
+      toast.success(`Status von ${selectedCompanies.length} Firmen aktualisiert`);
+      setSelectedCompanies([]);
+      refetch();
+    } catch (error) {
+      toast.error('Fehler beim Aktualisieren der Firmen');
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      await Promise.all(
+        selectedCompanies.map((company) =>
+          supabase.from('companies').delete().eq('id', company.id)
+        )
+      );
+      toast.success(`${selectedCompanies.length} Firmen gelöscht`);
+      setSelectedCompanies([]);
+      refetch();
+    } catch (error) {
+      toast.error('Fehler beim Löschen der Firmen');
+    }
+  };
+
+  const handleBulkExport = () => {
+    const csv = Papa.unparse(
+      selectedCompanies.map((c) => ({
+        Firma: c.company,
+        Branche: c.industry || '',
+        CEO: c.ceo_name || '',
+        Email: c.email || '',
+        Telefon: c.phone || '',
+        Website: c.website || '',
+        Stadt: c.city || '',
+        Bundesland: c.state || '',
+        Status: c.status,
+      }))
+    );
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `firmen-export-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    toast.success('Export erfolgreich');
+  };
 
   if (isLoading) {
     return (
@@ -79,28 +165,108 @@ export default function ProjectCompanies() {
           </div>
         </div>
 
+        {/* Quick Stats */}
+        <CompanyStats companies={companies} isLoading={isLoading} />
+
         <Card>
           <CardHeader>
-            <CardTitle>Firmen-Liste</CardTitle>
-            <CardDescription>
-              Filtern, sortieren und verwalten Sie die Firmen dieses Projekts
-            </CardDescription>
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle>Firmen-Liste</CardTitle>
+                <CardDescription>
+                  Filtern, sortieren und verwalten Sie die Firmen dieses Projekts
+                </CardDescription>
+              </div>
+              <ViewControls
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
+                density={density}
+                onDensityChange={setDensity}
+                visibleColumns={visibleColumns}
+                onVisibleColumnsChange={setVisibleColumns}
+              />
+            </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between gap-4">
-              <CompanyFilters filters={filters} onFiltersChange={setFilters} />
-              <div className="flex gap-2">
-                <ImportCompaniesButton projectId={id!} />
-                <ExportCompaniesButton projectId={id!} />
-              </div>
-            </div>
-            <CompaniesTable
-              companies={companies}
-              onDelete={deleteCompany}
-              onStatusChange={updateCompanyStatus}
-              sortConfig={sortConfig}
-              onSortChange={setSortConfig}
+            {/* Filters */}
+            <CompanyFilters filters={filters} onFiltersChange={(f) => { setFilters(f); setCurrentPage(0); }} />
+
+            {/* Bulk Actions */}
+            <BulkActions
+              selectedCompanies={selectedCompanies}
+              onClearSelection={() => setSelectedCompanies([])}
+              onStatusChange={handleBulkStatusChange}
+              onDelete={handleBulkDelete}
+              onExport={handleBulkExport}
             />
+
+            {/* Import/Export Buttons */}
+            <div className="flex gap-2 justify-end">
+              <ImportCompaniesButton projectId={id!} />
+              <ExportCompaniesButton projectId={id!} />
+            </div>
+
+            {/* Table/Cards View */}
+            {companies.length === 0 && !isLoading ? (
+              <div className="text-center py-16 border rounded-lg bg-muted/20">
+                <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Keine Firmen gefunden</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  {Object.keys(filters).length > 0
+                    ? 'Versuchen Sie, die Filter anzupassen'
+                    : 'Starten Sie Finder Felix, um Firmen zu finden'}
+                </p>
+                {Object.keys(filters).length === 0 && (
+                  <Button onClick={() => navigate(`/projects/${id}/finder-felix`)}>
+                    <Search className="mr-2 h-4 w-4" />
+                    Finder Felix starten
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <>
+                <CompaniesTable
+                  companies={companies}
+                  onDelete={deleteCompany}
+                  onStatusChange={updateCompanyStatus}
+                  sortConfig={sortConfig}
+                  onSortChange={setSortConfig}
+                  selectedCompanies={selectedCompanies}
+                  onSelectionChange={setSelectedCompanies}
+                  viewMode={viewMode}
+                  density={density}
+                  visibleColumns={visibleColumns}
+                />
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground">
+                      Zeige {currentPage * pageSize + 1} bis{' '}
+                      {Math.min((currentPage + 1) * pageSize, totalCount)} von {totalCount} Firmen
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                        disabled={currentPage === 0}
+                      >
+                        Zurück
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={currentPage >= totalPages - 1}
+                      >
+                        Weiter
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

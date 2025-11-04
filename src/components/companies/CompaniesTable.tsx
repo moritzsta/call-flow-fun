@@ -31,6 +31,9 @@ import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ResponsiveTable, MobileCard } from '@/components/ui/responsive-table';
 import { CompanyDataTags } from './CompanyDataTags';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ViewMode, Density, VisibleColumns } from './ViewControls';
+import { cn } from '@/lib/utils';
 
 interface CompaniesTableProps {
   companies: Company[];
@@ -38,6 +41,11 @@ interface CompaniesTableProps {
   onStatusChange: (companyId: string, status: Company['status']) => void;
   sortConfig: CompanySortConfig;
   onSortChange: (config: CompanySortConfig) => void;
+  selectedCompanies?: Company[];
+  onSelectionChange?: (companies: Company[]) => void;
+  viewMode?: ViewMode;
+  density?: Density;
+  visibleColumns?: VisibleColumns;
 }
 
 export const CompaniesTable = ({
@@ -46,10 +54,55 @@ export const CompaniesTable = ({
   onStatusChange,
   sortConfig,
   onSortChange,
+  selectedCompanies = [],
+  onSelectionChange = () => {},
+  viewMode = 'table',
+  density = 'comfortable',
+  visibleColumns = {
+    company: true,
+    industry: true,
+    ceo: false,
+    city: true,
+    state: true,
+    email: false,
+    phone: false,
+    website: false,
+    address: false,
+    district: false,
+    dataTags: true,
+    status: true,
+    created: true,
+  },
 }: CompaniesTableProps) => {
   const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const isMobile = useIsMobile();
+
+  const isSelected = (company: Company) =>
+    selectedCompanies.some((c) => c.id === company.id);
+
+  const toggleSelection = (company: Company) => {
+    if (isSelected(company)) {
+      onSelectionChange(selectedCompanies.filter((c) => c.id !== company.id));
+    } else {
+      onSelectionChange([...selectedCompanies, company]);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedCompanies.length === companies.length) {
+      onSelectionChange([]);
+    } else {
+      onSelectionChange(companies);
+    }
+  };
+
+  const densityClasses = {
+    compact: 'py-2',
+    comfortable: 'py-3',
+    spacious: 'py-4',
+  };
 
   const handleSort = (field: CompanySortConfig['field']) => {
     onSortChange({
@@ -86,15 +139,52 @@ export const CompaniesTable = ({
     );
   };
 
-  const isMobile = useIsMobile();
-
   if (companies.length === 0) {
+    return null;
+  }
+
+  // Cards View
+  if (viewMode === 'cards') {
     return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Keine Firmen gefunden</p>
-        <p className="text-sm text-muted-foreground mt-2">
-          Starten Sie Finder Felix, um Firmen zu finden
-        </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {companies.map((company) => (
+          <MobileCard key={company.id} onClick={() => navigate(`/companies/${company.id}`)}>
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <Checkbox
+                  checked={isSelected(company)}
+                  onCheckedChange={() => toggleSelection(company)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <Button variant="ghost" size="icon">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/companies/${company.id}`); }}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      Details
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDeleteClick(company); }} className="text-destructive">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Löschen
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg">{company.company}</h3>
+                {company.industry && <p className="text-sm text-muted-foreground">{company.industry}</p>}
+                <CompanyDataTags company={company} className="mt-2" />
+              </div>
+              <div className="flex items-center justify-between">
+                {getStatusBadge(company.status)}
+              </div>
+            </div>
+          </MobileCard>
+        ))}
       </div>
     );
   }
@@ -191,6 +281,13 @@ export const CompaniesTable = ({
           <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[50px]">
+                <Checkbox
+                  checked={selectedCompanies.length === companies.length}
+                  onCheckedChange={toggleSelectAll}
+                  aria-label="Alle auswählen"
+                />
+              </TableHead>
               <TableHead>
                 <Button
                   variant="ghost"
@@ -203,73 +300,86 @@ export const CompaniesTable = ({
                   <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
                 </Button>
               </TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort('industry')}
-                  className="-ml-3"
-                  aria-label="Nach Branche sortieren"
-                >
-                  Branche
-                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
-                </Button>
-              </TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort('city')}
-                  className="-ml-3"
-                  aria-label="Nach Stadt sortieren"
-                >
-                  Stadt
-                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
-                </Button>
-              </TableHead>
-              <TableHead>Bundesland</TableHead>
-              <TableHead>Daten</TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort('status')}
-                  className="-ml-3"
-                  aria-label="Nach Status sortieren"
-                >
-                  Status
-                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
-                </Button>
-              </TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort('created_at')}
-                  className="-ml-3"
-                  aria-label="Nach Erstelldatum sortieren"
-                >
-                  Erstellt
-                  <ArrowUpDown className="ml-2 h-4 w-4" aria-hidden="true" />
-                </Button>
-              </TableHead>
+              {visibleColumns.industry && (
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('industry')} className="-ml-3">
+                    Branche
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+              )}
+              {visibleColumns.ceo && <TableHead>CEO</TableHead>}
+              {visibleColumns.city && (
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('city')} className="-ml-3">
+                    Stadt
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+              )}
+              {visibleColumns.state && <TableHead>Bundesland</TableHead>}
+              {visibleColumns.email && <TableHead>E-Mail</TableHead>}
+              {visibleColumns.phone && <TableHead>Telefon</TableHead>}
+              {visibleColumns.website && <TableHead>Website</TableHead>}
+              {visibleColumns.address && <TableHead>Adresse</TableHead>}
+              {visibleColumns.district && <TableHead>Bezirk</TableHead>}
+              {visibleColumns.dataTags && <TableHead>Daten</TableHead>}
+              {visibleColumns.status && (
+                <TableHead>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleSort('status')}
+                    className="-ml-3"
+                    aria-label="Nach Status sortieren"
+                  >
+                    Status
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+              )}
+              {visibleColumns.created && (
+                <TableHead>
+                  <Button variant="ghost" size="sm" onClick={() => handleSort('created_at')} className="-ml-3">
+                    Erstellt
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+              )}
               <TableHead className="w-[50px]"><span className="sr-only">Aktionen</span></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {companies.map((company) => (
-              <TableRow key={company.id}>
-                <TableCell className="font-medium">{company.company}</TableCell>
-                <TableCell>{company.industry || '-'}</TableCell>
-                <TableCell>{company.city || '-'}</TableCell>
-                <TableCell>{company.state || '-'}</TableCell>
+              <TableRow key={company.id} className={cn(densityClasses[density])}>
                 <TableCell>
-                  <CompanyDataTags company={company} />
+                  <Checkbox
+                    checked={isSelected(company)}
+                    onCheckedChange={() => toggleSelection(company)}
+                    aria-label={`${company.company} auswählen`}
+                  />
                 </TableCell>
-                <TableCell>{getStatusBadge(company.status)}</TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {new Date(company.created_at).toLocaleDateString('de-DE')}
-                </TableCell>
+                <TableCell className="font-medium">{company.company}</TableCell>
+                {visibleColumns.industry && <TableCell>{company.industry || '-'}</TableCell>}
+                {visibleColumns.ceo && <TableCell>{company.ceo_name || '-'}</TableCell>}
+                {visibleColumns.city && <TableCell>{company.city || '-'}</TableCell>}
+                {visibleColumns.state && <TableCell>{company.state || '-'}</TableCell>}
+                {visibleColumns.email && <TableCell className="text-sm">{company.email || '-'}</TableCell>}
+                {visibleColumns.phone && <TableCell className="text-sm">{company.phone || '-'}</TableCell>}
+                {visibleColumns.website && <TableCell className="text-sm truncate max-w-[200px]">{company.website || '-'}</TableCell>}
+                {visibleColumns.address && <TableCell className="text-sm">{company.address || '-'}</TableCell>}
+                {visibleColumns.district && <TableCell>{company.district || '-'}</TableCell>}
+                {visibleColumns.dataTags && (
+                  <TableCell>
+                    <CompanyDataTags company={company} />
+                  </TableCell>
+                )}
+                {visibleColumns.status && <TableCell>{getStatusBadge(company.status)}</TableCell>}
+                {visibleColumns.created && (
+                  <TableCell className="text-muted-foreground text-sm">
+                    {new Date(company.created_at).toLocaleDateString('de-DE')}
+                  </TableCell>
+                )}
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
