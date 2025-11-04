@@ -64,7 +64,7 @@ export const useCompanies = (
       // Select only needed fields for better performance
       let query = supabase
         .from('companies')
-        .select('id, project_id, company, industry, ceo_name, email, phone, website, address, city, state, district, status, created_at, updated_at', { count: 'exact' })
+        .select('id, project_id, company, industry, ceo_name, email, phone, website, address, city, state, district, status, analysis, created_at, updated_at', { count: 'exact' })
         .eq('project_id', projectId);
 
       // Apply filters

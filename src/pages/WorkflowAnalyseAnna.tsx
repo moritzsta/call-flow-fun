@@ -12,9 +12,21 @@ import { useCompanies } from '@/hooks/useCompanies';
 export default function WorkflowAnalyseAnna() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { companies, isLoading } = useCompanies(id || '');
+  const { companies, isLoading } = useCompanies(
+    id || '',
+    undefined,
+    undefined,
+    { page: 0, pageSize: 1000 } // Fetch all companies
+  );
 
-  const analyzedCompanies = companies.filter((c) => c.analysis !== null);
+  // Deduplicate and filter analyzed companies
+  const analyzedCompanies = Array.from(
+    new Map(
+      companies
+        .filter((c) => c.analysis !== null)
+        .map((company) => [company.id, company])
+    ).values()
+  );
 
   return (
     <SidebarProvider>
