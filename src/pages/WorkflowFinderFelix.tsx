@@ -12,7 +12,12 @@ import { useCompanies } from '@/hooks/useCompanies';
 export default function WorkflowFinderFelix() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { companies, isLoading } = useCompanies(id || '');
+  const { companies, isLoading } = useCompanies(
+    id || '',
+    undefined,
+    undefined,
+    { page: 0, pageSize: 1000 } // Fetch all companies
+  );
 
   // Deduplicate companies by ID and filter by status
   const foundCompanies = Array.from(
