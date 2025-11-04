@@ -46,8 +46,6 @@ export default function ProjectCompanies() {
     status: true,
     created: true,
   });
-  const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 50;
 
   const {
     companies,
@@ -56,9 +54,7 @@ export default function ProjectCompanies() {
     refetch,
     deleteCompany,
     updateCompanyStatus,
-  } = useCompanies(id, filters, sortConfig, { page: currentPage, pageSize });
-
-  const totalPages = Math.ceil(totalCount / pageSize);
+  } = useCompanies(id, filters, sortConfig, { page: 0, pageSize: 10000 });
 
   // Bulk Actions Handlers
   const handleBulkStatusChange = async (status: Company['status']) => {
@@ -153,7 +149,7 @@ export default function ProjectCompanies() {
                 <div>
                   <h1 className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}>Firmen</h1>
                   <p className="text-muted-foreground text-sm">
-                    {companies.length} {companies.length === 1 ? 'Firma' : 'Firmen'} gefunden
+                    {totalCount} {totalCount === 1 ? 'Firma' : 'Firmen'} gesamt
                   </p>
                 </div>
               </div>
@@ -189,7 +185,7 @@ export default function ProjectCompanies() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Filters */}
-            <CompanyFilters filters={filters} onFiltersChange={(f) => { setFilters(f); setCurrentPage(0); }} />
+            <CompanyFilters filters={filters} onFiltersChange={setFilters} />
 
             {/* Bulk Actions */}
             <BulkActions
@@ -238,33 +234,11 @@ export default function ProjectCompanies() {
                   visibleColumns={visibleColumns}
                 />
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-muted-foreground">
-                      Zeige {currentPage * pageSize + 1} bis{' '}
-                      {Math.min((currentPage + 1) * pageSize, totalCount)} von {totalCount} Firmen
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-                        disabled={currentPage === 0}
-                      >
-                        Zurück
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
-                        disabled={currentPage >= totalPages - 1}
-                      >
-                        Weiter
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                {/* Total count info */}
+                <div className="text-sm text-muted-foreground text-center pt-4 border-t">
+                  {companies.length} von {totalCount} Firmen angezeigt
+                  {companies.length !== totalCount && ' (gefiltert)'}
+                </div>
               </>
             )}
           </CardContent>
