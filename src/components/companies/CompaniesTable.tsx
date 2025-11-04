@@ -30,6 +30,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ResponsiveTable, MobileCard } from '@/components/ui/responsive-table';
+import { CompanyDataTags } from './CompanyDataTags';
 
 interface CompaniesTableProps {
   companies: Company[];
@@ -112,6 +113,9 @@ export const CompaniesTable = ({
                     {company.industry}
                   </p>
                 )}
+                <div className="mt-2">
+                  <CompanyDataTags company={company} />
+                </div>
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -224,6 +228,7 @@ export const CompaniesTable = ({
                 </Button>
               </TableHead>
               <TableHead>Bundesland</TableHead>
+              <TableHead>Daten</TableHead>
               <TableHead>
                 <Button
                   variant="ghost"
@@ -258,6 +263,9 @@ export const CompaniesTable = ({
                 <TableCell>{company.industry || '-'}</TableCell>
                 <TableCell>{company.city || '-'}</TableCell>
                 <TableCell>{company.state || '-'}</TableCell>
+                <TableCell>
+                  <CompanyDataTags company={company} />
+                </TableCell>
                 <TableCell>{getStatusBadge(company.status)}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {new Date(company.created_at).toLocaleDateString('de-DE')}

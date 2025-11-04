@@ -31,6 +31,9 @@ export interface CompanyFilters {
   city?: string;
   state?: string;
   search?: string;
+  hasWebsite?: boolean;
+  hasEmail?: boolean;
+  isAnalyzed?: boolean;
 }
 
 export interface CompanySortConfig {
@@ -82,8 +85,17 @@ export const useCompanies = (
       }
       if (filters?.search) {
         query = query.or(
-          `company.ilike.%${filters.search}%,email.ilike.%${filters.search}%,phone.ilike.%${filters.search}%`
+          `company.ilike.%${filters.search}%,email.ilike.%${filters.search}%,phone.ilike.%${filters.search}%,ceo_name.ilike.%${filters.search}%,industry.ilike.%${filters.search}%,city.ilike.%${filters.search}%,state.ilike.%${filters.search}%,address.ilike.%${filters.search}%`
         );
+      }
+      if (filters?.hasWebsite) {
+        query = query.not('website', 'is', null);
+      }
+      if (filters?.hasEmail) {
+        query = query.not('email', 'is', null);
+      }
+      if (filters?.isAnalyzed) {
+        query = query.not('analysis', 'is', null);
       }
 
       // Apply sorting

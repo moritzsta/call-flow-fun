@@ -12,6 +12,7 @@ import { useOrganizations } from '@/hooks/useOrganizations';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
+import { useCompanies } from '@/hooks/useCompanies';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { 
   ArrowLeft, 
@@ -55,6 +56,18 @@ export default function ProjectDashboard() {
 
   // Workflow Status
   const { counts: workflowCounts, isLoading: workflowsLoading } = useWorkflowStatus(id || '');
+
+  // Companies Data
+  const { companies, isLoading: companiesLoading } = useCompanies(
+    id || '',
+    undefined,
+    undefined,
+    { page: 0, pageSize: 1000 }
+  );
+
+  const totalCompanies = companies.length;
+  const foundCompanies = companies.filter((c) => c.status === 'found').length;
+  const analyzedCompanies = companies.filter((c) => c.analysis !== null).length;
 
   if (orgsLoading || membersLoading) {
     return (
@@ -151,8 +164,11 @@ export default function ProjectDashboard() {
 
               {/* KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Companies Card */}
-                <Card>
+              {/* Companies Card */}
+                <Card 
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => navigate(`/projects/${id}/companies`)}
+                >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       Firmen
@@ -161,13 +177,15 @@ export default function ProjectDashboard() {
                   <CardContent>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-3xl font-bold text-foreground">-</p>
-                        <div className="flex gap-2 mt-2">
+                        <p className="text-3xl font-bold text-foreground">
+                          {companiesLoading ? '-' : totalCompanies}
+                        </p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
                           <Badge variant="secondary" className="text-xs">
-                            Gefunden: -
+                            Gefunden: {companiesLoading ? '-' : foundCompanies}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            Analysiert: -
+                            Analysiert: {companiesLoading ? '-' : analyzedCompanies}
                           </Badge>
                         </div>
                       </div>

@@ -1,7 +1,9 @@
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, X } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Search, X, Globe, Mail, CheckCircle2 } from 'lucide-react';
 import { CompanyFilters as Filters } from '@/hooks/useCompanies';
 
 interface CompanyFiltersProps {
@@ -15,7 +17,14 @@ export const CompanyFilters = ({ filters, onFiltersChange }: CompanyFiltersProps
   };
 
   const hasActiveFilters =
-    filters.status || filters.industry || filters.city || filters.state || filters.search;
+    filters.status || 
+    filters.industry || 
+    filters.city || 
+    filters.state || 
+    filters.search ||
+    filters.hasWebsite ||
+    filters.hasEmail ||
+    filters.isAnalyzed;
 
   return (
     <div className="space-y-4">
@@ -78,6 +87,60 @@ export const CompanyFilters = ({ filters, onFiltersChange }: CompanyFiltersProps
             onFiltersChange({ ...filters, state: e.target.value || undefined })
           }
         />
+      </div>
+
+      {/* Data Tags Filter */}
+      <div className="flex flex-wrap gap-4 p-4 bg-muted/30 rounded-lg">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="has-website"
+            checked={filters.hasWebsite || false}
+            onCheckedChange={(checked) =>
+              onFiltersChange({ ...filters, hasWebsite: checked as boolean || undefined })
+            }
+          />
+          <Label 
+            htmlFor="has-website" 
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Globe className="h-3.5 w-3.5 text-green-600" />
+            Nur mit Website
+          </Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="has-email"
+            checked={filters.hasEmail || false}
+            onCheckedChange={(checked) =>
+              onFiltersChange({ ...filters, hasEmail: checked as boolean || undefined })
+            }
+          />
+          <Label 
+            htmlFor="has-email" 
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5 cursor-pointer"
+          >
+            <Mail className="h-3.5 w-3.5 text-blue-600" />
+            Nur mit Email
+          </Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="is-analyzed"
+            checked={filters.isAnalyzed || false}
+            onCheckedChange={(checked) =>
+              onFiltersChange({ ...filters, isAnalyzed: checked as boolean || undefined })
+            }
+          />
+          <Label 
+            htmlFor="is-analyzed" 
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex items-center gap-1.5 cursor-pointer"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 text-purple-600" />
+            Nur analysierte
+          </Label>
+        </div>
       </div>
 
       {/* Reset Button */}
