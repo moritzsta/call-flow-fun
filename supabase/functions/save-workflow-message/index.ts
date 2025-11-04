@@ -37,15 +37,44 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Verify workflow state exists
+    // Verify workflow state exists (or create it)
     const { data: workflowState, error: stateError } = await supabase
       .from('n8n_workflow_states')
-      .select('id, project_id')
+      .select('id, project_id, user_id')
       .eq('id', workflow_state_id)
-      .single();
+      .maybeSingle();
 
-    if (stateError || !workflowState) {
-      throw new Error(`Workflow state not found: ${workflow_state_id}`);
+    if (stateError) {
+      console.error('[save-workflow-message] Error querying workflow state:', stateError);
+      throw new Error(`Database error: ${stateError.message}`);
+    }
+
+    // Auto-create workflow state if it doesn't exist
+    if (!workflowState) {
+      console.log(`[save-workflow-message] Workflow state not found, creating new one: ${workflow_state_id}`);
+      
+      const workflowName = metadata?.workflow_name || 'unknown';
+      
+      const { data: newState, error: createError } = await supabase
+        .from('n8n_workflow_states')
+        .insert({
+          id: workflow_state_id,
+          project_id: project_id,
+          user_id: metadata?.user_id || null,
+          workflow_name: workflowName,
+          status: 'running',
+          conversation_active: true,
+          trigger_data: metadata || {},
+        })
+        .select('id, project_id')
+        .single();
+
+      if (createError) {
+        console.error('[save-workflow-message] Failed to create workflow state:', createError);
+        throw new Error(`Failed to create workflow state: ${createError.message}`);
+      }
+
+      console.log(`[save-workflow-message] Created new workflow state: ${newState.id}`);
     }
 
     // Insert message
