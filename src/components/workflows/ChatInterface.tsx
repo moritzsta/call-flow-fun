@@ -8,7 +8,7 @@ import { useWorkflowChat } from '@/hooks/useWorkflowChat';
 import { cn } from '@/lib/utils';
 
 interface ChatInterfaceProps {
-  workflowName: 'finder_felix' | 'analyse_anna' | 'pitch_paul';
+  workflowName: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'branding_britta';
   projectId: string;
   workflowStateId?: string;
   title?: string;

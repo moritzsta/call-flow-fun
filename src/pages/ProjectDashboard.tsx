@@ -24,7 +24,8 @@ import {
   Search, 
   BarChart3, 
   Send,
-  Settings 
+  Settings,
+  Sparkles
 } from 'lucide-react';
 
 export default function ProjectDashboard() {
@@ -380,6 +381,37 @@ export default function ProjectDashboard() {
                     >
                       <Mail className="mr-2 h-4 w-4" />
                       Mit Paul chatten
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Branding Britta Card */}
+                <Card className="border-2 border-purple-500/20 hover:border-purple-500/40 transition-colors">
+                  <CardHeader>
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                        <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div>
+                        <CardTitle>Branding Britta</CardTitle>
+                        <CardDescription>
+                          E-Mails verschönern lassen
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Verbessern Sie Ihre E-Mails mit Icons, Formatierung und professionellem Design.
+                    </p>
+                    <Button 
+                      className="w-full" 
+                      variant="outline" 
+                      disabled={!canManage}
+                      onClick={() => navigate(`/projects/${id}/branding-britta`)}
+                    >
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Mit Britta chatten
                     </Button>
                   </CardContent>
                 </Card>

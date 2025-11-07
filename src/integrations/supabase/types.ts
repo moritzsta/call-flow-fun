@@ -441,6 +441,7 @@ export type Database = {
       project_emails: {
         Row: {
           body: string
+          body_improved: string | null
           company_id: string
           created_at: string
           id: string
@@ -453,6 +454,7 @@ export type Database = {
         }
         Insert: {
           body: string
+          body_improved?: string | null
           company_id: string
           created_at?: string
           id?: string
@@ -465,6 +467,7 @@ export type Database = {
         }
         Update: {
           body?: string
+          body_improved?: string | null
           company_id?: string
           created_at?: string
           id?: string

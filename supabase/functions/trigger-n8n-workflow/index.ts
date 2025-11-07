@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface WorkflowRequest {
-  workflow_name: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'email_sender';
+  workflow_name: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'branding_britta' | 'email_sender';
   workflow_id: string;
   project_id: string;
   user_id: string;
@@ -39,6 +39,7 @@ serve(async (req) => {
       finder_felix: '/finder-felix',
       analyse_anna: '/analyse-anna',
       pitch_paul: '/pitch-paul',
+      branding_britta: '/branding-britta',
       email_sender: '/email-sender',
     };
 

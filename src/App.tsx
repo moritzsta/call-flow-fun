@@ -25,6 +25,7 @@ import NotFound from "./pages/NotFound";
 import WorkflowFinderFelix from "./pages/WorkflowFinderFelix";
 import WorkflowAnalyseAnna from "./pages/WorkflowAnalyseAnna";
 import WorkflowPitchPaul from "./pages/WorkflowPitchPaul";
+import WorkflowBrandingBritta from "./pages/WorkflowBrandingBritta";
 import AutomationStatus from "./pages/AutomationStatus";
 
 const queryClient = new QueryClient();
@@ -109,6 +110,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <WorkflowPitchPaul />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/branding-britta" 
+              element={
+                <ProtectedRoute>
+                  <WorkflowBrandingBritta />
                 </ProtectedRoute>
               } 
             />
