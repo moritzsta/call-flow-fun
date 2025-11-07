@@ -115,9 +115,9 @@ serve(async (req) => {
           throw new Error('Rate limit exceeded. Please try again later.');
         }
 
-        // Retry on 502 Bad Gateway
-        if (n8nResponse.status === 502) {
-          lastError = new Error(`502 Bad Gateway on attempt ${attempt}`);
+        // Retry on 502 Bad Gateway or 503 Service Unavailable
+        if (n8nResponse.status === 502 || n8nResponse.status === 503) {
+          lastError = new Error(`${n8nResponse.status} ${n8nResponse.statusText} on attempt ${attempt}`);
           if (attempt < maxAttempts) {
             console.log(`[trigger-n8n-workflow] Retrying after ${backoffDelays[attempt - 1]}ms...`);
             await new Promise(resolve => setTimeout(resolve, backoffDelays[attempt - 1]));
