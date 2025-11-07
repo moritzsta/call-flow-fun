@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useWorkflowChat } from './useWorkflowChat';
 import { toast } from 'sonner';
@@ -24,7 +24,76 @@ type PipelineStatus = 'idle' | 'running' | 'completed' | 'failed';
 export const useAutomatedPipeline = (projectId?: string) => {
   const [currentPhase, setCurrentPhase] = useState<PipelinePhase | null>(null);
   const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus>('idle');
+  const [activePipelineId, setActivePipelineId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+
+  // Check for active pipeline on mount
+  const { data: existingPipeline } = useQuery({
+    queryKey: ['active-pipeline', projectId],
+    queryFn: async () => {
+      if (!projectId) return null;
+      
+      const { data, error } = await supabase
+        .from('automation_pipelines')
+        .select('*')
+        .eq('project_id', projectId)
+        .eq('status', 'running')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!projectId,
+  });
+
+  // Restore state from existing pipeline
+  useEffect(() => {
+    if (existingPipeline) {
+      console.log('[Pipeline] Restored active pipeline:', existingPipeline.id);
+      setActivePipelineId(existingPipeline.id);
+      setPipelineStatus('running');
+      setCurrentPhase(existingPipeline.current_phase as PipelinePhase || null);
+    }
+  }, [existingPipeline]);
+
+  // Subscribe to pipeline status updates
+  useEffect(() => {
+    if (!activePipelineId || !projectId) return;
+
+    console.log('[Pipeline] Subscribing to pipeline updates:', activePipelineId);
+
+    const channel = supabase
+      .channel(`pipeline-${activePipelineId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'automation_pipelines',
+          filter: `id=eq.${activePipelineId}`,
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          console.log('[Pipeline] Received update:', updated);
+          setPipelineStatus(updated.status);
+          setCurrentPhase(updated.current_phase as PipelinePhase || null);
+          
+          if (updated.status === 'completed' || updated.status === 'failed') {
+            console.log('[Pipeline] Pipeline finished:', updated.status);
+            setActivePipelineId(null);
+            queryClient.invalidateQueries({ queryKey: ['active-pipeline', projectId] });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('[Pipeline] Unsubscribing from pipeline updates');
+      supabase.removeChannel(channel);
+    };
+  }, [activePipelineId, projectId, queryClient]);
 
   // Initialize chat instances for each workflow
   const felixChat = useWorkflowChat({
@@ -88,6 +157,12 @@ export const useAutomatedPipeline = (projectId?: string) => {
 
   const startPipeline = useMutation({
     mutationFn: async ({ projectId, userId, config }: StartPipelineParams) => {
+      // Check if there's already a running pipeline
+      if (activePipelineId) {
+        throw new Error('Es läuft bereits eine Pipeline für dieses Projekt');
+      }
+
+      console.log('[Pipeline] Starting new pipeline...');
       setPipelineStatus('running');
 
       // 1. Create pipeline record
@@ -108,6 +183,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
       }
 
       const pipelineId = pipeline.id;
+      setActivePipelineId(pipelineId);
 
       try {
         // 2. Trigger Finder Felix via Chat
@@ -201,6 +277,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
 
         setPipelineStatus('completed');
         setCurrentPhase(null);
+        setActivePipelineId(null);
 
         return { pipelineId, status: 'completed' };
       } catch (error) {
@@ -216,17 +293,20 @@ export const useAutomatedPipeline = (projectId?: string) => {
 
         setPipelineStatus('failed');
         setCurrentPhase(null);
+        setActivePipelineId(null);
         throw error;
       }
     },
     onSuccess: () => {
       toast.success('Automation Pipeline erfolgreich abgeschlossen!');
+      queryClient.invalidateQueries({ queryKey: ['active-pipeline', projectId] });
       queryClient.invalidateQueries({ queryKey: ['workflow-states'] });
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       queryClient.invalidateQueries({ queryKey: ['emails'] });
     },
     onError: (error: Error) => {
       toast.error(`Pipeline fehlgeschlagen: ${error.message}`);
+      queryClient.invalidateQueries({ queryKey: ['active-pipeline', projectId] });
     },
   });
 
