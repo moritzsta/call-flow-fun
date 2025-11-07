@@ -13,6 +13,7 @@ import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 import { useCompanies } from '@/hooks/useCompanies';
+import { useEmails } from '@/hooks/useEmails';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { 
   ArrowLeft, 
@@ -68,6 +69,17 @@ export default function ProjectDashboard() {
   const totalCompanies = companies.length;
   const foundCompanies = companies.filter((c) => c.status === 'found').length;
   const analyzedCompanies = companies.filter((c) => c.analysis !== null).length;
+
+  // Emails Data
+  const { emails, isLoading: emailsLoading } = useEmails(
+    id || '',
+    undefined,
+    undefined
+  );
+
+  const totalEmails = emails.length;
+  const draftEmails = emails.filter((e) => e.status === 'draft').length;
+  const sentEmails = emails.filter((e) => e.status === 'sent').length;
 
   if (orgsLoading || membersLoading) {
     return (
@@ -197,7 +209,10 @@ export default function ProjectDashboard() {
                 </Card>
 
                 {/* Emails Card */}
-                <Card>
+                <Card 
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => navigate(`/projects/${id}/emails`)}
+                >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       E-Mails
@@ -206,13 +221,15 @@ export default function ProjectDashboard() {
                   <CardContent>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-3xl font-bold text-foreground">-</p>
-                        <div className="flex gap-2 mt-2">
+                        <p className="text-3xl font-bold text-foreground">
+                          {emailsLoading ? '-' : totalEmails}
+                        </p>
+                        <div className="flex gap-2 mt-2 flex-wrap">
                           <Badge variant="secondary" className="text-xs">
-                            Draft: -
+                            Entwürfe: {emailsLoading ? '-' : draftEmails}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            Sent: -
+                            Versendet: {emailsLoading ? '-' : sentEmails}
                           </Badge>
                         </div>
                       </div>

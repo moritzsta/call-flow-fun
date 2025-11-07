@@ -8,12 +8,15 @@ import { ArrowLeft, Mail, RefreshCw, Send } from 'lucide-react';
 import { useEmails, EmailFilters as Filters, EmailSortConfig } from '@/hooks/useEmails';
 import { EmailFilters } from '@/components/emails/EmailFilters';
 import { EmailsTable } from '@/components/emails/EmailsTable';
+import { EmailStats } from '@/components/emails/EmailStats';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function ProjectEmails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
 
   const [filters, setFilters] = useState<Filters>({});
   const [sortConfig, setSortConfig] = useState<EmailSortConfig>({
@@ -62,22 +65,22 @@ export default function ProjectEmails() {
         </Button>
 
         <div className="mb-8">
-          <div className="flex items-start justify-between">
+          <div className={`flex items-start ${isMobile ? 'flex-col gap-4' : 'justify-between'}`}>
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
                   <Mail className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-bold">E-Mails</h1>
-                  <p className="text-muted-foreground">
-                    {emails.length} {emails.length === 1 ? 'E-Mail' : 'E-Mails'} gefunden
+                  <h1 className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}>E-Mails</h1>
+                  <p className="text-muted-foreground text-sm">
+                    {emails.length} {emails.length === 1 ? 'E-Mail' : 'E-Mails'} gesamt
                   </p>
                 </div>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => refetch()}>
+            <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
+              <Button variant="outline" onClick={() => refetch()} className={isMobile ? 'w-full' : ''}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Aktualisieren
               </Button>
@@ -86,6 +89,7 @@ export default function ProjectEmails() {
                 variant="default"
                 onClick={() => sendAllEmails({ projectId: id!, userId: user?.id! })}
                 disabled={isSendingAll || readyToSendCount === 0}
+                className={isMobile ? 'w-full' : ''}
               >
                 <Send className="mr-2 h-4 w-4" />
                 {isSendingAll ? 'Versende...' : `Alle versenden (${readyToSendCount})`}
@@ -93,6 +97,9 @@ export default function ProjectEmails() {
             </div>
           </div>
         </div>
+
+        {/* Quick Stats */}
+        <EmailStats emails={emails} isLoading={isLoading} />
 
         <Card>
           <CardHeader>
