@@ -15,8 +15,7 @@ export default function WorkflowBrandingBritta() {
   const { emails, isLoading } = useEmails(id || '');
 
   // Filter emails that have been improved
-  // @ts-ignore - body_improved will be available after types regenerate
-  const improvedEmails = emails.filter((e) => (e as any).body_improved !== null && (e as any).body_improved?.length > 0);
+  const improvedEmails = emails.filter((e) => e.body_improved !== null && e.body_improved !== undefined && e.body_improved.length > 0);
 
   return (
     <SidebarProvider>

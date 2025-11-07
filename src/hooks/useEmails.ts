@@ -13,6 +13,7 @@ export interface ProjectEmail {
   company_id: string;
   subject: string;
   body: string;
+  body_improved?: string | null;
   recipient_email: string;
   status: 'draft' | 'ready_to_send' | 'sent' | 'failed';
   sent_at: string | null;
@@ -59,7 +60,7 @@ export const useEmails = (
       let query = supabase
         .from('project_emails')
         .select(`
-          id, project_id, company_id, subject, body, recipient_email, status, sent_at, created_at, updated_at,
+          id, project_id, company_id, subject, body, body_improved, recipient_email, status, sent_at, created_at, updated_at,
           companies!project_emails_company_id_fkey(company)
         `, { count: 'exact' })
         .eq('project_id', projectId);
