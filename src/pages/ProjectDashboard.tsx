@@ -235,10 +235,10 @@ export default function ProjectDashboard() {
                             Entwürfe: {emailsLoading ? '-' : draftEmails}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            Versendet: {emailsLoading ? '-' : sentEmails}
+                            Verbessert: {emailsLoading ? '-' : improvedEmails}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            Verbessert: {emailsLoading ? '-' : improvedEmails}
+                            Versendet: {emailsLoading ? '-' : sentEmails}
                           </Badge>
                         </div>
                       </div>

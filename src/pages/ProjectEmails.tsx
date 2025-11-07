@@ -9,6 +9,7 @@ import { useEmails, EmailFilters as Filters, EmailSortConfig } from '@/hooks/use
 import { EmailFilters } from '@/components/emails/EmailFilters';
 import { EmailsTable } from '@/components/emails/EmailsTable';
 import { EmailStats } from '@/components/emails/EmailStats';
+import { ExportEmailsButton } from '@/components/emails/ExportEmailsButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -80,6 +81,8 @@ export default function ProjectEmails() {
               </div>
             </div>
             <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
+              <ExportEmailsButton projectId={id!} />
+              
               <Button variant="outline" onClick={() => refetch()} className={isMobile ? 'w-full' : ''}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Aktualisieren
