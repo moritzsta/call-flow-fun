@@ -127,6 +127,12 @@ export const useWorkflowChat = ({
 
       // Create workflow state if this is a new conversation
       if (!currentWorkflowStateId) {
+        console.log('[useWorkflowChat] Creating new workflow state:', {
+          project_id: projectId,
+          user_id: user.id,
+          workflow_name: workflowName,
+        });
+
         const { data: newState, error: stateError } = await supabase
           .from('n8n_workflow_states')
           .insert({
@@ -140,10 +146,17 @@ export const useWorkflowChat = ({
           .select()
           .single();
 
-        if (stateError || !newState) {
-          throw new Error('Fehler beim Erstellen des Workflow-Status');
+        if (stateError) {
+          console.error('[useWorkflowChat] Error creating workflow state:', stateError);
+          throw new Error(`Fehler beim Erstellen des Workflow-Status: ${stateError.message}`);
         }
 
+        if (!newState) {
+          console.error('[useWorkflowChat] No state returned after insert');
+          throw new Error('Fehler beim Erstellen des Workflow-Status: Keine Daten zurückgegeben');
+        }
+
+        console.log('[useWorkflowChat] Workflow state created:', newState.id);
         currentWorkflowStateId = newState.id;
         setWorkflowStateId(currentWorkflowStateId);
       }
