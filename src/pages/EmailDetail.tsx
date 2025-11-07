@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail } from 'lucide-react';
+import { ArrowLeft, Mail, Sparkles } from 'lucide-react';
 import { useEmail } from '@/hooks/useEmail';
 import { useEmails, ProjectEmail } from '@/hooks/useEmails';
 import { EmailPreview } from '@/components/emails/EmailPreview';
@@ -99,6 +99,12 @@ export default function EmailDetail() {
                     An: {email.recipient_email}
                     {email.company_name && ` (${email.company_name})`}
                   </p>
+                  {email.body_improved && (
+                    <Badge variant="secondary" className="mt-2 bg-purple-500/10 text-purple-700 dark:text-purple-400">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Von Britta verschönert
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -139,15 +145,31 @@ export default function EmailDetail() {
           </div>
         </div>
 
-        <Tabs defaultValue="preview" className="w-full">
+        <Tabs defaultValue={email.body_improved ? "verbessert" : "original"} className="w-full">
           <TabsList>
-            <TabsTrigger value="preview">Vorschau</TabsTrigger>
+            {email.body_improved && (
+              <TabsTrigger value="verbessert">
+                <Sparkles className="h-4 w-4 mr-2" />
+                Verbessert
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="original">Original</TabsTrigger>
             <TabsTrigger value="edit" disabled={email.status === 'sent'}>
               Bearbeiten
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="preview" className="mt-6">
+          {email.body_improved && (
+            <TabsContent value="verbessert" className="mt-6">
+              <EmailPreview
+                subject={email.subject}
+                body={email.body_improved}
+                recipientEmail={email.recipient_email}
+              />
+            </TabsContent>
+          )}
+
+          <TabsContent value="original" className="mt-6">
             <EmailPreview
               subject={email.subject}
               body={email.body}
