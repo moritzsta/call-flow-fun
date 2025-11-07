@@ -39,7 +39,7 @@ serve(async (req) => {
       finder_felix: '/finder-felix',
       analyse_anna: '/analyse-anna',
       pitch_paul: '/pitch-paul',
-      branding_britta: '/branding-britta',
+      branding_britta: '/webhook-test/branding-britta',
       email_sender: '/email-sender',
     };
 
