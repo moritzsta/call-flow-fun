@@ -114,7 +114,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Starting Finder Felix...');
         setCurrentPhase('felix');
         
-        const felixMessage = `🤖 Automatisch: Suche mir bitte alle Firmen zur Kategorie "${config.category}" in der Stadt ${config.city}, ${config.state}${config.maxCompanies ? `. Begrenze deine Suche auf ${config.maxCompanies} Firmen` : ''}`;
+        const felixMessage = `System-Message: Suche mir bitte alle Firmen zur Kategorie "${config.category}" in der Stadt ${config.city}, ${config.state}${config.maxCompanies ? `. Begrenze deine Suche auf ${config.maxCompanies} Firmen` : ''}`;
         const felixWorkflowId = await felixChat.sendMessage(felixMessage);
         
         if (!felixWorkflowId) {
@@ -133,7 +133,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Starting Analyse Anna...');
         setCurrentPhase('anna');
         
-        const annaMessage = `🤖 Automatisch: Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
+        const annaMessage = `System-Message: Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
         const annaWorkflowId = await annaChat.sendMessage(annaMessage);
         
         if (!annaWorkflowId) {
@@ -152,7 +152,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Starting Pitch Paul...');
         setCurrentPhase('paul');
         
-        const paulMessage = `🤖 Automatisch: Bitte generiere E-Mails für alle Firmen in der Datenbank, welche eine E-Mail-Adresse hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
+        const paulMessage = `System-Message: Bitte generiere E-Mails für alle Firmen in der Datenbank, welche eine E-Mail-Adresse hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
         const paulWorkflowId = await paulChat.sendMessage(paulMessage);
         
         if (!paulWorkflowId) {
@@ -171,7 +171,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Starting Branding Britta...');
         setCurrentPhase('britta');
 
-        const brittaMessage = `🤖 Automatisch: Bitte optimiere alle E-Mails in der Datenbank (Draft und Sent Status). Verbessere Betreffzeilen, Ansprache und Call-to-Actions für maximale Öffnungs- und Klickraten.`;
+        const brittaMessage = `System-Message: Bitte optimiere alle E-Mails in der Datenbank (Draft und Sent Status). Verbessere Betreffzeilen, Ansprache und Call-to-Actions für maximale Öffnungs- und Klickraten.`;
         const brittaWorkflowId = await brittaChat.sendMessage(brittaMessage);
 
         if (!brittaWorkflowId) {
