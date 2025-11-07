@@ -237,8 +237,7 @@ export default function ProjectDashboard() {
                           <Badge variant="secondary" className="text-xs">
                             Versendet: {emailsLoading ? '-' : sentEmails}
                           </Badge>
-                          <Badge variant="secondary" className="text-xs bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20">
-                            <Sparkles className="h-3 w-3 mr-1" />
+                          <Badge variant="secondary" className="text-xs">
                             Verbessert: {emailsLoading ? '-' : improvedEmails}
                           </Badge>
                         </div>
