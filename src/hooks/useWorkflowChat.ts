@@ -114,7 +114,7 @@ export const useWorkflowChat = ({
     };
   }, [workflowStateId]);
 
-  const sendMessage = async (content: string) => {
+  const sendMessage = async (content: string): Promise<string | undefined> => {
     if (!user) {
       toast.error('Sie müssen eingeloggt sein');
       return;
@@ -195,10 +195,13 @@ export const useWorkflowChat = ({
       if (triggerError) {
         throw triggerError;
       }
+
+      return currentWorkflowStateId;
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Fehler beim Senden der Nachricht');
       setIsLoading(false);
+      return undefined;
     }
   };
 

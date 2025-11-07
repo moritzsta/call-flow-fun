@@ -115,21 +115,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
         setCurrentPhase('felix');
         
         const felixMessage = `🤖 Automatisch: Suche mir bitte alle Firmen zur Kategorie "${config.category}" in der Stadt ${config.city}, ${config.state}${config.maxCompanies ? `. Begrenze deine Suche auf ${config.maxCompanies} Firmen` : ''}`;
-        await felixChat.sendMessage(felixMessage);
-
-        // Wait for workflow state to be created
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const felixWorkflowId = await felixChat.sendMessage(felixMessage);
         
-        if (!felixChat.workflowStateId) {
+        if (!felixWorkflowId) {
           throw new Error('Felix Workflow-State konnte nicht erstellt werden');
         }
 
         await supabase
           .from('automation_pipelines')
-          .update({ felix_workflow_id: felixChat.workflowStateId })
+          .update({ felix_workflow_id: felixWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(felixChat.workflowStateId, projectId);
+        await waitForWorkflowCompletion(felixWorkflowId, projectId);
         console.log('[Pipeline] Finder Felix completed');
 
         // 3. Trigger Analyse Anna via Chat
@@ -137,21 +134,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
         setCurrentPhase('anna');
         
         const annaMessage = `🤖 Automatisch: Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        await annaChat.sendMessage(annaMessage);
-
-        // Wait for workflow state to be created
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const annaWorkflowId = await annaChat.sendMessage(annaMessage);
         
-        if (!annaChat.workflowStateId) {
+        if (!annaWorkflowId) {
           throw new Error('Anna Workflow-State konnte nicht erstellt werden');
         }
 
         await supabase
           .from('automation_pipelines')
-          .update({ anna_workflow_id: annaChat.workflowStateId })
+          .update({ anna_workflow_id: annaWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(annaChat.workflowStateId, projectId);
+        await waitForWorkflowCompletion(annaWorkflowId, projectId);
         console.log('[Pipeline] Analyse Anna completed');
 
         // 4. Trigger Pitch Paul via Chat
@@ -159,21 +153,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
         setCurrentPhase('paul');
         
         const paulMessage = `🤖 Automatisch: Bitte generiere E-Mails für alle Firmen in der Datenbank, welche eine E-Mail-Adresse hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        await paulChat.sendMessage(paulMessage);
-
-        // Wait for workflow state to be created
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const paulWorkflowId = await paulChat.sendMessage(paulMessage);
         
-        if (!paulChat.workflowStateId) {
+        if (!paulWorkflowId) {
           throw new Error('Paul Workflow-State konnte nicht erstellt werden');
         }
 
         await supabase
           .from('automation_pipelines')
-          .update({ paul_workflow_id: paulChat.workflowStateId })
+          .update({ paul_workflow_id: paulWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(paulChat.workflowStateId, projectId);
+        await waitForWorkflowCompletion(paulWorkflowId, projectId);
         console.log('[Pipeline] Pitch Paul completed');
 
         // 5. Trigger Branding Britta via Chat
@@ -181,21 +172,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
         setCurrentPhase('britta');
 
         const brittaMessage = `🤖 Automatisch: Bitte optimiere alle E-Mails in der Datenbank (Draft und Sent Status). Verbessere Betreffzeilen, Ansprache und Call-to-Actions für maximale Öffnungs- und Klickraten.`;
-        await brittaChat.sendMessage(brittaMessage);
+        const brittaWorkflowId = await brittaChat.sendMessage(brittaMessage);
 
-        // Wait for workflow state to be created
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        if (!brittaChat.workflowStateId) {
+        if (!brittaWorkflowId) {
           throw new Error('Britta Workflow-State konnte nicht erstellt werden');
         }
 
         await supabase
           .from('automation_pipelines')
-          .update({ britta_workflow_id: brittaChat.workflowStateId })
+          .update({ britta_workflow_id: brittaWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(brittaChat.workflowStateId, projectId);
+        await waitForWorkflowCompletion(brittaWorkflowId, projectId);
         console.log('[Pipeline] Branding Britta completed');
 
         // 6. Mark pipeline as completed
