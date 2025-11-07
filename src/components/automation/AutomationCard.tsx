@@ -40,13 +40,17 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
   };
 
   const getPhaseLabel = () => {
+    if (!isRunning) return null;
+    
     switch (currentPhase) {
       case 'felix':
-        return 'Finder Felix läuft...';
+        return 'Phase 1/4: Firmen finden...';
       case 'anna':
-        return 'Analyse Anna läuft...';
+        return 'Phase 2/4: Firmen analysieren...';
       case 'paul':
-        return 'Pitch Paul läuft...';
+        return 'Phase 3/4: E-Mails generieren...';
+      case 'britta':
+        return 'Phase 4/4: E-Mails optimieren...';
       default:
         return 'Pipeline läuft...';
     }
@@ -91,7 +95,7 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
                 <CardDescription className="text-sm">
                   {isRunning
                     ? getPhaseLabel()
-                    : 'Felix → Anna → Paul automatisch ausführen'}
+                    : 'Felix → Anna → Paul → Britta automatisch ausführen'}
                 </CardDescription>
               </div>
             </div>
@@ -112,9 +116,11 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
                   style={{
                     width:
                       currentPhase === 'felix'
-                        ? '33%'
+                        ? '25%'
                         : currentPhase === 'anna'
-                        ? '66%'
+                        ? '50%'
+                        : currentPhase === 'paul'
+                        ? '75%'
                         : '100%',
                   }}
                 />

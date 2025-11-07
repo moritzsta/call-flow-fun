@@ -17,6 +17,7 @@ export type Database = {
       automation_pipelines: {
         Row: {
           anna_workflow_id: string | null
+          britta_workflow_id: string | null
           completed_at: string | null
           config: Json
           created_at: string
@@ -32,6 +33,7 @@ export type Database = {
         }
         Insert: {
           anna_workflow_id?: string | null
+          britta_workflow_id?: string | null
           completed_at?: string | null
           config: Json
           created_at?: string
@@ -47,6 +49,7 @@ export type Database = {
         }
         Update: {
           anna_workflow_id?: string | null
+          britta_workflow_id?: string | null
           completed_at?: string | null
           config?: Json
           created_at?: string
@@ -64,6 +67,13 @@ export type Database = {
           {
             foreignKeyName: "automation_pipelines_anna_workflow_id_fkey"
             columns: ["anna_workflow_id"]
+            isOneToOne: false
+            referencedRelation: "n8n_workflow_states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_pipelines_britta_workflow_id_fkey"
+            columns: ["britta_workflow_id"]
             isOneToOne: false
             referencedRelation: "n8n_workflow_states"
             referencedColumns: ["id"]

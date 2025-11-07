@@ -17,7 +17,7 @@ interface StartPipelineParams {
   config: PipelineConfig;
 }
 
-type PipelinePhase = 'felix' | 'anna' | 'paul';
+type PipelinePhase = 'felix' | 'anna' | 'paul' | 'britta';
 type PipelineStatus = 'idle' | 'running' | 'completed' | 'failed';
 
 export const useAutomatedPipeline = (projectId?: string) => {
@@ -38,6 +38,11 @@ export const useAutomatedPipeline = (projectId?: string) => {
 
   const paulChat = useWorkflowChat({
     workflowName: 'pitch_paul',
+    projectId: projectId || '',
+  });
+
+  const brittaChat = useWorkflowChat({
+    workflowName: 'branding_britta',
     projectId: projectId || '',
   });
 
@@ -170,7 +175,29 @@ export const useAutomatedPipeline = (projectId?: string) => {
         await waitForWorkflowCompletion(paulChat.workflowStateId, projectId);
         console.log('[Pipeline] Pitch Paul completed');
 
-        // 5. Mark pipeline as completed
+        // 5. Trigger Branding Britta via Chat
+        console.log('[Pipeline] Starting Branding Britta...');
+        setCurrentPhase('britta');
+
+        const brittaMessage = `🤖 Automatisch: Bitte optimiere alle E-Mails in der Datenbank (Draft und Sent Status). Verbessere Betreffzeilen, Ansprache und Call-to-Actions für maximale Öffnungs- und Klickraten.`;
+        await brittaChat.sendMessage(brittaMessage);
+
+        // Wait for workflow state to be created
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        if (!brittaChat.workflowStateId) {
+          throw new Error('Britta Workflow-State konnte nicht erstellt werden');
+        }
+
+        await supabase
+          .from('automation_pipelines')
+          .update({ britta_workflow_id: brittaChat.workflowStateId })
+          .eq('id', pipelineId);
+
+        await waitForWorkflowCompletion(brittaChat.workflowStateId, projectId);
+        console.log('[Pipeline] Branding Britta completed');
+
+        // 6. Mark pipeline as completed
         await supabase
           .from('automation_pipelines')
           .update({ 
