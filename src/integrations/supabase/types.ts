@@ -14,6 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      automation_pipelines: {
+        Row: {
+          anna_workflow_id: string | null
+          completed_at: string | null
+          config: Json
+          created_at: string
+          current_phase: string | null
+          error_message: string | null
+          felix_workflow_id: string | null
+          id: string
+          paul_workflow_id: string | null
+          project_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anna_workflow_id?: string | null
+          completed_at?: string | null
+          config: Json
+          created_at?: string
+          current_phase?: string | null
+          error_message?: string | null
+          felix_workflow_id?: string | null
+          id?: string
+          paul_workflow_id?: string | null
+          project_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anna_workflow_id?: string | null
+          completed_at?: string | null
+          config?: Json
+          created_at?: string
+          current_phase?: string | null
+          error_message?: string | null
+          felix_workflow_id?: string | null
+          id?: string
+          paul_workflow_id?: string | null
+          project_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_pipelines_anna_workflow_id_fkey"
+            columns: ["anna_workflow_id"]
+            isOneToOne: false
+            referencedRelation: "n8n_workflow_states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_pipelines_felix_workflow_id_fkey"
+            columns: ["felix_workflow_id"]
+            isOneToOne: false
+            referencedRelation: "n8n_workflow_states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_pipelines_paul_workflow_id_fkey"
+            columns: ["paul_workflow_id"]
+            isOneToOne: false
+            referencedRelation: "n8n_workflow_states"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "automation_pipelines_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address: string | null

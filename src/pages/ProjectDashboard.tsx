@@ -15,6 +15,7 @@ import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useEmails } from '@/hooks/useEmails';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
+import { AutomationCard } from '@/components/automation/AutomationCard';
 import { 
   ArrowLeft, 
   Building2, 
@@ -173,6 +174,9 @@ export default function ProjectDashboard() {
                   )}
                 </div>
               </div>
+
+              {/* Automation Card - Full Width */}
+              <AutomationCard projectId={id || ''} />
 
               {/* KPI Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
