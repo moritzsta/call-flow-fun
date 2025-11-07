@@ -40,7 +40,7 @@ serve(async (req) => {
       analyse_anna: '/analyse-anna',
       pitch_paul: '/pitch-paul',
       branding_britta: '/branding-britta',
-      email_sender: '/email-sender',
+      email_sender: '/sende-susan',
     };
 
     const webhookPath = webhookPaths[workflow_name];
@@ -48,8 +48,10 @@ serve(async (req) => {
       throw new Error(`Unknown workflow: ${workflow_name}`);
     }
 
-    // Call n8n webhook
-    const n8nUrl = `${N8N_WEBHOOK_BASE_URL}${webhookPath}`;
+    // Build normalized n8n webhook URL (ensure '/webhook' prefix and single slashes)
+    const baseUrl = (N8N_WEBHOOK_BASE_URL || '').replace(/\/+$/, '');
+    const needsWebhookPrefix = !/\/webhook$/.test(baseUrl);
+    const n8nUrl = `${baseUrl}${needsWebhookPrefix ? '/webhook' : ''}${webhookPath}`;
     console.log(`[trigger-n8n-workflow] Calling n8n: ${n8nUrl}`);
 
     const headerName = Deno.env.get('N8N_WEBHOOK_HEADER_NAME') || 'X-Webhook-Secret';
