@@ -289,33 +289,30 @@ export default function ProjectDashboard() {
               </div>
 
               {/* Action Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Finder Felix Card */}
                 <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Search className="h-5 w-5 text-primary" />
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Search className="h-4 w-4 text-primary" />
                       </div>
-                      <div>
-                        <CardTitle>Finder Felix</CardTitle>
-                        <CardDescription>
-                          Firmen in Deutschland finden
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">Finder Felix</CardTitle>
+                        <CardDescription className="text-xs">
+                          Firmen finden
                         </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Durchsuchen Sie die Datenbank nach passenden Firmen basierend auf
-                      Branche, Standort und weiteren Kriterien.
-                    </p>
+                  <CardContent className="pt-0">
                     <Button 
+                      size="sm"
                       className="w-full" 
                       disabled={!canManage}
                       onClick={() => navigate(`/projects/${id}/finder-felix`)}
                     >
-                      <Search className="mr-2 h-4 w-4" />
+                      <Search className="mr-2 h-3 w-3" />
                       Mit Felix chatten
                     </Button>
                   </CardContent>
@@ -323,31 +320,28 @@ export default function ProjectDashboard() {
 
                 {/* Analyse Anna Card */}
                 <Card className="border-2 border-accent/20 hover:border-accent/40 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                        <BarChart3 className="h-5 w-5 text-accent" />
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                        <BarChart3 className="h-4 w-4 text-accent" />
                       </div>
-                      <div>
-                        <CardTitle>Analyse Anna</CardTitle>
-                        <CardDescription>
-                          Firmen analysieren lassen
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">Analyse Anna</CardTitle>
+                        <CardDescription className="text-xs">
+                          Firmen analysieren
                         </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      KI-gestützte Analyse der Firmen mit Informationen zu Produkten,
-                      Services und Ansprechpartnern.
-                    </p>
+                  <CardContent className="pt-0">
                     <Button 
+                      size="sm"
                       className="w-full" 
                       variant="outline" 
                       disabled={!canManage}
                       onClick={() => navigate(`/projects/${id}/analyse-anna`)}
                     >
-                      <BarChart3 className="mr-2 h-4 w-4" />
+                      <BarChart3 className="mr-2 h-3 w-3" />
                       Mit Anna chatten
                     </Button>
                   </CardContent>
@@ -355,31 +349,28 @@ export default function ProjectDashboard() {
 
                 {/* Pitch Paul Card */}
                 <Card className="border-2 border-secondary/50 hover:border-secondary transition-colors">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-secondary/50 flex items-center justify-center">
-                        <Mail className="h-5 w-5 text-foreground" />
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-secondary/50 flex items-center justify-center shrink-0">
+                        <Mail className="h-4 w-4 text-foreground" />
                       </div>
-                      <div>
-                        <CardTitle>Pitch Paul</CardTitle>
-                        <CardDescription>
-                          E-Mails generieren lassen
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">Pitch Paul</CardTitle>
+                        <CardDescription className="text-xs">
+                          E-Mails generieren
                         </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Lassen Sie personalisierte Cold-Calling E-Mails basierend auf der
-                      Firmenanalyse erstellen.
-                    </p>
+                  <CardContent className="pt-0">
                     <Button 
+                      size="sm"
                       className="w-full" 
                       variant="outline" 
                       disabled={!canManage}
                       onClick={() => navigate(`/projects/${id}/pitch-paul`)}
                     >
-                      <Mail className="mr-2 h-4 w-4" />
+                      <Mail className="mr-2 h-3 w-3" />
                       Mit Paul chatten
                     </Button>
                   </CardContent>
@@ -387,30 +378,28 @@ export default function ProjectDashboard() {
 
                 {/* Branding Britta Card */}
                 <Card className="border-2 border-purple-500/20 hover:border-purple-500/40 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center">
-                        <Sparkles className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                        <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <div>
-                        <CardTitle>Branding Britta</CardTitle>
-                        <CardDescription>
-                          E-Mails verschönern lassen
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">Branding Britta</CardTitle>
+                        <CardDescription className="text-xs">
+                          E-Mails verschönern
                         </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Verbessern Sie Ihre E-Mails mit Icons, Formatierung und professionellem Design.
-                    </p>
+                  <CardContent className="pt-0">
                     <Button 
+                      size="sm"
                       className="w-full" 
                       variant="outline" 
                       disabled={!canManage}
                       onClick={() => navigate(`/projects/${id}/branding-britta`)}
                     >
-                      <Sparkles className="mr-2 h-4 w-4" />
+                      <Sparkles className="mr-2 h-3 w-3" />
                       Mit Britta chatten
                     </Button>
                   </CardContent>
@@ -418,26 +407,22 @@ export default function ProjectDashboard() {
 
                 {/* Email Versand Card */}
                 <Card className="border-2 border-green-500/20 hover:border-green-500/40 transition-colors">
-                  <CardHeader>
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
-                        <Send className="h-5 w-5 text-green-600" />
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                        <Send className="h-4 w-4 text-green-600" />
                       </div>
-                      <div>
-                        <CardTitle>E-Mail Versand</CardTitle>
-                        <CardDescription>
+                      <div className="min-w-0">
+                        <CardTitle className="text-base">E-Mail Versand</CardTitle>
+                        <CardDescription className="text-xs">
                           E-Mails versenden
                         </CardDescription>
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Senden Sie die generierten E-Mails einzeln oder im Batch-Modus an
-                      Ihre Kontakte.
-                    </p>
-                    <Button className="w-full" variant="outline" disabled={!canManage}>
-                      <Send className="mr-2 h-4 w-4" />
+                  <CardContent className="pt-0">
+                    <Button size="sm" className="w-full" variant="outline" disabled={!canManage}>
+                      <Send className="mr-2 h-3 w-3" />
                       E-Mails senden
                     </Button>
                   </CardContent>
