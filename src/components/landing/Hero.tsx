@@ -4,9 +4,22 @@ import { Sparkles, ArrowRight } from 'lucide-react';
 
 export const Hero = () => {
   return (
-    <section className="relative flex min-h-[90vh] items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
+    <section className="relative flex min-h-[90vh] items-center justify-center px-4 py-20 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Animated Gradient Orbs Background */}
+      <div className="absolute inset-0">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }} />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1000ms' }} />
+        {/* Grid Pattern */}
+        <div 
+          className="absolute inset-0 opacity-[0.02]"
+          style={{
+            backgroundImage: `linear-gradient(to right, currentColor 1px, transparent 1px),
+                             linear-gradient(to bottom, currentColor 1px, transparent 1px)`,
+            backgroundSize: '24px 24px',
+          }}
+        />
+      </div>
       
       {/* Content */}
       <div className="relative z-10 mx-auto max-w-4xl text-center space-y-8">
@@ -26,8 +39,8 @@ export const Hero = () => {
 
         {/* Subtitle */}
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
-          Mit Cold Calling nutzen Sie drei KI-Workflows, um automatisch Firmen zu finden, 
-          deren Websites zu analysieren und personalisierte Sales-E-Mails zu generieren.
+          Mit Cold Calling nutzen Sie vier KI-Workflows, um automatisch Firmen zu finden, 
+          deren Websites zu analysieren und personalisierte Sales-E-Mails zu generieren und zu optimieren.
         </p>
 
         {/* CTA Buttons */}
@@ -48,7 +61,7 @@ export const Hero = () => {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-8 pt-12 border-t border-border/50">
           <div>
-            <div className="text-3xl font-bold text-primary">3</div>
+            <div className="text-3xl font-bold text-primary">4</div>
             <div className="text-sm text-muted-foreground">KI-Workflows</div>
           </div>
           <div>

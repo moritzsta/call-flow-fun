@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Brain, Mail } from 'lucide-react';
+import { Search, Brain, Mail, Sparkles } from 'lucide-react';
 
 const features = [
   {
@@ -26,6 +26,14 @@ const features = [
     color: 'text-green-500',
     bgColor: 'bg-green-500/10',
   },
+  {
+    icon: Sparkles,
+    title: 'Branding Britta',
+    description: 'E-Mail-Optimierung durch KI',
+    details: 'Britta verbessert Ihre E-Mails mit KI-gestütztem Copywriting. Sie optimiert Betreffzeilen, Ansprache und Call-to-Actions für maximale Öffnungs- und Klickraten.',
+    color: 'text-orange-500',
+    bgColor: 'bg-orange-500/10',
+  },
 ];
 
 export const Features = () => {
@@ -38,12 +46,12 @@ export const Features = () => {
             Ihre KI-Assistenten für Sales
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Drei spezialisierte KI-Workflows arbeiten Hand in Hand, um Ihre Kaltakquise zu automatisieren
+            Vier spezialisierte KI-Workflows arbeiten Hand in Hand, um Ihre Kaltakquise zu automatisieren
           </p>
         </div>
 
         {/* Features Grid */}
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (

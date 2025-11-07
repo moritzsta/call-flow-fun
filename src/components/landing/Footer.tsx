@@ -44,19 +44,24 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">Ressourcen</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  Dokumentation
+                <Link to="/about" className="hover:text-foreground transition-colors">
+                  Über uns
+                </Link>
+              </li>
+              <li>
+                <a href="#features" className="hover:text-foreground transition-colors">
+                  Features
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  Support
-                </a>
+                <Link to="/pricing" className="hover:text-foreground transition-colors">
+                  Preise
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
-                  FAQ
-                </a>
+                <Link to="/contact" className="hover:text-foreground transition-colors">
+                  Kontakt
+                </Link>
               </li>
             </ul>
           </div>
@@ -66,19 +71,19 @@ export const Footer = () => {
             <h4 className="font-semibold mb-4">Rechtliches</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <Link to="/imprint" className="hover:text-foreground transition-colors">
                   Impressum
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <Link to="/privacy" className="hover:text-foreground transition-colors">
                   Datenschutz
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <Link to="/terms" className="hover:text-foreground transition-colors">
                   AGB
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
