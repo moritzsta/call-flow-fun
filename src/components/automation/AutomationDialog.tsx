@@ -16,6 +16,7 @@ const automationSchema = z.object({
   state: z.string().min(1, 'Bundesland erforderlich'),
   category: z.string().min(1, 'Kategorie ist erforderlich').max(200),
   vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(1000),
+  maxCompanies: z.number().positive('Bitte geben Sie eine positive Zahl ein').optional().or(z.literal(undefined)),
 });
 
 type AutomationFormData = z.infer<typeof automationSchema>;
@@ -51,6 +52,7 @@ export const AutomationDialog = ({
       state: '',
       category: '',
       vorhaben: '',
+      maxCompanies: undefined,
     },
   });
 
@@ -202,6 +204,27 @@ export const AutomationDialog = ({
           {errors.vorhaben && (
             <p className="text-sm text-destructive">{errors.vorhaben.message}</p>
           )}
+        </div>
+
+        {/* Max Companies (Optional) */}
+        <div className="space-y-2">
+          <Label htmlFor="maxCompanies">Maximale Anzahl Firmen (optional)</Label>
+          <Input
+            id="maxCompanies"
+            type="number"
+            min="1"
+            placeholder="z.B. 50"
+            {...register('maxCompanies', { 
+              setValueAs: (v) => v === '' || v === null ? undefined : parseInt(v, 10) 
+            })}
+            disabled={isStarting}
+          />
+          {errors.maxCompanies && (
+            <p className="text-sm text-destructive">{String(errors.maxCompanies.message)}</p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Leer lassen für unbegrenzte Suche
+          </p>
         </div>
 
         {/* Actions */}

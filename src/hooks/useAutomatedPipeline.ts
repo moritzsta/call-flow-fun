@@ -9,6 +9,7 @@ interface PipelineConfig {
   state: string;
   category: string;
   vorhaben: string;
+  maxCompanies?: number;
 }
 
 interface StartPipelineParams {
@@ -113,7 +114,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Starting Finder Felix...');
         setCurrentPhase('felix');
         
-        const felixMessage = `🤖 Automatisch: Suche mir bitte alle Firmen zur Kategorie "${config.category}" in der Stadt ${config.city}, ${config.state}`;
+        const felixMessage = `🤖 Automatisch: Suche mir bitte alle Firmen zur Kategorie "${config.category}" in der Stadt ${config.city}, ${config.state}${config.maxCompanies ? `. Begrenze deine Suche auf ${config.maxCompanies} Firmen` : ''}`;
         await felixChat.sendMessage(felixMessage);
 
         // Wait for workflow state to be created
