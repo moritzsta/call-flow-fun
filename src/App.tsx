@@ -27,6 +27,7 @@ import WorkflowAnalyseAnna from "./pages/WorkflowAnalyseAnna";
 import WorkflowPitchPaul from "./pages/WorkflowPitchPaul";
 import WorkflowBrandingBritta from "./pages/WorkflowBrandingBritta";
 import AutomationStatus from "./pages/AutomationStatus";
+import ProjectWorkflows from "./pages/ProjectWorkflows";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +127,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AutomationStatus />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/workflows" 
+              element={
+                <ProtectedRoute>
+                  <ProjectWorkflows />
                 </ProtectedRoute>
               } 
             />

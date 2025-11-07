@@ -82,6 +82,7 @@ export default function ProjectDashboard() {
   const totalEmails = emails.length;
   const draftEmails = emails.filter((e) => e.status === 'draft').length;
   const sentEmails = emails.filter((e) => e.status === 'sent').length;
+  const improvedEmails = emails.filter((e) => e.body_improved && e.body_improved.length > 0).length;
 
   if (orgsLoading || membersLoading) {
     return (
@@ -236,6 +237,10 @@ export default function ProjectDashboard() {
                           <Badge variant="secondary" className="text-xs">
                             Versendet: {emailsLoading ? '-' : sentEmails}
                           </Badge>
+                          <Badge variant="secondary" className="text-xs bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20">
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Verbessert: {emailsLoading ? '-' : improvedEmails}
+                          </Badge>
                         </div>
                       </div>
                       <div className="h-12 w-12 rounded-full bg-accent/10 flex items-center justify-center">
@@ -246,7 +251,10 @@ export default function ProjectDashboard() {
                 </Card>
 
                 {/* Workflows Card */}
-                <Card>
+                <Card 
+                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => navigate(`/projects/${id}/workflows`)}
+                >
                   <CardHeader className="pb-3">
                     <CardTitle className="text-sm font-medium text-muted-foreground">
                       Workflows
