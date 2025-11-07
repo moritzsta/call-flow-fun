@@ -7,9 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle2, Circle, Clock, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertCircle, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface WorkflowState {
   id: string;
@@ -22,6 +24,7 @@ interface WorkflowState {
 
 export default function AutomationStatus() {
   const { id: projectId } = useParams();
+  const navigate = useNavigate();
 
   // Fetch latest pipeline
   const { data: pipeline, isLoading: pipelineLoading, refetch } = useQuery({
@@ -158,18 +161,21 @@ export default function AutomationStatus() {
       workflow: felixWorkflow,
       icon: Circle,
       description: 'Firmen suchen',
+      chatPath: `/projects/${projectId}/workflows/finder-felix`,
     },
     {
       name: 'Analyse Anna',
       workflow: annaWorkflow,
       icon: Circle,
       description: 'Firmen analysieren',
+      chatPath: `/projects/${projectId}/workflows/analyse-anna`,
     },
     {
       name: 'Pitch Paul',
       workflow: paulWorkflow,
       icon: Circle,
       description: 'E-Mails generieren',
+      chatPath: `/projects/${projectId}/workflows/pitch-paul`,
     },
   ];
 
@@ -332,9 +338,24 @@ export default function AutomationStatus() {
                           <h3 className="font-semibold">{phase.name}</h3>
                           <p className="text-sm text-muted-foreground">{phase.description}</p>
                         </div>
-                        {phase.workflow && (
-                          <WorkflowStatusBadge status={phase.workflow.status} />
-                        )}
+                        <div className="flex items-center gap-2">
+                          {phase.workflow && (
+                            <>
+                              <WorkflowStatusBadge status={phase.workflow.status} />
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(phase.chatPath);
+                                }}
+                              >
+                                <MessageSquare className="h-4 w-4 mr-2" />
+                                Chat öffnen
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       {phase.workflow?.result_summary && (

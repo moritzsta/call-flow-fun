@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useWorkflowTrigger } from './useWorkflowTrigger';
+import { useWorkflowChat } from './useWorkflowChat';
 import { toast } from 'sonner';
 
 interface PipelineConfig {
@@ -20,11 +20,26 @@ interface StartPipelineParams {
 type PipelinePhase = 'felix' | 'anna' | 'paul';
 type PipelineStatus = 'idle' | 'running' | 'completed' | 'failed';
 
-export const useAutomatedPipeline = () => {
+export const useAutomatedPipeline = (projectId?: string) => {
   const [currentPhase, setCurrentPhase] = useState<PipelinePhase | null>(null);
   const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus>('idle');
-  const { triggerWorkflow } = useWorkflowTrigger();
   const queryClient = useQueryClient();
+
+  // Initialize chat instances for each workflow
+  const felixChat = useWorkflowChat({
+    workflowName: 'finder_felix',
+    projectId: projectId || '',
+  });
+
+  const annaChat = useWorkflowChat({
+    workflowName: 'analyse_anna',
+    projectId: projectId || '',
+  });
+
+  const paulChat = useWorkflowChat({
+    workflowName: 'pitch_paul',
+    projectId: projectId || '',
+  });
 
   const waitForWorkflowCompletion = (workflowId: string, projectId: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -89,97 +104,70 @@ export const useAutomatedPipeline = () => {
       const pipelineId = pipeline.id;
 
       try {
-        // 2. Trigger Finder Felix
+        // 2. Trigger Finder Felix via Chat
         console.log('[Pipeline] Starting Finder Felix...');
         setCurrentPhase('felix');
         
-        const felixMessage = `Suche mir bitte alle Firmen zur Kategorie "${config.category}" in der Stadt ${config.city}, ${config.state}`;
-        
-        const felixPromise = new Promise<string>((resolve, reject) => {
-          triggerWorkflow(
-            {
-              workflowName: 'finder_felix',
-              projectId,
-              userId,
-              triggerData: { user_message: felixMessage },
-            },
-            {
-              onSuccess: (data) => resolve(data.workflow_id),
-              onError: (error) => reject(error),
-            }
-          );
-        });
+        const felixMessage = `🤖 Automatisch: Suche mir bitte alle Firmen zur Kategorie "${config.category}" in der Stadt ${config.city}, ${config.state}`;
+        await felixChat.sendMessage(felixMessage);
 
-        const felixWorkflowId = await felixPromise;
+        // Wait for workflow state to be created
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
+        if (!felixChat.workflowStateId) {
+          throw new Error('Felix Workflow-State konnte nicht erstellt werden');
+        }
+
         await supabase
           .from('automation_pipelines')
-          .update({ felix_workflow_id: felixWorkflowId })
+          .update({ felix_workflow_id: felixChat.workflowStateId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(felixWorkflowId, projectId);
+        await waitForWorkflowCompletion(felixChat.workflowStateId, projectId);
         console.log('[Pipeline] Finder Felix completed');
 
-        // 3. Trigger Analyse Anna
+        // 3. Trigger Analyse Anna via Chat
         console.log('[Pipeline] Starting Analyse Anna...');
         setCurrentPhase('anna');
         
-        const annaMessage = `Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        
-        const annaPromise = new Promise<string>((resolve, reject) => {
-          triggerWorkflow(
-            {
-              workflowName: 'analyse_anna',
-              projectId,
-              userId,
-              triggerData: { user_message: annaMessage },
-            },
-            {
-              onSuccess: (data) => resolve(data.workflow_id),
-              onError: (error) => reject(error),
-            }
-          );
-        });
+        const annaMessage = `🤖 Automatisch: Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
+        await annaChat.sendMessage(annaMessage);
 
-        const annaWorkflowId = await annaPromise;
+        // Wait for workflow state to be created
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
+        if (!annaChat.workflowStateId) {
+          throw new Error('Anna Workflow-State konnte nicht erstellt werden');
+        }
+
         await supabase
           .from('automation_pipelines')
-          .update({ anna_workflow_id: annaWorkflowId })
+          .update({ anna_workflow_id: annaChat.workflowStateId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(annaWorkflowId, projectId);
+        await waitForWorkflowCompletion(annaChat.workflowStateId, projectId);
         console.log('[Pipeline] Analyse Anna completed');
 
-        // 4. Trigger Pitch Paul
+        // 4. Trigger Pitch Paul via Chat
         console.log('[Pipeline] Starting Pitch Paul...');
         setCurrentPhase('paul');
         
-        const paulMessage = `Bitte generiere E-Mails für alle Firmen in der Datenbank, welche eine E-Mail-Adresse hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        
-        const paulPromise = new Promise<string>((resolve, reject) => {
-          triggerWorkflow(
-            {
-              workflowName: 'pitch_paul',
-              projectId,
-              userId,
-              triggerData: { user_message: paulMessage },
-            },
-            {
-              onSuccess: (data) => resolve(data.workflow_id),
-              onError: (error) => reject(error),
-            }
-          );
-        });
+        const paulMessage = `🤖 Automatisch: Bitte generiere E-Mails für alle Firmen in der Datenbank, welche eine E-Mail-Adresse hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
+        await paulChat.sendMessage(paulMessage);
 
-        const paulWorkflowId = await paulPromise;
+        // Wait for workflow state to be created
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
+        if (!paulChat.workflowStateId) {
+          throw new Error('Paul Workflow-State konnte nicht erstellt werden');
+        }
+
         await supabase
           .from('automation_pipelines')
-          .update({ paul_workflow_id: paulWorkflowId })
+          .update({ paul_workflow_id: paulChat.workflowStateId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(paulWorkflowId, projectId);
+        await waitForWorkflowCompletion(paulChat.workflowStateId, projectId);
         console.log('[Pipeline] Pitch Paul completed');
 
         // 5. Mark pipeline as completed

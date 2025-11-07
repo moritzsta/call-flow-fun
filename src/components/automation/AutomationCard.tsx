@@ -16,7 +16,7 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { startPipeline, isRunning, currentPhase } = useAutomatedPipeline();
+  const { startPipeline, isRunning, currentPhase } = useAutomatedPipeline(projectId);
 
   const handleStart = (config: any) => {
     if (!user) return;
