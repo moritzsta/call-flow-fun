@@ -129,6 +129,9 @@ export const useAutomatedPipeline = (projectId?: string) => {
         await waitForWorkflowCompletion(felixWorkflowId, projectId);
         console.log('[Pipeline] Finder Felix completed');
 
+        // Small delay before Anna to prevent n8n cold start issues
+        await new Promise(resolve => setTimeout(resolve, 1200));
+
         // 3. Trigger Analyse Anna via Chat
         console.log('[Pipeline] Starting Analyse Anna...');
         setCurrentPhase('anna');

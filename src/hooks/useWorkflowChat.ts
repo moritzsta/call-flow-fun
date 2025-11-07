@@ -198,7 +198,9 @@ export const useWorkflowChat = ({
 
       return currentWorkflowStateId;
     } catch (error) {
-      console.error('Error sending message:', error);
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      const contentPreview = content.substring(0, 60);
+      console.error(`[useWorkflowChat] Error in ${workflowName}, msg: "${contentPreview}...": ${errorMsg}`);
       toast.error('Fehler beim Senden der Nachricht');
       setIsLoading(false);
       return undefined;
