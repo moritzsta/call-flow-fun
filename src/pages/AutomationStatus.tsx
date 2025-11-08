@@ -337,13 +337,13 @@ export default function AutomationStatus() {
           ${pipeline.status === 'completed' ? 'ring-2 ring-green-500/30 shadow-lg shadow-green-500/10' : ''}
           ${pipeline.status === 'failed' ? 'ring-2 ring-destructive/30 shadow-lg shadow-destructive/10' : ''}
         `}>
-          <CardHeader className="pb-1">
+          <CardHeader className="pb-1 pt-3">
             <CardTitle className="flex items-center gap-2 text-lg">
               <Activity className={`h-4 w-4 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
               Gesamtstatus
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1.5 pt-0">
+          <CardContent className="space-y-1.5 pt-0 pb-3">
             <div className="grid md:grid-cols-2 gap-2">
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Status</p>
@@ -385,11 +385,11 @@ export default function AutomationStatus() {
             {(pipeline.status === 'running' || pipeline.status === 'alive') && (() => {
               const activeWorkflow = workflows.find(w => w.status === 'running' || w.status === 'alive');
               if (activeWorkflow) {
-                return <div className="my-1"><WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} /></div>;
+                return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} /></div>;
               }
               // Show timer animation during waiting period between workflows
               if (timeUntilNextPhase !== null && timeUntilNextPhase > 0) {
-                return <div className="my-1"><WorkflowLoadingAnimation workflowName="timer" /></div>;
+                return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName="timer" /></div>;
               }
               return null;
             })()}
