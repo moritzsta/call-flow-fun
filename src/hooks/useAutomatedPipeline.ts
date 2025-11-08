@@ -205,40 +205,16 @@ export const useAutomatedPipeline = (projectId?: string) => {
         await waitForWorkflowCompletion(felixWorkflowId, projectId);
         console.log('[Pipeline] Finder Felix completed');
 
-        // Longer delay before Anna to prevent n8n cold start issues
-        console.log('[Pipeline] Waiting 5 seconds before starting Anna...');
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // 6 Minuten Wartezeit vor Anna
+        console.log('[Pipeline] Waiting 6 minutes before starting Anna...');
+        await new Promise(resolve => setTimeout(resolve, 360000));
 
-        // 3. Trigger Analyse Anna via Chat with retry logic
+        // 3. Trigger Analyse Anna via Chat
         console.log('[Pipeline] Starting Analyse Anna...');
         setCurrentPhase('anna');
         
         const annaMessage = `System-Message: Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        
-        let annaWorkflowId: string | undefined;
-        let annaAttempts = 0;
-        const maxAnnaAttempts = 3;
-        
-        while (!annaWorkflowId && annaAttempts < maxAnnaAttempts) {
-          annaAttempts++;
-          console.log(`[Pipeline] Anna attempt ${annaAttempts}/${maxAnnaAttempts}`);
-          
-          try {
-            annaWorkflowId = await annaChat.sendMessage(annaMessage);
-            if (!annaWorkflowId) {
-              throw new Error('No workflow ID returned');
-            }
-          } catch (error) {
-            console.error(`[Pipeline] Anna attempt ${annaAttempts} failed:`, error);
-            if (annaAttempts < maxAnnaAttempts) {
-              const delay = annaAttempts * 3000; // 3s, 6s
-              console.log(`[Pipeline] Retrying Anna in ${delay}ms...`);
-              await new Promise(resolve => setTimeout(resolve, delay));
-            } else {
-              throw new Error('Anna Workflow konnte nach 3 Versuchen nicht gestartet werden');
-            }
-          }
-        }
+        const annaWorkflowId = await annaChat.sendMessage(annaMessage);
         
         if (!annaWorkflowId) {
           throw new Error('Anna Workflow-State konnte nicht erstellt werden');
@@ -251,6 +227,10 @@ export const useAutomatedPipeline = (projectId?: string) => {
 
         await waitForWorkflowCompletion(annaWorkflowId, projectId);
         console.log('[Pipeline] Analyse Anna completed');
+
+        // 6 Minuten Wartezeit vor Paul
+        console.log('[Pipeline] Waiting 6 minutes before starting Paul...');
+        await new Promise(resolve => setTimeout(resolve, 360000));
 
         // 4. Trigger Pitch Paul via Chat
         console.log('[Pipeline] Starting Pitch Paul...');
@@ -270,6 +250,10 @@ export const useAutomatedPipeline = (projectId?: string) => {
 
         await waitForWorkflowCompletion(paulWorkflowId, projectId);
         console.log('[Pipeline] Pitch Paul completed');
+
+        // 6 Minuten Wartezeit vor Britta
+        console.log('[Pipeline] Waiting 6 minutes before starting Britta...');
+        await new Promise(resolve => setTimeout(resolve, 360000));
 
         // 5. Trigger Branding Britta via Chat
         console.log('[Pipeline] Starting Branding Britta...');
