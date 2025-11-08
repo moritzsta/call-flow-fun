@@ -27,7 +27,7 @@ import {
   Sparkles,
   Timer
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface WorkflowState {
   id: string;
@@ -46,6 +46,8 @@ export default function AutomationStatus() {
   const [timeSinceUpdate, setTimeSinceUpdate] = useState<{[key: string]: number}>({});
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowState | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showProgressPulse, setShowProgressPulse] = useState(false);
+  const prevTimeSinceUpdate = useRef<number>(0);
 
   // Fetch latest pipeline
   const { data: pipeline, isLoading: pipelineLoading, refetch } = useQuery({
@@ -201,6 +203,21 @@ export default function AutomationStatus() {
 
     return () => clearInterval(interval);
   }, [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow]);
+
+  // Detect workflow updates and trigger pulse effect
+  useEffect(() => {
+    if (Object.keys(timeSinceUpdate).length === 0) return;
+
+    const currentMax = Math.max(...Object.values(timeSinceUpdate));
+    
+    // If time since update drops significantly (> 5 seconds), an update occurred
+    if (prevTimeSinceUpdate.current > 5 && currentMax < prevTimeSinceUpdate.current - 5) {
+      setShowProgressPulse(true);
+      setTimeout(() => setShowProgressPulse(false), 1200);
+    }
+    
+    prevTimeSinceUpdate.current = currentMax;
+  }, [timeSinceUpdate]);
 
   const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null): 'pending' | 'running' | 'completed' | 'failed' | 'alive' => {
     if (!workflow) return 'pending';
@@ -383,7 +400,8 @@ export default function AutomationStatus() {
                 <span className="text-2xl font-bold tabular-nums">{Math.round(progress)}%</span>
               </div>
               <Progress 
-                value={progress} 
+                value={progress}
+                showPulse={showProgressPulse}
                 className={`
                   h-3 transition-all duration-500
                   ${pipeline.status === 'running' ? 'bg-primary/10' : 'bg-secondary'}
