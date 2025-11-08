@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 interface WorkflowState {
   id: string;
   workflow_name: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'alive';
   result_summary: any;
   started_at: string;
   completed_at: string | null;
@@ -103,7 +103,7 @@ export default function AutomationStatus() {
     };
   }, [projectId, pipeline?.id, refetch]);
 
-  // Calculate time until next phase (4 minutes between workflows)
+  // Calculate time until next phase (2 minutes between workflows)
   useEffect(() => {
     if (pipeline?.status !== 'running' || !workflows.length) {
       setTimeUntilNextPhase(null);
@@ -119,11 +119,11 @@ export default function AutomationStatus() {
       if (completedWorkflows.length > 0) {
         const lastCompleted = completedWorkflows[0];
         const completedTime = new Date(lastCompleted.completed_at!).getTime();
-        const nextPhaseTime = completedTime + (4 * 60 * 1000); // 4 minutes
+        const nextPhaseTime = completedTime + (2 * 60 * 1000); // 2 minutes
         const now = Date.now();
         const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
 
-        if (remaining > 0 && remaining < 240) { // Only show if within 4 minutes
+        if (remaining > 0 && remaining < 120) { // Only show if within 2 minutes
           setTimeUntilNextPhase(remaining);
         } else {
           setTimeUntilNextPhase(null);
@@ -151,12 +151,12 @@ export default function AutomationStatus() {
   const paulWorkflow = getWorkflowByName('pitch_paul');
   const brittaWorkflow = getWorkflowByName('branding_britta');
 
-  // Track time since last update for running workflows
+  // Track time since last update for running and alive workflows
   useEffect(() => {
     const interval = setInterval(() => {
       const updates: {[key: string]: number} = {};
       [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow].forEach(workflow => {
-        if (workflow?.status === 'running' && workflow.updated_at) {
+        if (workflow && (workflow.status === 'running' || workflow.status === 'alive') && workflow.updated_at) {
           const secondsSince = Math.floor((Date.now() - new Date(workflow.updated_at).getTime()) / 1000);
           updates[workflow.workflow_name] = secondsSince;
         }
@@ -437,14 +437,15 @@ export default function AutomationStatus() {
                         </div>
                       </div>
 
-                      {phase.workflow?.status === 'running' && (
+                      {(phase.workflow?.status === 'running' || phase.workflow?.status === 'alive') && (
                         <div className="mt-2 text-sm text-muted-foreground">
                           Gestartet am {new Date(phase.workflow.started_at).toLocaleString('de-DE')}
                           {timeSinceUpdate[phase.workflow.workflow_name] !== undefined && (
                             <div className="flex items-center gap-2 mt-1 text-emerald-600 dark:text-emerald-400">
                               <Activity className="w-4 h-4 animate-pulse" />
                               <span>
-                                Workflow aktiv (zuletzt aktualisiert vor {timeSinceUpdate[phase.workflow.workflow_name]}s)
+                                {phase.workflow.status === 'alive' ? 'Workflow aktiv' : 'Läuft'} 
+                                (zuletzt aktualisiert vor {timeSinceUpdate[phase.workflow.workflow_name]}s)
                               </span>
                             </div>
                           )}

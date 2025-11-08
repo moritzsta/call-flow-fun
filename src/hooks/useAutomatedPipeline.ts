@@ -116,15 +116,23 @@ export const useAutomatedPipeline = (projectId?: string) => {
     projectId: projectId || '',
   });
 
-  const waitForWorkflowCompletion = async (workflowId: string, projectId: string, workflowName?: string): Promise<void> => {
+  const waitForWorkflowAndCheckActivity = async (
+    workflowId: string, 
+    projectId: string, 
+    workflowName?: string
+  ): Promise<'completed' | 'timeout'> => {
     return new Promise(async (resolve, reject) => {
-      // 1. Initial State Check - vor Subscribe aktuellen Status prüfen
+      let lastUpdateTime = Date.now();
+      const INACTIVITY_TIMEOUT = 4 * 60 * 1000; // 4 Minuten
+      const MAX_TIMEOUT = workflowName === 'analyse_anna' ? 30 * 60 * 1000 : 10 * 60 * 1000;
+      
+      // Initial State Check
       const { data: initialState, error: fetchError } = await supabase
         .from('n8n_workflow_states')
-        .select('status')
+        .select('status, updated_at')
         .eq('id', workflowId)
         .single();
-
+        
       if (fetchError) {
         console.error(`[Pipeline] Error fetching initial workflow state for ${workflowId}:`, fetchError);
       } else if (initialState) {
@@ -132,42 +140,60 @@ export const useAutomatedPipeline = (projectId?: string) => {
         
         if (initialState.status === 'completed') {
           console.log('[Pipeline] Workflow already completed');
-          return resolve();
-        } else if (initialState.status === 'failed') {
-          return reject(new Error('Workflow bereits fehlgeschlagen'));
+          return resolve('completed');
         }
+        
+        lastUpdateTime = new Date(initialState.updated_at || Date.now()).getTime();
       }
-
-      // Anna can take up to 30 minutes, others 10 minutes
-      const timeoutDuration = workflowName === 'analyse_anna' ? 30 * 60 * 1000 : 10 * 60 * 1000;
-      const timeout = setTimeout(() => {
-        console.error(`[Pipeline] Timeout for workflow ${workflowId} after ${timeoutDuration / 60000} minutes`);
+      
+      // Max Timeout (absoluter Failsafe)
+      const maxTimeout = setTimeout(() => {
         cleanup();
-        reject(new Error(`Workflow-Timeout nach ${timeoutDuration / 60000} Minuten`));
-      }, timeoutDuration);
-
-      // 2. Polling Fallback - alle 10 Sekunden Status prüfen
-      const pollingInterval = setInterval(async () => {
+        reject(new Error(`Workflow-Timeout nach ${MAX_TIMEOUT / 60000} Minuten`));
+      }, MAX_TIMEOUT);
+      
+      // Inaktivitäts-Check (alle 30 Sekunden)
+      const inactivityCheck = setInterval(async () => {
         const { data: currentState } = await supabase
           .from('n8n_workflow_states')
-          .select('status')
+          .select('status, updated_at')
           .eq('id', workflowId)
           .single();
-
-        if (currentState) {
-          console.log(`[Pipeline] Polling check - Workflow ${workflowId} status: ${currentState.status}`);
           
-          if (currentState.status === 'completed') {
-            cleanup();
-            resolve();
-          } else if (currentState.status === 'failed') {
-            cleanup();
-            reject(new Error('Workflow fehlgeschlagen'));
-          }
+        if (!currentState) return;
+        
+        const currentUpdateTime = new Date(currentState.updated_at).getTime();
+        const timeSinceUpdate = Date.now() - currentUpdateTime;
+        
+        console.log(`[Pipeline] Inactivity check - ${workflowId}: ${Math.floor(timeSinceUpdate / 1000)}s since last update`);
+        
+        // Wenn 4 Minuten keine Updates → Timeout
+        if (timeSinceUpdate >= INACTIVITY_TIMEOUT) {
+          console.warn(`[Pipeline] Workflow ${workflowId} inactive for 4 minutes - marking as failed but continuing pipeline`);
+          
+          // Status auf "failed" setzen
+          await supabase
+            .from('n8n_workflow_states')
+            .update({ status: 'failed' })
+            .eq('id', workflowId);
+          
+          cleanup();
+          resolve('timeout'); // Pipeline läuft weiter!
         }
-      }, 10000);
-
-      // 3. Realtime Subscription
+        
+        // Wenn completed → fertig
+        if (currentState.status === 'completed') {
+          cleanup();
+          resolve('completed');
+        }
+        
+        // Update lastUpdateTime wenn es neue Updates gab
+        if (currentUpdateTime > lastUpdateTime) {
+          lastUpdateTime = currentUpdateTime;
+        }
+      }, 30000); // Alle 30 Sekunden
+      
+      // Realtime Subscription für sofortige Updates
       const channel = supabase
         .channel(`workflow-completion:${workflowId}`)
         .on(
@@ -180,26 +206,29 @@ export const useAutomatedPipeline = (projectId?: string) => {
           },
           (payload) => {
             const status = payload.new.status;
-            console.log(`[Pipeline] Realtime update - Workflow ${workflowId} status: ${status}`);
-
+            const updated_at = payload.new.updated_at;
+            
+            console.log(`[Pipeline] Realtime update - ${workflowId}: ${status}`);
+            
+            // Update lastUpdateTime
+            lastUpdateTime = new Date(updated_at).getTime();
+            
             if (status === 'completed') {
               cleanup();
-              resolve();
+              resolve('completed');
             } else if (status === 'failed') {
               cleanup();
-              reject(new Error('Workflow fehlgeschlagen'));
-            } else if (status === 'alive') {
-              console.log(`[Pipeline] Workflow ${workflowId} is alive`);
+              resolve('timeout');
             }
           }
         )
         .subscribe((status) => {
           console.log(`[Pipeline] Subscription status for ${workflowId}: ${status}`);
         });
-
+      
       const cleanup = () => {
-        clearTimeout(timeout);
-        clearInterval(pollingInterval);
+        clearTimeout(maxTimeout);
+        clearInterval(inactivityCheck);
         supabase.removeChannel(channel);
       };
     });
@@ -252,12 +281,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ felix_workflow_id: felixWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(felixWorkflowId, projectId, 'finder_felix');
-        console.log('[Pipeline] Finder Felix completed');
+        const felixResult = await waitForWorkflowAndCheckActivity(felixWorkflowId, projectId, 'finder_felix');
+        
+        if (felixResult === 'timeout') {
+          console.warn('[Pipeline] Felix timed out, but continuing pipeline...');
+          toast.warning('Finder Felix wurde beendet (keine Aktivität), Pipeline läuft weiter');
+        } else {
+          console.log('[Pipeline] Finder Felix completed');
+        }
 
-        // 4 Minuten Wartezeit vor Anna
-        console.log('[Pipeline] Waiting 4 minutes before starting Anna...');
-        await new Promise(resolve => setTimeout(resolve, 240000));
+        // 2 Minuten Wartezeit vor Anna
+        console.log('[Pipeline] Waiting 2 minutes before starting Anna...');
+        await new Promise(resolve => setTimeout(resolve, 120000));
 
         // 3. Trigger Analyse Anna via Chat
         console.log('[Pipeline] Starting Analyse Anna...');
@@ -275,12 +310,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ anna_workflow_id: annaWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(annaWorkflowId, projectId, 'analyse_anna');
-        console.log('[Pipeline] Analyse Anna completed');
+        const annaResult = await waitForWorkflowAndCheckActivity(annaWorkflowId, projectId, 'analyse_anna');
+        
+        if (annaResult === 'timeout') {
+          console.warn('[Pipeline] Anna timed out, but continuing pipeline...');
+          toast.warning('Analyse Anna wurde beendet (keine Aktivität), Pipeline läuft weiter');
+        } else {
+          console.log('[Pipeline] Analyse Anna completed');
+        }
 
-        // 4 Minuten Wartezeit vor Paul
-        console.log('[Pipeline] Waiting 4 minutes before starting Paul...');
-        await new Promise(resolve => setTimeout(resolve, 240000));
+        // 2 Minuten Wartezeit vor Paul
+        console.log('[Pipeline] Waiting 2 minutes before starting Paul...');
+        await new Promise(resolve => setTimeout(resolve, 120000));
 
         // 4. Trigger Pitch Paul via Chat
         console.log('[Pipeline] Starting Pitch Paul...');
@@ -298,12 +339,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ paul_workflow_id: paulWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(paulWorkflowId, projectId, 'pitch_paul');
-        console.log('[Pipeline] Pitch Paul completed');
+        const paulResult = await waitForWorkflowAndCheckActivity(paulWorkflowId, projectId, 'pitch_paul');
+        
+        if (paulResult === 'timeout') {
+          console.warn('[Pipeline] Paul timed out, but continuing pipeline...');
+          toast.warning('Pitch Paul wurde beendet (keine Aktivität), Pipeline läuft weiter');
+        } else {
+          console.log('[Pipeline] Pitch Paul completed');
+        }
 
-        // 4 Minuten Wartezeit vor Britta
-        console.log('[Pipeline] Waiting 4 minutes before starting Britta...');
-        await new Promise(resolve => setTimeout(resolve, 240000));
+        // 2 Minuten Wartezeit vor Britta
+        console.log('[Pipeline] Waiting 2 minutes before starting Britta...');
+        await new Promise(resolve => setTimeout(resolve, 120000));
 
         // 5. Trigger Branding Britta via Chat
         console.log('[Pipeline] Starting Branding Britta...');
@@ -321,8 +368,14 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ britta_workflow_id: brittaWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(brittaWorkflowId, projectId, 'branding_britta');
-        console.log('[Pipeline] Branding Britta completed');
+        const brittaResult = await waitForWorkflowAndCheckActivity(brittaWorkflowId, projectId, 'branding_britta');
+        
+        if (brittaResult === 'timeout') {
+          console.warn('[Pipeline] Britta timed out, but continuing pipeline...');
+          toast.warning('Branding Britta wurde beendet (keine Aktivität), Pipeline läuft weiter');
+        } else {
+          console.log('[Pipeline] Branding Britta completed');
+        }
 
         // 6. Mark pipeline as completed
         await supabase
