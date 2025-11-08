@@ -116,12 +116,14 @@ export const useAutomatedPipeline = (projectId?: string) => {
     projectId: projectId || '',
   });
 
-  const waitForWorkflowCompletion = (workflowId: string, projectId: string): Promise<void> => {
+  const waitForWorkflowCompletion = (workflowId: string, projectId: string, workflowName?: string): Promise<void> => {
     return new Promise((resolve, reject) => {
+      // Anna can take up to 10 hours, use 12h timeout for safety
+      const timeoutDuration = workflowName === 'analyse_anna' ? 12 * 60 * 60 * 1000 : 10 * 60 * 1000;
       const timeout = setTimeout(() => {
         cleanup();
-        reject(new Error('Workflow-Timeout nach 10 Minuten'));
-      }, 10 * 60 * 1000); // 10 minutes timeout
+        reject(new Error(`Workflow-Timeout nach ${timeoutDuration / 60000} Minuten`));
+      }, timeoutDuration);
 
       const channel = supabase
         .channel(`workflow-completion:${workflowId}`)
@@ -202,12 +204,12 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ felix_workflow_id: felixWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(felixWorkflowId, projectId);
+        await waitForWorkflowCompletion(felixWorkflowId, projectId, 'finder_felix');
         console.log('[Pipeline] Finder Felix completed');
 
-        // 6 Minuten Wartezeit vor Anna
-        console.log('[Pipeline] Waiting 6 minutes before starting Anna...');
-        await new Promise(resolve => setTimeout(resolve, 360000));
+        // 4 Minuten Wartezeit vor Anna
+        console.log('[Pipeline] Waiting 4 minutes before starting Anna...');
+        await new Promise(resolve => setTimeout(resolve, 240000));
 
         // 3. Trigger Analyse Anna via Chat
         console.log('[Pipeline] Starting Analyse Anna...');
@@ -225,12 +227,12 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ anna_workflow_id: annaWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(annaWorkflowId, projectId);
+        await waitForWorkflowCompletion(annaWorkflowId, projectId, 'analyse_anna');
         console.log('[Pipeline] Analyse Anna completed');
 
-        // 6 Minuten Wartezeit vor Paul
-        console.log('[Pipeline] Waiting 6 minutes before starting Paul...');
-        await new Promise(resolve => setTimeout(resolve, 360000));
+        // 4 Minuten Wartezeit vor Paul
+        console.log('[Pipeline] Waiting 4 minutes before starting Paul...');
+        await new Promise(resolve => setTimeout(resolve, 240000));
 
         // 4. Trigger Pitch Paul via Chat
         console.log('[Pipeline] Starting Pitch Paul...');
@@ -248,12 +250,12 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ paul_workflow_id: paulWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(paulWorkflowId, projectId);
+        await waitForWorkflowCompletion(paulWorkflowId, projectId, 'pitch_paul');
         console.log('[Pipeline] Pitch Paul completed');
 
-        // 6 Minuten Wartezeit vor Britta
-        console.log('[Pipeline] Waiting 6 minutes before starting Britta...');
-        await new Promise(resolve => setTimeout(resolve, 360000));
+        // 4 Minuten Wartezeit vor Britta
+        console.log('[Pipeline] Waiting 4 minutes before starting Britta...');
+        await new Promise(resolve => setTimeout(resolve, 240000));
 
         // 5. Trigger Branding Britta via Chat
         console.log('[Pipeline] Starting Branding Britta...');
@@ -271,7 +273,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
           .update({ britta_workflow_id: brittaWorkflowId })
           .eq('id', pipelineId);
 
-        await waitForWorkflowCompletion(brittaWorkflowId, projectId);
+        await waitForWorkflowCompletion(brittaWorkflowId, projectId, 'branding_britta');
         console.log('[Pipeline] Branding Britta completed');
 
         // 6. Mark pipeline as completed

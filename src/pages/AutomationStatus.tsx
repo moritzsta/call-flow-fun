@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle2, Circle, Clock, AlertCircle, MessageSquare } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertCircle, MessageSquare, Timer } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -25,6 +25,7 @@ interface WorkflowState {
 export default function AutomationStatus() {
   const { id: projectId } = useParams();
   const navigate = useNavigate();
+  const [timeUntilNextPhase, setTimeUntilNextPhase] = useState<number | null>(null);
 
   // Fetch latest pipeline
   const { data: pipeline, isLoading: pipelineLoading, refetch } = useQuery({
@@ -98,6 +99,45 @@ export default function AutomationStatus() {
       supabase.removeChannel(channel);
     };
   }, [projectId, pipeline?.id, refetch]);
+
+  // Calculate time until next phase (4 minutes between workflows)
+  useEffect(() => {
+    if (pipeline?.status !== 'running' || !workflows.length) {
+      setTimeUntilNextPhase(null);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      // Find the last completed workflow
+      const completedWorkflows = workflows
+        .filter(w => w.completed_at)
+        .sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime());
+
+      if (completedWorkflows.length > 0) {
+        const lastCompleted = completedWorkflows[0];
+        const completedTime = new Date(lastCompleted.completed_at!).getTime();
+        const nextPhaseTime = completedTime + (4 * 60 * 1000); // 4 minutes
+        const now = Date.now();
+        const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
+
+        if (remaining > 0 && remaining < 240) { // Only show if within 4 minutes
+          setTimeUntilNextPhase(remaining);
+        } else {
+          setTimeUntilNextPhase(null);
+        }
+      } else {
+        setTimeUntilNextPhase(null);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [pipeline, workflows]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const getWorkflowByName = (name: string) => {
     return workflows.find((w) => w.workflow_name === name);
@@ -235,6 +275,18 @@ export default function AutomationStatus() {
                   <div className="flex-1">
                     <p className="font-medium text-destructive">Fehler</p>
                     <p className="text-sm text-destructive/80">{pipeline.error_message}</p>
+                  </div>
+                </div>
+              )}
+
+              {timeUntilNextPhase !== null && (
+                <div className="flex items-center gap-3 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                  <Timer className="h-5 w-5 text-blue-600 animate-pulse" />
+                  <div className="flex-1">
+                    <p className="font-medium text-blue-600">Wartezeit zwischen Workflows</p>
+                    <p className="text-sm text-blue-600/80">
+                      Nächste Phase startet in {formatTime(timeUntilNextPhase)}
+                    </p>
                   </div>
                 </div>
               )}
