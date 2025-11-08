@@ -348,7 +348,11 @@ export default function AutomationStatus() {
                 <div className="space-y-2 text-right">
                   <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Aktuelle Phase</p>
                   <p className="text-2xl font-bold capitalize bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    {pipeline.current_phase}
+                    {pipeline.current_phase === 'felix' ? 'Finder Felix' :
+                     pipeline.current_phase === 'anna' ? 'Analyse Anna' :
+                     pipeline.current_phase === 'paul' ? 'Pitch Paul' :
+                     pipeline.current_phase === 'britta' ? 'Branding Britta' :
+                     pipeline.current_phase}
                   </p>
                 </div>
               )}
@@ -378,7 +382,7 @@ export default function AutomationStatus() {
               </div>
             )}
 
-            {timeUntilNextPhase !== null && timeUntilNextPhase > 0 && (
+            {pipeline.status === 'running' && timeUntilNextPhase !== null && timeUntilNextPhase > 0 && (
               <div className="flex items-center gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-fade-in">
                 <Timer className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-pulse flex-shrink-0" />
                 <div>
@@ -438,12 +442,14 @@ export default function AutomationStatus() {
                   </div>
                 </div>
               )}
-              {(pipeline.config as any).projectDescription && (
+              {((pipeline.config as any).projectDescription || (pipeline.config as any).vorhaben) && (
                 <div className="flex items-start gap-3 md:col-span-3 p-4 rounded-lg bg-muted/50">
                   <FileText className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <p className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Projektbeschreibung</p>
-                    <p className="text-base leading-relaxed mt-2">{(pipeline.config as any).projectDescription}</p>
+                    <p className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Ihr Vorhaben</p>
+                    <p className="text-base leading-relaxed mt-2">
+                      {(pipeline.config as any).projectDescription || (pipeline.config as any).vorhaben}
+                    </p>
                   </div>
                 </div>
               )}
