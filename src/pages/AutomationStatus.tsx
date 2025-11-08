@@ -337,27 +337,27 @@ export default function AutomationStatus() {
           ${pipeline.status === 'completed' ? 'ring-2 ring-green-500/30 shadow-lg shadow-green-500/10' : ''}
           ${pipeline.status === 'failed' ? 'ring-2 ring-destructive/30 shadow-lg shadow-destructive/10' : ''}
         `}>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-3 text-2xl">
-              <Activity className={`h-6 w-6 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <Activity className={`h-5 w-5 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
               Gesamtstatus
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 pt-0">
             <div className="grid md:grid-cols-2 gap-3">
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Status</p>
                 <WorkflowStatusBadge 
                   status={pipeline.status as 'pending' | 'running' | 'completed' | 'failed' | 'alive'}
-                  className="text-base px-4 py-2 animate-scale-in"
+                  className="text-sm px-3 py-1.5 animate-scale-in"
                 />
               </div>
               {(
                 (workflows && workflows.length > 0) || pipeline.status === 'completed'
               ) && (
-                <div className="space-y-2 text-right">
+                <div className="space-y-1.5 text-right">
                   <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Aktuelle Phase</p>
-                  <p className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                  <p className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                     {(() => {
                       const map: Record<string, string> = {
                         finder_felix: 'Finder Felix',
@@ -385,19 +385,19 @@ export default function AutomationStatus() {
             {(pipeline.status === 'running' || pipeline.status === 'alive') && (() => {
               const activeWorkflow = workflows.find(w => w.status === 'running' || w.status === 'alive');
               if (activeWorkflow) {
-                return <WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} />;
+                return <div className="my-3"><WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} /></div>;
               }
               // Show timer animation during waiting period between workflows
               if (timeUntilNextPhase !== null && timeUntilNextPhase > 0) {
-                return <WorkflowLoadingAnimation workflowName="timer" />;
+                return <div className="my-3"><WorkflowLoadingAnimation workflowName="timer" /></div>;
               }
               return null;
             })()}
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="font-semibold text-base">Gesamtfortschritt</span>
-                <span className="text-2xl font-bold tabular-nums">{Math.round(progress)}%</span>
+                <span className="font-medium text-sm">Gesamtfortschritt</span>
+                <span className="text-xl font-bold tabular-nums">{Math.round(progress)}%</span>
               </div>
               <Progress 
                 value={progress}
@@ -410,21 +410,21 @@ export default function AutomationStatus() {
             </div>
 
             {pipeline.error_message && (
-              <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg animate-fade-in">
-                <AlertCircle className="h-6 w-6 text-destructive mt-0.5 flex-shrink-0" />
-                <div className="space-y-1">
-                  <p className="font-semibold text-destructive text-base">Fehler aufgetreten</p>
+              <div className="flex items-start gap-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg animate-fade-in">
+                <AlertCircle className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+                <div className="space-y-0.5">
+                  <p className="font-semibold text-destructive text-sm">Fehler aufgetreten</p>
                   <p className="text-sm text-destructive/90 leading-relaxed">{pipeline.error_message}</p>
                 </div>
               </div>
             )}
 
             {pipeline.status === 'running' && timeUntilNextPhase !== null && timeUntilNextPhase > 0 && (
-              <div className="flex items-center gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-fade-in">
-                <Timer className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-pulse flex-shrink-0" />
+              <div className="flex items-center gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-fade-in">
+                <Timer className="h-5 w-5 text-blue-600 dark:text-blue-400 animate-pulse flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Nächste Phase startet in</p>
-                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                  <p className="text-xs font-medium text-muted-foreground">Nächste Phase startet in</p>
+                  <p className="text-xl font-bold text-blue-600 dark:text-blue-400 tabular-nums">
                     {formatTime(timeUntilNextPhase)}
                   </p>
                 </div>
@@ -432,8 +432,8 @@ export default function AutomationStatus() {
             )}
 
             {timeSinceUpdate && Object.keys(timeSinceUpdate).length > 0 && pipeline.status === 'running' && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
-                <Clock className="h-4 w-4 animate-pulse" />
+              <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1.5 border-t">
+                <Clock className="h-3.5 w-3.5 animate-pulse" />
                 <span className="tabular-nums">
                   Letzte Aktivität vor <span className="font-semibold">
                     {Math.floor(Math.max(...Object.values(timeSinceUpdate)) / 60)}m {Math.max(...Object.values(timeSinceUpdate)) % 60}s
