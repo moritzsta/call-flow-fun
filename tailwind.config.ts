@@ -124,6 +124,16 @@ export default {
             boxShadow: "0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3), 0 0 30px hsl(var(--primary) / 0.2)",
           },
         },
+        "particle-rise": {
+          "0%": {
+            transform: "translateY(0) scale(1)",
+            opacity: "1",
+          },
+          "100%": {
+            transform: "translateY(-40px) scale(0.5)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -131,6 +141,7 @@ export default {
         "sweep-pulse": "sweep-pulse 1s ease-out",
         "progress-shimmer": "progress-shimmer 2s linear infinite",
         "progress-glow": "progress-glow 2s ease-in-out infinite",
+        "particle-rise": "particle-rise 1.2s ease-out forwards",
       },
     },
   },
