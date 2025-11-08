@@ -116,15 +116,58 @@ export const useAutomatedPipeline = (projectId?: string) => {
     projectId: projectId || '',
   });
 
-  const waitForWorkflowCompletion = (workflowId: string, projectId: string, workflowName?: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
+  const waitForWorkflowCompletion = async (workflowId: string, projectId: string, workflowName?: string): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      // 1. Initial State Check - vor Subscribe aktuellen Status prüfen
+      const { data: initialState, error: fetchError } = await supabase
+        .from('n8n_workflow_states')
+        .select('status')
+        .eq('id', workflowId)
+        .single();
+
+      if (fetchError) {
+        console.error(`[Pipeline] Error fetching initial workflow state for ${workflowId}:`, fetchError);
+      } else if (initialState) {
+        console.log(`[Pipeline] Initial status for ${workflowId}: ${initialState.status}`);
+        
+        if (initialState.status === 'completed') {
+          console.log('[Pipeline] Workflow already completed');
+          return resolve();
+        } else if (initialState.status === 'failed') {
+          return reject(new Error('Workflow bereits fehlgeschlagen'));
+        }
+      }
+
       // Anna can take up to 30 minutes, others 10 minutes
       const timeoutDuration = workflowName === 'analyse_anna' ? 30 * 60 * 1000 : 10 * 60 * 1000;
       const timeout = setTimeout(() => {
+        console.error(`[Pipeline] Timeout for workflow ${workflowId} after ${timeoutDuration / 60000} minutes`);
         cleanup();
         reject(new Error(`Workflow-Timeout nach ${timeoutDuration / 60000} Minuten`));
       }, timeoutDuration);
 
+      // 2. Polling Fallback - alle 10 Sekunden Status prüfen
+      const pollingInterval = setInterval(async () => {
+        const { data: currentState } = await supabase
+          .from('n8n_workflow_states')
+          .select('status')
+          .eq('id', workflowId)
+          .single();
+
+        if (currentState) {
+          console.log(`[Pipeline] Polling check - Workflow ${workflowId} status: ${currentState.status}`);
+          
+          if (currentState.status === 'completed') {
+            cleanup();
+            resolve();
+          } else if (currentState.status === 'failed') {
+            cleanup();
+            reject(new Error('Workflow fehlgeschlagen'));
+          }
+        }
+      }, 10000);
+
+      // 3. Realtime Subscription
       const channel = supabase
         .channel(`workflow-completion:${workflowId}`)
         .on(
@@ -137,7 +180,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
           },
           (payload) => {
             const status = payload.new.status;
-            console.log(`[Pipeline] Workflow ${workflowId} status: ${status}`);
+            console.log(`[Pipeline] Realtime update - Workflow ${workflowId} status: ${status}`);
 
             if (status === 'completed') {
               cleanup();
@@ -145,13 +188,18 @@ export const useAutomatedPipeline = (projectId?: string) => {
             } else if (status === 'failed') {
               cleanup();
               reject(new Error('Workflow fehlgeschlagen'));
+            } else if (status === 'alive') {
+              console.log(`[Pipeline] Workflow ${workflowId} is alive`);
             }
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log(`[Pipeline] Subscription status for ${workflowId}: ${status}`);
+        });
 
       const cleanup = () => {
         clearTimeout(timeout);
+        clearInterval(pollingInterval);
         supabase.removeChannel(channel);
       };
     });
