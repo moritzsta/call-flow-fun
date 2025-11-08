@@ -205,15 +205,40 @@ export const useAutomatedPipeline = (projectId?: string) => {
         await waitForWorkflowCompletion(felixWorkflowId, projectId);
         console.log('[Pipeline] Finder Felix completed');
 
-        // Small delay before Anna to prevent n8n cold start issues
-        await new Promise(resolve => setTimeout(resolve, 1200));
+        // Longer delay before Anna to prevent n8n cold start issues
+        console.log('[Pipeline] Waiting 5 seconds before starting Anna...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
-        // 3. Trigger Analyse Anna via Chat
+        // 3. Trigger Analyse Anna via Chat with retry logic
         console.log('[Pipeline] Starting Analyse Anna...');
         setCurrentPhase('anna');
         
         const annaMessage = `System-Message: Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        const annaWorkflowId = await annaChat.sendMessage(annaMessage);
+        
+        let annaWorkflowId: string | undefined;
+        let annaAttempts = 0;
+        const maxAnnaAttempts = 3;
+        
+        while (!annaWorkflowId && annaAttempts < maxAnnaAttempts) {
+          annaAttempts++;
+          console.log(`[Pipeline] Anna attempt ${annaAttempts}/${maxAnnaAttempts}`);
+          
+          try {
+            annaWorkflowId = await annaChat.sendMessage(annaMessage);
+            if (!annaWorkflowId) {
+              throw new Error('No workflow ID returned');
+            }
+          } catch (error) {
+            console.error(`[Pipeline] Anna attempt ${annaAttempts} failed:`, error);
+            if (annaAttempts < maxAnnaAttempts) {
+              const delay = annaAttempts * 3000; // 3s, 6s
+              console.log(`[Pipeline] Retrying Anna in ${delay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+            } else {
+              throw new Error('Anna Workflow konnte nach 3 Versuchen nicht gestartet werden');
+            }
+          }
+        }
         
         if (!annaWorkflowId) {
           throw new Error('Anna Workflow-State konnte nicht erstellt werden');
