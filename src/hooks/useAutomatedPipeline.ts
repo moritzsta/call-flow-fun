@@ -118,8 +118,8 @@ export const useAutomatedPipeline = (projectId?: string) => {
 
   const waitForWorkflowCompletion = (workflowId: string, projectId: string, workflowName?: string): Promise<void> => {
     return new Promise((resolve, reject) => {
-      // Anna can take up to 10 hours, use 12h timeout for safety
-      const timeoutDuration = workflowName === 'analyse_anna' ? 12 * 60 * 60 * 1000 : 10 * 60 * 1000;
+      // Anna can take up to 30 minutes, others 10 minutes
+      const timeoutDuration = workflowName === 'analyse_anna' ? 30 * 60 * 1000 : 10 * 60 * 1000;
       const timeout = setTimeout(() => {
         cleanup();
         reject(new Error(`Workflow-Timeout nach ${timeoutDuration / 60000} Minuten`));

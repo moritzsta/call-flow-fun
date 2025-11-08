@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle2, Circle, Clock, AlertCircle, MessageSquare, Timer } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, AlertCircle, MessageSquare, Timer, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,12 +20,14 @@ interface WorkflowState {
   result_summary: any;
   started_at: string;
   completed_at: string | null;
+  updated_at: string;
 }
 
 export default function AutomationStatus() {
   const { id: projectId } = useParams();
   const navigate = useNavigate();
   const [timeUntilNextPhase, setTimeUntilNextPhase] = useState<number | null>(null);
+  const [timeSinceUpdate, setTimeSinceUpdate] = useState<{[key: string]: number}>({});
 
   // Fetch latest pipeline
   const { data: pipeline, isLoading: pipelineLoading, refetch } = useQuery({
@@ -148,6 +150,22 @@ export default function AutomationStatus() {
   const annaWorkflow = getWorkflowByName('analyse_anna');
   const paulWorkflow = getWorkflowByName('pitch_paul');
   const brittaWorkflow = getWorkflowByName('branding_britta');
+
+  // Track time since last update for running workflows
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const updates: {[key: string]: number} = {};
+      [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow].forEach(workflow => {
+        if (workflow?.status === 'running' && workflow.updated_at) {
+          const secondsSince = Math.floor((Date.now() - new Date(workflow.updated_at).getTime()) / 1000);
+          updates[workflow.workflow_name] = secondsSince;
+        }
+      });
+      setTimeSinceUpdate(updates);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow]);
 
   const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null) => {
     if (!workflow) return 'pending';
@@ -418,6 +436,20 @@ export default function AutomationStatus() {
                           )}
                         </div>
                       </div>
+
+                      {phase.workflow?.status === 'running' && (
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          Gestartet am {new Date(phase.workflow.started_at).toLocaleString('de-DE')}
+                          {timeSinceUpdate[phase.workflow.workflow_name] !== undefined && (
+                            <div className="flex items-center gap-2 mt-1 text-emerald-600 dark:text-emerald-400">
+                              <Activity className="w-4 h-4 animate-pulse" />
+                              <span>
+                                Workflow aktiv (zuletzt aktualisiert vor {timeSinceUpdate[phase.workflow.workflow_name]}s)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       {phase.workflow?.result_summary && (
                         <div className="mt-2 p-3 bg-muted/50 rounded-lg text-sm">
