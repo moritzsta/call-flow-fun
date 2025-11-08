@@ -59,6 +59,7 @@ export default function AutomationStatus() {
         pipeline.felix_workflow_id,
         pipeline.anna_workflow_id,
         pipeline.paul_workflow_id,
+        pipeline.britta_workflow_id,
       ].filter(Boolean);
 
       if (workflowIds.length === 0) return [];
@@ -146,6 +147,7 @@ export default function AutomationStatus() {
   const felixWorkflow = getWorkflowByName('finder_felix');
   const annaWorkflow = getWorkflowByName('analyse_anna');
   const paulWorkflow = getWorkflowByName('pitch_paul');
+  const brittaWorkflow = getWorkflowByName('branding_britta');
 
   const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null) => {
     if (!workflow) return 'pending';
@@ -159,11 +161,11 @@ export default function AutomationStatus() {
     if (!pipeline) return 0;
     if (pipeline.status === 'completed') return 100;
     
-    const phases = ['felix', 'anna', 'paul'];
+    const phases = ['felix', 'anna', 'paul', 'britta'];
     const currentIndex = phases.indexOf(pipeline.current_phase || '');
     
     if (currentIndex === -1) return 0;
-    return ((currentIndex + 1) / 3) * 100;
+    return ((currentIndex + 1) / 4) * 100;
   };
 
   if (pipelineLoading) {
@@ -216,6 +218,13 @@ export default function AutomationStatus() {
       icon: Circle,
       description: 'E-Mails generieren',
       chatPath: `/projects/${projectId}/workflows/pitch-paul`,
+    },
+    {
+      name: 'Branding Britta',
+      workflow: brittaWorkflow,
+      icon: Circle,
+      description: 'E-Mails optimieren',
+      chatPath: `/projects/${projectId}/workflows/branding-britta`,
     },
   ];
 
