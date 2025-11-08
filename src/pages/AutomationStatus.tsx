@@ -1,17 +1,32 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
-import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle2, Circle, Clock, AlertCircle, MessageSquare, Timer, Activity } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
+import { WorkflowProgressBadge } from '@/components/workflows/WorkflowProgressBadge';
+import { useWorkflowProgress } from '@/hooks/useWorkflowProgress';
+import { ChatInterface } from '@/components/workflows/ChatInterface';
+import { 
+  Clock, 
+  CheckCircle2, 
+  AlertCircle, 
+  ArrowLeft, 
+  MessageSquare,
+  Activity,
+  MapPin,
+  Target,
+  FileText,
+  Building2,
+  BarChart3,
+  Mail,
+  Sparkles,
+  Timer
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface WorkflowState {
   id: string;
@@ -28,6 +43,8 @@ export default function AutomationStatus() {
   const navigate = useNavigate();
   const [timeUntilNextPhase, setTimeUntilNextPhase] = useState<number | null>(null);
   const [timeSinceUpdate, setTimeSinceUpdate] = useState<{[key: string]: number}>({});
+  const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowState | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // Fetch latest pipeline
   const { data: pipeline, isLoading: pipelineLoading, refetch } = useQuery({
@@ -46,10 +63,15 @@ export default function AutomationStatus() {
     },
     enabled: !!projectId,
     refetchInterval: (query) => {
-      // Refetch every 2 seconds if pipeline is running
       return query.state.data?.status === 'running' ? 2000 : false;
     },
   });
+
+  // Get workflow progress data
+  const workflowProgress = useWorkflowProgress(
+    pipeline?.project_id, 
+    pipeline?.status === 'running'
+  );
 
   // Fetch workflow states
   const { data: workflows = [] } = useQuery({
@@ -114,7 +136,6 @@ export default function AutomationStatus() {
       const now = Date.now();
       let triggerTime: number | null = null;
 
-      // Map phase names to workflow names
       const phaseToWorkflowName: {[key: string]: string} = {
         felix: 'finder_felix',
         anna: 'analyse_anna',
@@ -130,25 +151,20 @@ export default function AutomationStatus() {
         return;
       }
 
-      // Determine trigger time based on current workflow status
       if (currentWorkflow.status === 'completed' && currentWorkflow.completed_at) {
-        // Workflow completed normally - start countdown from completed_at
         triggerTime = new Date(currentWorkflow.completed_at).getTime();
       } else if (currentWorkflow.status === 'failed') {
-        // Workflow failed - start countdown from failure time (updated_at)
         triggerTime = new Date(currentWorkflow.updated_at).getTime();
       } else {
-        // Workflow is running or alive - check if 4 minutes have passed since last update
         const lastUpdate = new Date(currentWorkflow.updated_at).getTime();
-        const inactivityTimeout = 4 * 60 * 1000; // 4 minutes
+        const inactivityTimeout = 4 * 60 * 1000;
         if (now >= lastUpdate + inactivityTimeout) {
           triggerTime = lastUpdate + inactivityTimeout;
         }
       }
 
-      // Calculate remaining time and display only if within 2-minute window
       if (triggerTime) {
-        const nextPhaseTime = triggerTime + (2 * 60 * 1000); // 2 minutes after trigger
+        const nextPhaseTime = triggerTime + (2 * 60 * 1000);
         const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
 
         if (remaining > 0 && remaining <= 120) {
@@ -195,12 +211,9 @@ export default function AutomationStatus() {
     return () => clearInterval(interval);
   }, [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow]);
 
-  const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null) => {
+  const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null): 'pending' | 'running' | 'completed' | 'failed' | 'alive' => {
     if (!workflow) return 'pending';
-    if (workflow.status === 'completed') return 'completed';
-    if (workflow.status === 'failed') return 'failed';
-    if (workflow.status === 'running') return 'running';
-    return 'pending';
+    return workflow.status;
   };
 
   const calculateProgress = () => {
@@ -217,10 +230,12 @@ export default function AutomationStatus() {
   if (pipelineLoading) {
     return (
       <Layout>
-        <div className="container mx-auto p-6 space-y-6">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-64 w-full" />
+        <div className="container mx-auto py-8 space-y-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-10 bg-muted rounded w-1/3"></div>
+            <div className="h-72 bg-muted rounded"></div>
+            <div className="h-[500px] bg-muted rounded"></div>
+          </div>
         </div>
       </Layout>
     );
@@ -229,14 +244,20 @@ export default function AutomationStatus() {
   if (!pipeline) {
     return (
       <Layout>
-        <div className="container mx-auto p-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Keine Pipeline gefunden</CardTitle>
-              <CardDescription>
-                Es wurde noch keine Automation-Pipeline gestartet.
-              </CardDescription>
-            </CardHeader>
+        <div className="container mx-auto py-8 animate-fade-in">
+          <Card className="border-destructive/50">
+            <CardContent className="py-12 text-center">
+              <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <p className="text-lg font-medium text-muted-foreground">Pipeline nicht gefunden</p>
+              <Button 
+                variant="outline" 
+                onClick={() => navigate(-1)} 
+                className="mt-4"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Zurück
+              </Button>
+            </CardContent>
           </Card>
         </div>
       </Layout>
@@ -246,162 +267,200 @@ export default function AutomationStatus() {
   const phases = [
     {
       name: 'Finder Felix',
+      description: 'Findet passende Unternehmen basierend auf Ihren Kriterien',
       workflow: felixWorkflow,
-      icon: Circle,
-      description: 'Firmen suchen',
-      chatPath: `/projects/${projectId}/workflows/finder-felix`,
+      progressIcon: Building2,
+      progressCount: workflowProgress.felixCount,
+      progressLabel: 'Firmen gefunden',
     },
     {
       name: 'Analyse Anna',
+      description: 'Analysiert gefundene Unternehmen im Detail',
       workflow: annaWorkflow,
-      icon: Circle,
-      description: 'Firmen analysieren',
-      chatPath: `/projects/${projectId}/workflows/analyse-anna`,
+      progressIcon: BarChart3,
+      progressCount: workflowProgress.annaCount,
+      progressLabel: 'Analysen erstellt',
     },
     {
       name: 'Pitch Paul',
+      description: 'Erstellt personalisierte E-Mails für jedes Unternehmen',
       workflow: paulWorkflow,
-      icon: Circle,
-      description: 'E-Mails generieren',
-      chatPath: `/projects/${projectId}/workflows/pitch-paul`,
+      progressIcon: Mail,
+      progressCount: workflowProgress.paulCount,
+      progressLabel: 'E-Mails erstellt',
     },
     {
       name: 'Branding Britta',
+      description: 'Optimiert und finalisiert alle E-Mails',
       workflow: brittaWorkflow,
-      icon: Circle,
-      description: 'E-Mails optimieren',
-      chatPath: `/projects/${projectId}/workflows/branding-britta`,
+      progressIcon: Sparkles,
+      progressCount: workflowProgress.brittaCount,
+      progressLabel: 'E-Mails optimiert',
     },
   ];
 
+  const progress = calculateProgress();
+
   return (
     <Layout>
-      <div className="container mx-auto p-6 space-y-6">
+      <div className="container mx-auto py-8 space-y-8">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">Automation Pipeline</h1>
-          <p className="text-muted-foreground">
-            Überwachen Sie den Fortschritt Ihrer automatischen Workflows
-          </p>
+        <div className="flex items-center justify-between animate-fade-in">
+          <div>
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="mb-4 hover-scale"
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Zurück
+            </Button>
+            <h1 className="text-4xl font-bold tracking-tight">Automatisierungs-Pipeline</h1>
+            <p className="text-muted-foreground mt-2 text-lg">
+              Status und Fortschritt Ihrer automatischen Akquise
+            </p>
+          </div>
         </div>
 
         {/* Overall Status Card */}
-        <Card>
+        <Card className={`
+          animate-fade-in transition-all duration-300
+          ${pipeline.status === 'running' ? 'ring-2 ring-primary/30 shadow-lg shadow-primary/10' : ''}
+          ${pipeline.status === 'completed' ? 'ring-2 ring-green-500/30 shadow-lg shadow-green-500/10' : ''}
+          ${pipeline.status === 'failed' ? 'ring-2 ring-destructive/30 shadow-lg shadow-destructive/10' : ''}
+        `}>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Gesamt-Status</CardTitle>
-                <CardDescription>
-                  {pipeline.status === 'running' && 'Pipeline wird ausgeführt...'}
-                  {pipeline.status === 'completed' && 'Pipeline erfolgreich abgeschlossen'}
-                  {pipeline.status === 'failed' && 'Pipeline fehlgeschlagen'}
-                </CardDescription>
-              </div>
-              <Badge
-                variant={
-                  pipeline.status === 'completed'
-                    ? 'default'
-                    : pipeline.status === 'failed'
-                    ? 'destructive'
-                    : 'secondary'
-                }
-              >
-                {pipeline.status === 'running' && 'Läuft'}
-                {pipeline.status === 'completed' && 'Abgeschlossen'}
-                {pipeline.status === 'failed' && 'Fehlgeschlagen'}
-              </Badge>
-            </div>
+            <CardTitle className="flex items-center gap-3 text-2xl">
+              <Activity className={`h-6 w-6 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
+              Gesamtstatus
+            </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium">Fortschritt</span>
-                  <span className="text-sm text-muted-foreground">
-                    {Math.round(calculateProgress())}%
-                  </span>
-                </div>
-                <Progress value={calculateProgress()} />
+          <CardContent className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Status</p>
+                <WorkflowStatusBadge 
+                  status={pipeline.status as 'pending' | 'running' | 'completed' | 'failed' | 'alive'}
+                  className="text-base px-4 py-2 animate-scale-in"
+                />
               </div>
-
-              {pipeline.error_message && (
-                <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-                  <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
-                  <div className="flex-1">
-                    <p className="font-medium text-destructive">Fehler</p>
-                    <p className="text-sm text-destructive/80">{pipeline.error_message}</p>
-                  </div>
-                </div>
-              )}
-
-              {timeUntilNextPhase !== null && (
-                <div className="flex items-center gap-3 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-                  <Timer className="h-5 w-5 text-blue-600 animate-pulse" />
-                  <div className="flex-1">
-                    <p className="font-medium text-blue-600">Wartezeit zwischen Workflows</p>
-                    <p className="text-sm text-blue-600/80">
-                      Nächste Phase startet in {formatTime(timeUntilNextPhase)}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Gestartet:</span>
-                  <p className="font-medium">
-                    {new Date(pipeline.created_at).toLocaleString('de-DE')}
+              {pipeline.current_phase && (
+                <div className="space-y-2 text-right">
+                  <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Aktuelle Phase</p>
+                  <p className="text-2xl font-bold capitalize bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    {pipeline.current_phase}
                   </p>
                 </div>
-                {pipeline.completed_at && (
-                  <div>
-                    <span className="text-muted-foreground">Abgeschlossen:</span>
-                    <p className="font-medium">
-                      {new Date(pipeline.completed_at).toLocaleString('de-DE')}
-                    </p>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
+
+            <div className="space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="font-semibold text-base">Gesamtfortschritt</span>
+                <span className="text-2xl font-bold tabular-nums">{Math.round(progress)}%</span>
+              </div>
+              <Progress 
+                value={progress} 
+                className={`
+                  h-3 transition-all duration-500
+                  ${pipeline.status === 'running' ? 'bg-primary/10' : 'bg-secondary'}
+                `}
+              />
+            </div>
+
+            {pipeline.error_message && (
+              <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-lg animate-fade-in">
+                <AlertCircle className="h-6 w-6 text-destructive mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="font-semibold text-destructive text-base">Fehler aufgetreten</p>
+                  <p className="text-sm text-destructive/90 leading-relaxed">{pipeline.error_message}</p>
+                </div>
+              </div>
+            )}
+
+            {timeUntilNextPhase !== null && timeUntilNextPhase > 0 && (
+              <div className="flex items-center gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg animate-fade-in">
+                <Timer className="h-6 w-6 text-blue-600 dark:text-blue-400 animate-pulse flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Nächste Phase startet in</p>
+                  <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                    {formatTime(timeUntilNextPhase)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {timeSinceUpdate && Object.keys(timeSinceUpdate).length > 0 && pipeline.status === 'running' && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground pt-2 border-t">
+                <Clock className="h-4 w-4 animate-pulse" />
+                <span className="tabular-nums">
+                  Letzte Aktivität vor <span className="font-semibold">
+                    {Math.floor(Math.max(...Object.values(timeSinceUpdate)) / 60)}m {Math.max(...Object.values(timeSinceUpdate)) % 60}s
+                  </span>
+                </span>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* Pipeline Configuration */}
-        <Card>
+        <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
           <CardHeader>
-            <CardTitle>Konfiguration</CardTitle>
+            <CardTitle className="text-xl">Pipeline-Konfiguration</CardTitle>
+            <CardDescription>Einstellungen für diese Automatisierung</CardDescription>
           </CardHeader>
           <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Stadt:</span>
-                  <p className="font-medium">
-                    {(pipeline.config as any).city}, {(pipeline.config as any).state}
-                  </p>
+            <div className="grid md:grid-cols-3 gap-6">
+              {(pipeline.config as any).city && (
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Stadt</p>
+                    <p className="text-base font-medium mt-1">{(pipeline.config as any).city}</p>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Kategorie:</span>
-                  <p className="font-medium">{(pipeline.config as any).category}</p>
+              )}
+              {(pipeline.config as any).state && (
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Bundesland</p>
+                    <p className="text-base font-medium mt-1">{(pipeline.config as any).state}</p>
+                  </div>
                 </div>
-                <div className="col-span-2">
-                  <span className="text-muted-foreground">Vorhaben:</span>
-                  <p className="font-medium">{(pipeline.config as any).vorhaben}</p>
+              )}
+              {(pipeline.config as any).category && (
+                <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  <Target className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Branche</p>
+                    <p className="text-base font-medium mt-1">{(pipeline.config as any).category}</p>
+                  </div>
                 </div>
-              </div>
+              )}
+              {(pipeline.config as any).projectDescription && (
+                <div className="flex items-start gap-3 md:col-span-3 p-4 rounded-lg bg-muted/50">
+                  <FileText className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Projektbeschreibung</p>
+                    <p className="text-base leading-relaxed mt-2">{(pipeline.config as any).projectDescription}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
         {/* Workflow Timeline */}
-        <Card>
+        <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
           <CardHeader>
-            <CardTitle>Workflow Timeline</CardTitle>
-            <CardDescription>Schritt-für-Schritt Ausführung</CardDescription>
+            <CardTitle className="text-xl">Workflow-Ablauf</CardTitle>
+            <CardDescription>Status der einzelnen Automatisierungsschritte</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-8">
               {phases.map((phase, index) => {
                 const status = getPhaseStatus(phase.workflow, pipeline.current_phase);
-                // Map current_phase to workflow_name properly
                 const phaseToWorkflowName: {[key: string]: string} = {
                   felix: 'finder_felix',
                   anna: 'analyse_anna',
@@ -411,89 +470,119 @@ export default function AutomationStatus() {
                 const isActive = pipeline.current_phase && phaseToWorkflowName[pipeline.current_phase] === phase.workflow?.workflow_name;
 
                 return (
-                  <div key={phase.name} className="flex gap-4">
+                  <div 
+                    key={phase.name} 
+                    className="flex gap-6 animate-fade-in"
+                    style={{ animationDelay: `${300 + index * 100}ms` }}
+                  >
+                    {/* Timeline indicator */}
                     <div className="flex flex-col items-center">
                       <div
-                        className={cn(
-                          'rounded-full p-2 border-2',
-                          status === 'completed' &&
-                            'bg-green-500/10 border-green-500 text-green-600',
-                          status === 'running' &&
-                            'bg-blue-500/10 border-blue-500 text-blue-600 animate-pulse',
-                          status === 'failed' &&
-                            'bg-red-500/10 border-red-500 text-red-600',
-                          status === 'pending' &&
-                            'bg-muted border-muted-foreground/20 text-muted-foreground'
-                        )}
+                        className={`
+                          w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300
+                          ${status === 'completed' ? 'bg-green-500 text-white shadow-lg shadow-green-500/50' : ''}
+                          ${status === 'running' || status === 'alive' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/50 ring-4 ring-blue-500/20' : ''}
+                          ${status === 'pending' ? 'bg-muted text-muted-foreground' : ''}
+                          ${status === 'failed' ? 'bg-destructive text-destructive-foreground shadow-lg shadow-destructive/50' : ''}
+                        `}
                       >
-                        {status === 'completed' ? (
-                          <CheckCircle2 className="h-5 w-5" />
-                        ) : status === 'running' ? (
-                          <Clock className="h-5 w-5" />
-                        ) : (
-                          <phase.icon className="h-5 w-5" />
-                        )}
+                        {status === 'completed' && <CheckCircle2 className="h-6 w-6 animate-scale-in" />}
+                        {(status === 'running' || status === 'alive') && <Activity className="h-6 w-6 animate-pulse" />}
+                        {status === 'pending' && <Clock className="h-6 w-6" />}
+                        {status === 'failed' && <AlertCircle className="h-6 w-6" />}
                       </div>
                       {index < phases.length - 1 && (
-                        <div
-                          className={cn(
-                            'w-0.5 h-12 mt-2',
-                            status === 'completed'
-                              ? 'bg-green-500'
-                              : 'bg-muted-foreground/20'
-                          )}
-                        />
+                        <div className={`
+                          w-1 h-20 my-2 rounded-full transition-all duration-500
+                          ${status === 'completed' ? 'bg-green-500' : 'bg-border'}
+                          ${(status === 'running' || status === 'alive') ? 'bg-gradient-to-b from-blue-500 to-border animate-pulse' : ''}
+                        `} />
                       )}
                     </div>
 
-                    <div className="flex-1 pb-6">
-                      <div className="flex items-center justify-between mb-2">
-                        <div>
-                          <h3 className="font-semibold">{phase.name}</h3>
-                          <p className="text-sm text-muted-foreground">{phase.description}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {phase.workflow && (
-                            <>
-                              <WorkflowStatusBadge status={phase.workflow.status} />
+                    {/* Phase content */}
+                    <div className={`
+                      flex-1 pb-8 transition-all duration-300
+                      ${isActive ? 'transform scale-[1.02]' : ''}
+                    `}>
+                      <Card className={`
+                        transition-all duration-300 hover:shadow-lg
+                        ${isActive ? 'ring-2 ring-primary/50 shadow-lg shadow-primary/20 bg-primary/5' : ''}
+                        ${status === 'completed' ? 'border-green-500/30 bg-green-500/5' : ''}
+                        ${status === 'failed' ? 'border-destructive/30 bg-destructive/5' : ''}
+                      `}>
+                        <CardHeader>
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 space-y-2">
+                              <h3 className="font-bold text-xl">{phase.name}</h3>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{phase.description}</p>
+                            </div>
+                            {phase.workflow && (
+                              <WorkflowStatusBadge 
+                                status={phase.workflow.status} 
+                                className="flex-shrink-0"
+                              />
+                            )}
+                          </div>
+                          
+                          {/* Progress Badge */}
+                          <div className="pt-3">
+                            <WorkflowProgressBadge
+                              icon={phase.progressIcon}
+                              count={phase.progressCount}
+                              label={phase.progressLabel}
+                              isLoading={workflowProgress.isLoading}
+                            />
+                          </div>
+                        </CardHeader>
+
+                        {phase.workflow?.result_summary && (
+                          <CardContent className="pt-0">
+                            <div className="p-4 bg-muted/50 rounded-lg border">
+                              <p className="text-sm font-semibold mb-2 text-muted-foreground uppercase tracking-wide">
+                                Ergebnis
+                              </p>
+                              <p className="text-sm leading-relaxed">
+                                {typeof phase.workflow.result_summary === 'string'
+                                  ? phase.workflow.result_summary
+                                  : JSON.stringify(phase.workflow.result_summary)}
+                              </p>
+                            </div>
+                            
+                            {phase.workflow && (
                               <Button
                                 variant="outline"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(phase.chatPath);
+                                size="default"
+                                className="mt-4 hover-scale w-full sm:w-auto"
+                                onClick={() => {
+                                  setSelectedWorkflow(phase.workflow || null);
+                                  setIsChatOpen(true);
                                 }}
                               >
-                                <MessageSquare className="h-4 w-4 mr-2" />
+                                <MessageSquare className="mr-2 h-4 w-4" />
                                 Chat öffnen
                               </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
+                            )}
+                          </CardContent>
+                        )}
 
-                      {(phase.workflow?.status === 'running' || phase.workflow?.status === 'alive') && (
-                        <div className="mt-2 text-sm text-muted-foreground">
-                          Gestartet am {new Date(phase.workflow.started_at).toLocaleString('de-DE')}
-                          {timeSinceUpdate[phase.workflow.workflow_name] !== undefined && (
-                            <div className="flex items-center gap-2 mt-1 text-emerald-600 dark:text-emerald-400">
-                              <Activity className="w-4 h-4 animate-pulse" />
-                              <span>
-                                {phase.workflow.status === 'alive' ? 'Workflow aktiv' : 'Läuft'} 
-                                (zuletzt aktualisiert vor {timeSinceUpdate[phase.workflow.workflow_name]}s)
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {phase.workflow?.result_summary && (
-                        <div className="mt-2 p-3 bg-muted/50 rounded-lg text-sm">
-                          <pre className="whitespace-pre-wrap">
-                            {JSON.stringify(phase.workflow.result_summary, null, 2)}
-                          </pre>
-                        </div>
-                      )}
+                        {!phase.workflow?.result_summary && phase.workflow && (
+                          <CardContent className="pt-0">
+                            <Button
+                              variant="outline"
+                              size="default"
+                              className="hover-scale w-full sm:w-auto"
+                              onClick={() => {
+                                setSelectedWorkflow(phase.workflow || null);
+                                setIsChatOpen(true);
+                              }}
+                            >
+                              <MessageSquare className="mr-2 h-4 w-4" />
+                              Chat öffnen
+                            </Button>
+                          </CardContent>
+                        )}
+                      </Card>
                     </div>
                   </div>
                 );
@@ -501,6 +590,27 @@ export default function AutomationStatus() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Chat Interface Dialog */}
+        <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+          <DialogContent className="max-w-3xl h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedWorkflow ? 
+                  `Chat: ${selectedWorkflow.workflow_name.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}` 
+                  : 'Chat'
+                }
+              </DialogTitle>
+            </DialogHeader>
+            {selectedWorkflow && (
+              <ChatInterface
+                workflowStateId={selectedWorkflow.id}
+                workflowName={selectedWorkflow.workflow_name as 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'branding_britta'}
+                projectId={pipeline.project_id}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
