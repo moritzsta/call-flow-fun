@@ -367,9 +367,14 @@ export default function AutomationStatus() {
             {/* Ladeanimation */}
             {(pipeline.status === 'running' || pipeline.status === 'alive') && (() => {
               const activeWorkflow = workflows.find(w => w.status === 'running' || w.status === 'alive');
-              return activeWorkflow ? (
-                <WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} />
-              ) : null;
+              if (activeWorkflow) {
+                return <WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} />;
+              }
+              // Show timer animation during waiting period between workflows
+              if (timeUntilNextPhase !== null && timeUntilNextPhase > 0) {
+                return <WorkflowLoadingAnimation workflowName="timer" />;
+              }
+              return null;
             })()}
 
             <div className="space-y-3">

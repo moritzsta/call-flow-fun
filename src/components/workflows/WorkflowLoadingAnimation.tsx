@@ -10,6 +10,7 @@ const videoMap: Record<string, string> = {
   analyse_anna: '/videos/anna-ladeanimation.mp4',
   pitch_paul: '/videos/paul-ladeanimation.mp4',
   branding_britta: '/videos/britta-ladeanimation.mp4',
+  timer: '/videos/timer-ladeanimation.mp4',
 };
 
 export function WorkflowLoadingAnimation({ workflowName }: WorkflowLoadingAnimationProps) {
