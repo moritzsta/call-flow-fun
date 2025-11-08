@@ -127,58 +127,48 @@ export default function AutomationStatus() {
 
   // Calculate time until next phase (2 minutes between workflows)
   useEffect(() => {
-    if (pipeline?.status !== 'running' || !workflows.length || !pipeline.current_phase) {
+    if (pipeline?.status !== 'running' || !workflows.length) {
       setTimeUntilNextPhase(null);
       return;
     }
 
     const interval = setInterval(() => {
-      const now = Date.now();
-      let triggerTime: number | null = null;
-
-      const phaseToWorkflowName: {[key: string]: string} = {
-        felix: 'finder_felix',
-        anna: 'analyse_anna',
-        paul: 'pitch_paul',
-        britta: 'branding_britta',
-      };
-
-      const currentWorkflowName = phaseToWorkflowName[pipeline.current_phase];
-      const currentWorkflow = workflows.find(w => w.workflow_name === currentWorkflowName);
-
-      if (!currentWorkflow) {
+      const list = workflows as WorkflowState[];
+      const hasActive = list.some(w => w.status === 'running' || w.status === 'alive');
+      if (hasActive) {
         setTimeUntilNextPhase(null);
         return;
       }
 
-      if (currentWorkflow.status === 'completed' && currentWorkflow.completed_at) {
-        triggerTime = new Date(currentWorkflow.completed_at).getTime();
-      } else if (currentWorkflow.status === 'failed') {
-        triggerTime = new Date(currentWorkflow.updated_at).getTime();
-      } else {
-        const lastUpdate = new Date(currentWorkflow.updated_at).getTime();
-        const inactivityTimeout = 4 * 60 * 1000;
-        if (now >= lastUpdate + inactivityTimeout) {
-          triggerTime = lastUpdate + inactivityTimeout;
+      // Find most recent finished workflow (completed or failed)
+      let lastFinishTime: number | null = null;
+      list.forEach(w => {
+        if (w.status === 'completed' && w.completed_at) {
+          const t = new Date(w.completed_at).getTime();
+          if (!lastFinishTime || t > lastFinishTime) lastFinishTime = t;
+        } else if (w.status === 'failed') {
+          const t = new Date(w.updated_at).getTime();
+          if (!lastFinishTime || t > lastFinishTime) lastFinishTime = t;
         }
+      });
+
+      if (!lastFinishTime) {
+        setTimeUntilNextPhase(null);
+        return;
       }
 
-      if (triggerTime) {
-        const nextPhaseTime = triggerTime + (2 * 60 * 1000);
-        const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
-
-        if (remaining > 0 && remaining <= 120) {
-          setTimeUntilNextPhase(remaining);
-        } else {
-          setTimeUntilNextPhase(null);
-        }
+      const now = Date.now();
+      const nextPhaseTime = lastFinishTime + (2 * 60 * 1000); // 2 minutes gap
+      const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
+      if (remaining > 0 && remaining <= 120) {
+        setTimeUntilNextPhase(remaining);
       } else {
         setTimeUntilNextPhase(null);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [pipeline, workflows]);
+  }, [pipeline?.status, workflows]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
