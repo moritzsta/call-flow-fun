@@ -56,7 +56,7 @@ export default function AutomationStatus() {
         .eq('project_id', projectId)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -209,12 +209,12 @@ export default function AutomationStatus() {
   const calculateProgress = () => {
     if (!pipeline) return 0;
     if (pipeline.status === 'completed') return 100;
-    
-    const phases = ['felix', 'anna', 'paul', 'britta'];
-    const currentIndex = phases.indexOf(pipeline.current_phase || '');
-    
-    if (currentIndex === -1) return 0;
-    return ((currentIndex + 1) / 4) * 100;
+
+    const total = 4;
+    const completed = workflows.filter(w => w.status === 'completed').length;
+    const hasActive = workflows.some(w => w.status === 'running' || w.status === 'alive');
+    const value = ((completed + (hasActive ? 1 : 0)) / total) * 100;
+    return Math.min(100, Math.max(0, value));
   };
 
   if (pipelineLoading) {
@@ -334,15 +334,30 @@ export default function AutomationStatus() {
                   className="text-base px-4 py-2 animate-scale-in"
                 />
               </div>
-              {pipeline.current_phase && (
+              {(
+                (workflows && workflows.length > 0) || pipeline.status === 'completed'
+              ) && (
                 <div className="space-y-2 text-right">
                   <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Aktuelle Phase</p>
-                  <p className="text-2xl font-bold capitalize bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    {pipeline.current_phase === 'felix' ? 'Finder Felix' :
-                     pipeline.current_phase === 'anna' ? 'Analyse Anna' :
-                     pipeline.current_phase === 'paul' ? 'Pitch Paul' :
-                     pipeline.current_phase === 'britta' ? 'Branding Britta' :
-                     pipeline.current_phase}
+                  <p className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                    {(() => {
+                      const map: Record<string, string> = {
+                        finder_felix: 'Finder Felix',
+                        analyse_anna: 'Analyse Anna',
+                        pitch_paul: 'Pitch Paul',
+                        branding_britta: 'Branding Britta',
+                      };
+                      const active = workflows.find(w => w.status === 'running' || w.status === 'alive');
+                      if (active) return map[active.workflow_name] || active.workflow_name;
+                      if (pipeline.status === 'completed') return 'Abgeschlossen';
+                      // fallback: last completed
+                      const lastDone = [...workflows].filter(w => w.status === 'completed').sort((a,b) => {
+                        const ta = a.completed_at ? new Date(a.completed_at).getTime() : 0;
+                        const tb = b.completed_at ? new Date(b.completed_at).getTime() : 0;
+                        return tb - ta;
+                      })[0];
+                      return lastDone ? map[lastDone.workflow_name] : '—';
+                    })()}
                   </p>
                 </div>
               )}
@@ -457,13 +472,7 @@ export default function AutomationStatus() {
             <div className="space-y-8">
               {phases.map((phase, index) => {
                 const status = getPhaseStatus(phase.workflow, pipeline.current_phase);
-                const phaseToWorkflowName: {[key: string]: string} = {
-                  felix: 'finder_felix',
-                  anna: 'analyse_anna',
-                  paul: 'pitch_paul',
-                  britta: 'branding_britta',
-                };
-                const isActive = pipeline.current_phase && phaseToWorkflowName[pipeline.current_phase] === phase.workflow?.workflow_name;
+                const isActive = phase.workflow?.status === 'running' || phase.workflow?.status === 'alive';
 
                 return (
                   <div 
