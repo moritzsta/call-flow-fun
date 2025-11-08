@@ -320,14 +320,14 @@ export default function AutomationStatus() {
           ${pipeline.status === 'completed' ? 'ring-2 ring-green-500/30 shadow-lg shadow-green-500/10' : ''}
           ${pipeline.status === 'failed' ? 'ring-2 ring-destructive/30 shadow-lg shadow-destructive/10' : ''}
         `}>
-          <CardHeader>
+          <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-3 text-2xl">
               <Activity className={`h-6 w-6 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
               Gesamtstatus
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
+          <CardContent className="space-y-2 pt-0">
+            <div className="grid md:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Status</p>
                 <WorkflowStatusBadge 
