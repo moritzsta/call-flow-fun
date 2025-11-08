@@ -1,9 +1,9 @@
 import { Badge } from '@/components/ui/badge';
-import { Clock, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Clock, Loader2, CheckCircle2, XCircle, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WorkflowStatusBadgeProps {
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'alive';
   className?: string;
   showIcon?: boolean;
 }
@@ -25,6 +25,12 @@ export const WorkflowStatusBadge = ({
       variant: 'secondary' as const,
       className: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
       icon: Loader2,
+    },
+    alive: {
+      label: 'Aktiv',
+      variant: 'secondary' as const,
+      className: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20',
+      icon: Activity,
     },
     completed: {
       label: 'Abgeschlossen',
@@ -48,7 +54,8 @@ export const WorkflowStatusBadge = ({
         <Icon
           className={cn(
             'mr-1 h-3 w-3',
-            status === 'running' && 'animate-spin'
+            status === 'running' && 'animate-spin',
+            status === 'alive' && 'animate-pulse'
           )}
         />
       )}
