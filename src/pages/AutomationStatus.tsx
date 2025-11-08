@@ -111,16 +111,36 @@ export default function AutomationStatus() {
     }
 
     const interval = setInterval(() => {
-      // Find the last completed workflow
-      const completedWorkflows = workflows
-        .filter(w => w.completed_at)
-        .sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime());
+      const now = Date.now();
+      let triggerTime: number | null = null;
 
-      if (completedWorkflows.length > 0) {
-        const lastCompleted = completedWorkflows[0];
-        const completedTime = new Date(lastCompleted.completed_at!).getTime();
-        const nextPhaseTime = completedTime + (2 * 60 * 1000); // 2 minutes
-        const now = Date.now();
+      // Find workflows that are either completed or failed (due to inactivity)
+      const finishedWorkflows = workflows
+        .filter(w => w.completed_at || w.status === 'failed')
+        .map(w => {
+          if (w.completed_at) {
+            // Workflow completed normally
+            return {
+              workflow: w,
+              finishTime: new Date(w.completed_at).getTime()
+            };
+          } else if (w.status === 'failed') {
+            // Workflow failed due to inactivity (4 minutes after last update)
+            const lastUpdate = new Date(w.updated_at).getTime();
+            const inactivityTimeout = 4 * 60 * 1000; // 4 minutes
+            return {
+              workflow: w,
+              finishTime: lastUpdate + inactivityTimeout
+            };
+          }
+          return null;
+        })
+        .filter(Boolean)
+        .sort((a, b) => b!.finishTime - a!.finishTime);
+
+      if (finishedWorkflows.length > 0 && finishedWorkflows[0]) {
+        const lastFinished = finishedWorkflows[0];
+        const nextPhaseTime = lastFinished.finishTime + (2 * 60 * 1000); // 2 minutes after finish
         const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
 
         if (remaining > 0 && remaining < 120) { // Only show if within 2 minutes
