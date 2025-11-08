@@ -98,21 +98,39 @@ export default {
             opacity: "0",
           },
           "10%": {
-            opacity: "0.8",
+            opacity: "1",
           },
           "90%": {
-            opacity: "0.8",
+            opacity: "1",
           },
           "100%": {
             transform: "translateX(100%)",
             opacity: "0",
           },
         },
+        "progress-shimmer": {
+          "0%": {
+            backgroundPosition: "-200% 0",
+          },
+          "100%": {
+            backgroundPosition: "200% 0",
+          },
+        },
+        "progress-glow": {
+          "0%, 100%": {
+            boxShadow: "0 0 5px hsl(var(--primary) / 0.3), 0 0 10px hsl(var(--primary) / 0.2)",
+          },
+          "50%": {
+            boxShadow: "0 0 10px hsl(var(--primary) / 0.5), 0 0 20px hsl(var(--primary) / 0.3), 0 0 30px hsl(var(--primary) / 0.2)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "sweep-pulse": "sweep-pulse 1.2s ease-in-out",
+        "sweep-pulse": "sweep-pulse 1s ease-out",
+        "progress-shimmer": "progress-shimmer 2s linear infinite",
+        "progress-glow": "progress-glow 2s ease-in-out infinite",
       },
     },
   },

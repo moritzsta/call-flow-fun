@@ -427,10 +427,8 @@ export default function AutomationStatus() {
               <Progress 
                 value={progress}
                 showPulse={showProgressPulse}
-                className={`
-                  h-2.5 transition-all duration-500
-                  ${pipeline.status === 'running' ? 'bg-primary/10' : 'bg-secondary'}
-                `}
+                isActive={pipeline.status === 'running'}
+                className="h-3"
               />
             </div>
 
