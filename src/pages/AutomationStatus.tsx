@@ -47,7 +47,7 @@ export default function AutomationStatus() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowState | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showProgressPulse, setShowProgressPulse] = useState(false);
-  const prevTimeSinceUpdate = useRef<number>(0);
+  const prevWorkflowTimestamps = useRef<{[key: string]: string}>({});
 
   // Fetch latest pipeline
   const { data: pipeline, isLoading: pipelineLoading, refetch } = useQuery({
@@ -206,18 +206,43 @@ export default function AutomationStatus() {
 
   // Detect workflow updates and trigger pulse effect
   useEffect(() => {
-    if (Object.keys(timeSinceUpdate).length === 0) return;
+    // Track active workflows and detect when their updated_at timestamp changes
+    const activeWorkflows = [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow].filter(
+      w => w && (w.status === 'running' || w.status === 'alive')
+    );
 
-    const currentMax = Math.max(...Object.values(timeSinceUpdate));
-    
-    // If time since update drops significantly (> 5 seconds), an update occurred
-    if (prevTimeSinceUpdate.current > 5 && currentMax < prevTimeSinceUpdate.current - 5) {
+    if (activeWorkflows.length === 0) {
+      // Reset tracking when no active workflows
+      prevWorkflowTimestamps.current = {};
+      return;
+    }
+
+    let updateDetected = false;
+
+    activeWorkflows.forEach(workflow => {
+      const currentTimestamp = workflow.updated_at;
+      const prevTimestamp = prevWorkflowTimestamps.current[workflow.workflow_name];
+
+      // If we have a previous timestamp and it's different (newer), an update occurred
+      if (prevTimestamp && currentTimestamp !== prevTimestamp) {
+        const prevTime = new Date(prevTimestamp).getTime();
+        const currentTime = new Date(currentTimestamp).getTime();
+        
+        // Only trigger if the new timestamp is actually newer (not older due to refetch quirks)
+        if (currentTime > prevTime) {
+          updateDetected = true;
+        }
+      }
+
+      // Update the tracked timestamp
+      prevWorkflowTimestamps.current[workflow.workflow_name] = currentTimestamp;
+    });
+
+    if (updateDetected) {
       setShowProgressPulse(true);
       setTimeout(() => setShowProgressPulse(false), 1200);
     }
-    
-    prevTimeSinceUpdate.current = currentMax;
-  }, [timeSinceUpdate]);
+  }, [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow]);
 
   const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null): 'pending' | 'running' | 'completed' | 'failed' | 'alive' => {
     if (!workflow) return 'pending';
