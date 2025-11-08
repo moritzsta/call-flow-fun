@@ -188,7 +188,9 @@ export const useWorkflowChat = ({
           workflow_id: currentWorkflowStateId,
           project_id: projectId,
           user_id: user.id,
-          message: content,
+          trigger_data: {
+            message: content,
+          },
         },
       });
 

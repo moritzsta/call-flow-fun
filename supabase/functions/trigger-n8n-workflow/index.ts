@@ -62,19 +62,23 @@ serve(async (req) => {
     };
     headers[headerName] = N8N_WEBHOOK_SECRET;
 
-    // Build the request body with enhanced compatibility
+    // Build request body with unified structure
     const requestBody: any = {
       workflow_name,
       workflow_id,
       project_id,
       user_id,
-      ...(trigger_data || {}),
       trigger_data: trigger_data || {},
-      ...(message ? { message } : {}),
     };
+
+    // For chat workflows: extract message from trigger_data to top level (if n8n expects it there)
+    if (trigger_data?.message) {
+      requestBody.message = trigger_data.message;
+    }
 
     // Special handling for email_sender workflow
     if (workflow_name === 'email_sender' && trigger_data) {
+      requestBody.emails = trigger_data; // Legacy structure
       requestBody.email_id = trigger_data.email_id;
       requestBody.send_all = trigger_data.send_all || false;
     }
@@ -83,6 +87,10 @@ serve(async (req) => {
     if (workflow_name === 'finder_felix' && trigger_data) {
       requestBody.check_duplicates = true;
     }
+
+    // Log final URL and payload structure for debugging
+    console.log('[trigger-n8n-workflow] Final URL:', n8nUrl);
+    console.log('[trigger-n8n-workflow] Payload structure:', JSON.stringify(requestBody, null, 2));
 
     // Retry logic with exponential backoff for 502/network errors
     const maxAttempts = 5;
