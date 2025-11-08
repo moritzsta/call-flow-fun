@@ -105,7 +105,7 @@ export default function AutomationStatus() {
 
   // Calculate time until next phase (2 minutes between workflows)
   useEffect(() => {
-    if (pipeline?.status !== 'running' || !workflows.length) {
+    if (pipeline?.status !== 'running' || !workflows.length || !pipeline.current_phase) {
       setTimeUntilNextPhase(null);
       return;
     }
@@ -114,36 +114,44 @@ export default function AutomationStatus() {
       const now = Date.now();
       let triggerTime: number | null = null;
 
-      // Find workflows that are either completed or failed (due to inactivity)
-      const finishedWorkflows = workflows
-        .filter(w => w.completed_at || w.status === 'failed')
-        .map(w => {
-          if (w.completed_at) {
-            // Workflow completed normally
-            return {
-              workflow: w,
-              finishTime: new Date(w.completed_at).getTime()
-            };
-          } else if (w.status === 'failed') {
-            // Workflow failed due to inactivity (4 minutes after last update)
-            const lastUpdate = new Date(w.updated_at).getTime();
-            const inactivityTimeout = 4 * 60 * 1000; // 4 minutes
-            return {
-              workflow: w,
-              finishTime: lastUpdate + inactivityTimeout
-            };
-          }
-          return null;
-        })
-        .filter(Boolean)
-        .sort((a, b) => b!.finishTime - a!.finishTime);
+      // Map phase names to workflow names
+      const phaseToWorkflowName: {[key: string]: string} = {
+        felix: 'finder_felix',
+        anna: 'analyse_anna',
+        paul: 'pitch_paul',
+        britta: 'branding_britta',
+      };
 
-      if (finishedWorkflows.length > 0 && finishedWorkflows[0]) {
-        const lastFinished = finishedWorkflows[0];
-        const nextPhaseTime = lastFinished.finishTime + (2 * 60 * 1000); // 2 minutes after finish
+      const currentWorkflowName = phaseToWorkflowName[pipeline.current_phase];
+      const currentWorkflow = workflows.find(w => w.workflow_name === currentWorkflowName);
+
+      if (!currentWorkflow) {
+        setTimeUntilNextPhase(null);
+        return;
+      }
+
+      // Determine trigger time based on current workflow status
+      if (currentWorkflow.status === 'completed' && currentWorkflow.completed_at) {
+        // Workflow completed normally - start countdown from completed_at
+        triggerTime = new Date(currentWorkflow.completed_at).getTime();
+      } else if (currentWorkflow.status === 'failed') {
+        // Workflow failed - start countdown from failure time (updated_at)
+        triggerTime = new Date(currentWorkflow.updated_at).getTime();
+      } else {
+        // Workflow is running or alive - check if 4 minutes have passed since last update
+        const lastUpdate = new Date(currentWorkflow.updated_at).getTime();
+        const inactivityTimeout = 4 * 60 * 1000; // 4 minutes
+        if (now >= lastUpdate + inactivityTimeout) {
+          triggerTime = lastUpdate + inactivityTimeout;
+        }
+      }
+
+      // Calculate remaining time and display only if within 2-minute window
+      if (triggerTime) {
+        const nextPhaseTime = triggerTime + (2 * 60 * 1000); // 2 minutes after trigger
         const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
 
-        if (remaining > 0 && remaining < 120) { // Only show if within 2 minutes
+        if (remaining > 0 && remaining <= 120) {
           setTimeUntilNextPhase(remaining);
         } else {
           setTimeUntilNextPhase(null);
@@ -393,7 +401,14 @@ export default function AutomationStatus() {
             <div className="space-y-6">
               {phases.map((phase, index) => {
                 const status = getPhaseStatus(phase.workflow, pipeline.current_phase);
-                const isActive = pipeline.current_phase === phase.workflow?.workflow_name?.replace('_', ' ');
+                // Map current_phase to workflow_name properly
+                const phaseToWorkflowName: {[key: string]: string} = {
+                  felix: 'finder_felix',
+                  anna: 'analyse_anna',
+                  paul: 'pitch_paul',
+                  britta: 'branding_britta',
+                };
+                const isActive = pipeline.current_phase && phaseToWorkflowName[pipeline.current_phase] === phase.workflow?.workflow_name;
 
                 return (
                   <div key={phase.name} className="flex gap-4">
