@@ -85,8 +85,8 @@ serve(async (req) => {
     }
 
     // Retry logic with exponential backoff for 502/network errors
-    const maxAttempts = 3;
-    const backoffDelays = [500, 1500, 3000];
+    const maxAttempts = 5;
+    const backoffDelays = [500, 1500, 3000, 5000, 8000];
     let n8nResponse: Response | null = null;
     let lastError: Error | null = null;
 
@@ -140,7 +140,77 @@ serve(async (req) => {
     }
 
     if (!n8nResponse || !n8nResponse.ok) {
-      throw lastError || new Error('All retry attempts failed');
+      console.warn('[trigger-n8n-workflow] All immediate retry attempts failed. Queueing background retries...');
+
+      // Background retry task (won't block response)
+      const backgroundRetry = async () => {
+        try {
+          const extraBackoffs = [10000, 15000, 20000];
+          let bgResponse: Response | null = null;
+          for (let i = 0; i < extraBackoffs.length; i++) {
+            try {
+              console.log(`[trigger-n8n-workflow] BG attempt ${i + 1}/${extraBackoffs.length}`);
+              bgResponse = await fetch(n8nUrl, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(requestBody),
+              });
+              if (bgResponse.ok) break;
+
+              const txt = await bgResponse.text().catch(() => '');
+              console.log(`[trigger-n8n-workflow] BG status ${bgResponse.status}: ${txt}`);
+
+              if (bgResponse.status === 401 || bgResponse.status === 429) {
+                throw new Error(`Non-retryable BG error: ${bgResponse.status}`);
+              }
+            } catch (e) {
+              // swallow and continue bg retries
+            }
+
+            await new Promise(r => setTimeout(r, extraBackoffs[i]));
+          }
+
+          const supabaseBg = createClient(
+            Deno.env.get('SUPABASE_URL')!,
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+          );
+
+          if (bgResponse && bgResponse.ok) {
+            const data = await bgResponse.json().catch(() => ({}));
+            await supabaseBg.from('n8n_workflow_states').update({
+              status: 'running',
+              started_at: new Date().toISOString(),
+            }).eq('id', workflow_id);
+            console.log('[trigger-n8n-workflow] BG success, workflow set to running');
+          } else {
+            await supabaseBg.from('n8n_workflow_states').update({
+              status: 'failed',
+              updated_at: new Date().toISOString(),
+            }).eq('id', workflow_id);
+            console.error('[trigger-n8n-workflow] BG failed, workflow marked as failed');
+          }
+        } catch (e) {
+          console.error('[trigger-n8n-workflow] BG task fatal error', e);
+        }
+      };
+
+      // Use Edge Runtime background execution if available
+      try {
+        (globalThis as any).EdgeRuntime?.waitUntil?.(backgroundRetry());
+      } catch (_) {
+        // Fallback: fire-and-forget
+        backgroundRetry();
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          workflow_id,
+          status: 'queued',
+          message: 'n8n unavailable, background retries scheduled',
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 202 }
+      );
     }
 
     const n8nData = await n8nResponse.json();
