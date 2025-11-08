@@ -25,7 +25,7 @@ export function WorkflowLoadingAnimation({ workflowName }: WorkflowLoadingAnimat
   }
 
   return (
-    <div className="flex justify-center items-center py-4 animate-fade-in">
+    <div className="flex justify-center items-center py-1 animate-fade-in">
       <video
         autoPlay
         loop

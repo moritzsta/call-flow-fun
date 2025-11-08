@@ -326,8 +326,8 @@ export default function AutomationStatus() {
               Gesamtstatus
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
+          <CardContent className="space-y-4">
+            <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Status</p>
                 <WorkflowStatusBadge 
