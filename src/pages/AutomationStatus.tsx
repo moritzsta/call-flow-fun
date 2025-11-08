@@ -10,6 +10,7 @@ import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge'
 import { WorkflowProgressBadge } from '@/components/workflows/WorkflowProgressBadge';
 import { useWorkflowProgress } from '@/hooks/useWorkflowProgress';
 import { ChatInterface } from '@/components/workflows/ChatInterface';
+import { WorkflowLoadingAnimation } from '@/components/workflows/WorkflowLoadingAnimation';
 import { 
   Clock, 
   CheckCircle2, 
@@ -362,6 +363,14 @@ export default function AutomationStatus() {
                 </div>
               )}
             </div>
+
+            {/* Ladeanimation */}
+            {(pipeline.status === 'running' || pipeline.status === 'alive') && (() => {
+              const activeWorkflow = workflows.find(w => w.status === 'running' || w.status === 'alive');
+              return activeWorkflow ? (
+                <WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} />
+              ) : null;
+            })()}
 
             <div className="space-y-3">
               <div className="flex justify-between items-center">
