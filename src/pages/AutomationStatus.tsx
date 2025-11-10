@@ -346,7 +346,8 @@ export default function AutomationStatus() {
     phaseType: 'felix' | 'loop'
   ): number => {
     if (!workflow) return 0;
-    if (workflow.status === 'completed') return 25;
+    // Phase completed or failed -> always 25%
+    if (workflow.status === 'completed' || workflow.status === 'failed') return 25;
     if (maxLoops === 0 && phaseType === 'loop') return 0; // indeterminate
     
     if (phaseType === 'felix') {
