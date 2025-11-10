@@ -28,6 +28,7 @@ import {
   Timer
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 
 interface WorkflowState {
   id: string;
@@ -77,7 +78,7 @@ export default function AutomationStatus() {
   );
 
   // Fetch workflow states
-  const { data: workflows = [] } = useQuery({
+  const { data: workflows = [], refetch: refetchWorkflows } = useQuery({
     queryKey: ['pipeline-workflows', pipeline?.id],
     queryFn: async () => {
       if (!pipeline) return [];
@@ -127,6 +128,75 @@ export default function AutomationStatus() {
       supabase.removeChannel(channel);
     };
   }, [projectId, pipeline?.id, refetch]);
+
+  // Watchdog: Automatically detect and recover from stuck workflows
+  useEffect(() => {
+    if (!pipeline?.id || pipeline.status !== 'running') return;
+
+    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minuten
+    const CHECK_INTERVAL = 30 * 1000; // Check alle 30 Sekunden
+
+    console.log('[AutomationStatus] Starting workflow watchdog');
+
+    const watchdog = setInterval(async () => {
+      console.log('[AutomationStatus] Watchdog check running...');
+      
+      // Get all workflow IDs from pipeline
+      const workflowIds = [
+        pipeline.felix_workflow_id,
+        pipeline.anna_workflow_id,
+        pipeline.paul_workflow_id,
+        pipeline.britta_workflow_id,
+      ].filter(Boolean);
+
+      if (workflowIds.length === 0) return;
+
+      // Check each workflow for inactivity
+      const { data: currentWorkflows } = await supabase
+        .from('n8n_workflow_states')
+        .select('id, workflow_name, status, updated_at')
+        .in('id', workflowIds)
+        .in('status', ['running', 'alive']);
+
+      if (!currentWorkflows || currentWorkflows.length === 0) return;
+
+      for (const workflow of currentWorkflows) {
+        const timeSinceUpdate = Date.now() - new Date(workflow.updated_at).getTime();
+        
+        if (timeSinceUpdate >= INACTIVITY_TIMEOUT) {
+          console.warn(`[AutomationStatus] Workflow ${workflow.workflow_name} stuck for ${Math.floor(timeSinceUpdate / 1000)}s - marking as failed`);
+          
+          // Mark workflow as failed
+          const { error } = await supabase
+            .from('n8n_workflow_states')
+            .update({ status: 'failed' })
+            .eq('id', workflow.id);
+
+          if (!error) {
+            const workflowLabels: Record<string, string> = {
+              finder_felix: 'Finder Felix',
+              analyse_anna: 'Analyse Anna',
+              pitch_paul: 'Pitch Paul',
+              branding_britta: 'Branding Britta',
+            };
+            
+            toast.warning(
+              `${workflowLabels[workflow.workflow_name] || workflow.workflow_name} wurde nach 5 Minuten Inaktivität beendet. Pipeline läuft weiter.`,
+              { duration: 5000 }
+            );
+            
+            // Trigger refetch to update UI
+            refetchWorkflows();
+          }
+        }
+      }
+    }, CHECK_INTERVAL);
+
+    return () => {
+      console.log('[AutomationStatus] Stopping workflow watchdog');
+      clearInterval(watchdog);
+    };
+  }, [pipeline?.id, pipeline?.status, pipeline?.felix_workflow_id, pipeline?.anna_workflow_id, pipeline?.paul_workflow_id, pipeline?.britta_workflow_id, refetchWorkflows]);
 
   // Calculate time until next phase (2 minutes between workflows)
   useEffect(() => {
