@@ -362,6 +362,27 @@ export default function AutomationStatus() {
     }
   };
 
+  // Calculate individual workflow progress (0-100%)
+  const getIndividualProgress = (
+    workflow: WorkflowState | undefined,
+    maxLoops: number,
+    phaseType: 'felix' | 'loop'
+  ): number => {
+    if (!workflow) return 0;
+    // Phase completed or failed -> always 100%
+    if (workflow.status === 'completed' || workflow.status === 'failed') return 100;
+    if (maxLoops === 0 && phaseType === 'loop') return 0; // indeterminate
+    
+    if (phaseType === 'felix') {
+      // Time-based: 60 seconds
+      const elapsed = (Date.now() - new Date(workflow.started_at).getTime()) / 1000;
+      return Math.min(100, Math.max(0, (elapsed / 60) * 100));
+    } else {
+      // Loop-based
+      return Math.min(100, Math.max(0, (workflow.loop_count / maxLoops) * 100));
+    }
+  };
+
   const calculateProgress = () => {
     if (!pipeline) return 0;
     if (pipeline.status === 'completed') return 100;
@@ -716,8 +737,8 @@ export default function AutomationStatus() {
                             )}
                           </div>
                           
-                          {/* Progress Badge */}
-                          <div className="pt-3">
+                          {/* Progress Badge and Bar */}
+                          <div className="pt-3 space-y-3">
                             <WorkflowProgressBadge
                               icon={phase.progressIcon}
                               count={phase.phaseType === 'felix' && phase.workflow?.status === 'running'
@@ -731,6 +752,23 @@ export default function AutomationStatus() {
                                 ? Math.max(0, 60 - Math.floor((Date.now() - new Date(phase.workflow.started_at).getTime()) / 1000))
                                 : undefined}
                             />
+                            {phase.workflow && (
+                              <div className="space-y-1.5">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs font-medium text-muted-foreground">Workflow-Fortschritt</span>
+                                  <span className="text-sm font-bold tabular-nums">
+                                    {Math.round(getIndividualProgress(phase.workflow, phase.maxLoops, phase.phaseType))}%
+                                  </span>
+                                </div>
+                                <Progress
+                                  value={getIndividualProgress(phase.workflow, phase.maxLoops, phase.phaseType)}
+                                  showPulse={isActive && showProgressPulse}
+                                  isActive={isActive}
+                                  isIndeterminate={phase.maxLoops === 0 && phase.phaseType === 'loop' && phase.workflow.status !== 'completed' && phase.workflow.status !== 'failed'}
+                                  className="h-2"
+                                />
+                              </div>
+                            )}
                           </div>
                         </CardHeader>
 
