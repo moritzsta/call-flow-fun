@@ -21,7 +21,8 @@ export const useWorkflowMaxLoops = (
         .from('companies')
         .select('*', { count: 'exact', head: true })
         .eq('project_id', projectId)
-        .not('website', 'is', null);
+        .not('website', 'is', null)
+        .neq('website', '');
       
       if (error) throw error;
       return count || 0;
