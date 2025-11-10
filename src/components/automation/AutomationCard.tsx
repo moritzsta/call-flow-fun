@@ -1,12 +1,17 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { AutomationDialog } from './AutomationDialog';
 import { useAutomatedPipeline } from '@/hooks/useAutomatedPipeline';
+import { useWorkflowProgress } from '@/hooks/useWorkflowProgress';
+import { useWorkflowMaxLoops } from '@/hooks/useWorkflowMaxLoops';
 import { useAuth } from '@/contexts/AuthContext';
 import { Zap, Loader2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 interface AutomationCardProps {
   projectId: string;
@@ -14,9 +19,32 @@ interface AutomationCardProps {
 
 export const AutomationCard = ({ projectId }: AutomationCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showProgressPulse, setShowProgressPulse] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { startPipeline, isRunning, currentPhase } = useAutomatedPipeline(projectId);
+  
+  // Fetch workflow data and progress
+  const workflowProgress = useWorkflowProgress(projectId, isRunning);
+  const workflowMaxLoops = useWorkflowMaxLoops(projectId, isRunning);
+  
+  // Fetch individual workflow states
+  const { data: workflows } = useQuery({
+    queryKey: ['workflow-states', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('n8n_workflow_states')
+        .select('*')
+        .eq('project_id', projectId)
+        .order('created_at', { ascending: false })
+        .limit(4);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: isRunning,
+    refetchInterval: isRunning ? 5000 : false,
+  });
 
   const handleStart = (config: any) => {
     if (!user) return;
@@ -39,6 +67,54 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
     );
   };
 
+  // Trigger pulse effect on workflow updates
+  useEffect(() => {
+    if (!workflows || !isRunning) return;
+    
+    setShowProgressPulse(true);
+    const timer = setTimeout(() => setShowProgressPulse(false), 1200);
+    return () => clearTimeout(timer);
+  }, [workflows, isRunning]);
+  
+  const getWorkflowByName = (name: string) => {
+    return workflows?.find((w) => w.workflow_name === name);
+  };
+
+  const felixWorkflow = getWorkflowByName('finder_felix');
+  const annaWorkflow = getWorkflowByName('analyse_anna');
+  const paulWorkflow = getWorkflowByName('pitch_paul');
+  const brittaWorkflow = getWorkflowByName('branding_britta');
+
+  // Calculate phase progress (same logic as AutomationStatus page)
+  const getPhaseProgress = (
+    workflow: any,
+    maxLoops: number,
+    phaseType: 'felix' | 'loop'
+  ): number => {
+    if (!workflow) return 0;
+    if (workflow.status === 'completed' || workflow.status === 'failed') return 25;
+    if (maxLoops === 0 && phaseType === 'loop') return 0;
+    
+    if (phaseType === 'felix') {
+      const elapsed = (Date.now() - new Date(workflow.started_at).getTime()) / 1000;
+      const progress = (elapsed / 60) * 25;
+      return Math.min(25, Math.max(0, progress));
+    } else {
+      const progress = (workflow.loop_count / maxLoops) * 25;
+      return Math.min(25, Math.max(0, progress));
+    }
+  };
+
+  const calculateProgress = () => {
+    const felixProgress = getPhaseProgress(felixWorkflow, 0, 'felix');
+    const annaProgress = getPhaseProgress(annaWorkflow, workflowMaxLoops.annaMaxLoops, 'loop');
+    const paulProgress = getPhaseProgress(paulWorkflow, workflowMaxLoops.paulMaxLoops, 'loop');
+    const brittaProgress = getPhaseProgress(brittaWorkflow, workflowMaxLoops.brittaMaxLoops, 'loop');
+
+    const total = felixProgress + annaProgress + paulProgress + brittaProgress;
+    return Math.min(100, Math.max(0, total));
+  };
+  
   const getPhaseLabel = () => {
     if (!isRunning) return null;
     
@@ -53,6 +129,23 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
         return 'Phase 4/4: E-Mails optimieren...';
       default:
         return 'Pipeline läuft...';
+    }
+  };
+  
+  const getPhaseDetails = () => {
+    if (!isRunning || !workflows) return null;
+    
+    switch (currentPhase) {
+      case 'felix':
+        return `${workflowProgress.felixCount} Firmen gefunden`;
+      case 'anna':
+        return `${workflowProgress.annaCount}/${workflowMaxLoops.annaMaxLoops} Firmen analysiert`;
+      case 'paul':
+        return `${workflowProgress.paulCount}/${workflowMaxLoops.paulMaxLoops} E-Mails generiert`;
+      case 'britta':
+        return `${workflowProgress.brittaCount}/${workflowMaxLoops.brittaMaxLoops} E-Mails optimiert`;
+      default:
+        return null;
     }
   };
 
@@ -105,27 +198,27 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
 
         {isRunning && (
           <CardContent>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Status</span>
-                <span className="font-medium text-primary">In Bearbeitung</span>
+                <span className="text-muted-foreground">Fortschritt</span>
+                <span className="font-medium text-primary">{Math.round(calculateProgress())}%</span>
               </div>
-              <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all duration-500 animate-pulse"
-                  style={{
-                    width:
-                      currentPhase === 'felix'
-                        ? '25%'
-                        : currentPhase === 'anna'
-                        ? '50%'
-                        : currentPhase === 'paul'
-                        ? '75%'
-                        : '100%',
-                  }}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground text-center">
+              
+              <Progress 
+                value={calculateProgress()} 
+                showPulse={showProgressPulse}
+                isActive={true}
+                className="h-3"
+              />
+              
+              {getPhaseDetails() && (
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">Aktuell</span>
+                  <span className="font-medium">{getPhaseDetails()}</span>
+                </div>
+              )}
+              
+              <p className="text-xs text-muted-foreground text-center pt-1">
                 Klicken für Details
               </p>
             </div>
