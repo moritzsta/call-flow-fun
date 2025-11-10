@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { WorkflowProgressBadge } from '@/components/workflows/WorkflowProgressBadge';
 import { useWorkflowProgress } from '@/hooks/useWorkflowProgress';
+import { useWorkflowMaxLoops } from '@/hooks/useWorkflowMaxLoops';
 import { ChatInterface } from '@/components/workflows/ChatInterface';
 import { WorkflowLoadingAnimation } from '@/components/workflows/WorkflowLoadingAnimation';
 import { 
@@ -38,6 +39,7 @@ interface WorkflowState {
   started_at: string;
   completed_at: string | null;
   updated_at: string;
+  loop_count: number;
 }
 
 export default function AutomationStatus() {
@@ -74,6 +76,12 @@ export default function AutomationStatus() {
   // Get workflow progress data
   const workflowProgress = useWorkflowProgress(
     pipeline?.project_id, 
+    pipeline?.status === 'running'
+  );
+
+  // Get workflow max loops
+  const workflowMaxLoops = useWorkflowMaxLoops(
+    pipeline?.project_id,
     pipeline?.status === 'running'
   );
 
@@ -274,6 +282,18 @@ export default function AutomationStatus() {
     return () => clearInterval(interval);
   }, [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow]);
 
+  // Felix timer: Force re-render every second for time-based progress
+  useEffect(() => {
+    if (!felixWorkflow || felixWorkflow.status !== 'running') return;
+    
+    const interval = setInterval(() => {
+      // Force re-render to update Felix progress bar
+      setTimeSinceUpdate(prev => ({...prev}));
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, [felixWorkflow?.status, felixWorkflow?.started_at]);
+
   // Detect workflow updates and trigger pulse effect
   useEffect(() => {
     // Track active workflows and detect when their updated_at timestamp changes
@@ -319,15 +339,39 @@ export default function AutomationStatus() {
     return workflow.status;
   };
 
+  // Calculate individual phase progress (0-25%)
+  const getPhaseProgress = (
+    workflow: WorkflowState | undefined,
+    maxLoops: number,
+    phaseType: 'felix' | 'loop'
+  ): number => {
+    if (!workflow) return 0;
+    if (workflow.status === 'completed') return 25;
+    if (maxLoops === 0 && phaseType === 'loop') return 0; // indeterminate
+    
+    if (phaseType === 'felix') {
+      // Time-based: 60 seconds
+      const elapsed = (Date.now() - new Date(workflow.started_at).getTime()) / 1000;
+      const progress = (elapsed / 60) * 25;
+      return Math.min(25, Math.max(0, progress));
+    } else {
+      // Loop-based
+      const progress = (workflow.loop_count / maxLoops) * 25;
+      return Math.min(25, Math.max(0, progress));
+    }
+  };
+
   const calculateProgress = () => {
     if (!pipeline) return 0;
     if (pipeline.status === 'completed') return 100;
 
-    const total = 4;
-    const completed = workflows.filter(w => w.status === 'completed').length;
-    const hasActive = workflows.some(w => w.status === 'running' || w.status === 'alive');
-    const value = ((completed + (hasActive ? 1 : 0)) / total) * 100;
-    return Math.min(100, Math.max(0, value));
+    const felixProgress = getPhaseProgress(felixWorkflow, 0, 'felix');
+    const annaProgress = getPhaseProgress(annaWorkflow, workflowMaxLoops.annaMaxLoops, 'loop');
+    const paulProgress = getPhaseProgress(paulWorkflow, workflowMaxLoops.paulMaxLoops, 'loop');
+    const brittaProgress = getPhaseProgress(brittaWorkflow, workflowMaxLoops.brittaMaxLoops, 'loop');
+
+    const total = felixProgress + annaProgress + paulProgress + brittaProgress;
+    return Math.min(100, Math.max(0, total));
   };
 
   if (pipelineLoading) {
@@ -375,6 +419,10 @@ export default function AutomationStatus() {
       progressIcon: Building2,
       progressCount: workflowProgress.felixCount,
       progressLabel: 'Firmen gefunden',
+      loopCount: 0,
+      maxLoops: 0,
+      phaseType: 'felix' as const,
+      startedAt: felixWorkflow?.started_at,
     },
     {
       name: 'Analyse Anna',
@@ -383,6 +431,10 @@ export default function AutomationStatus() {
       progressIcon: BarChart3,
       progressCount: workflowProgress.annaCount,
       progressLabel: 'Analysen erstellt',
+      loopCount: annaWorkflow?.loop_count || 0,
+      maxLoops: workflowMaxLoops.annaMaxLoops,
+      phaseType: 'loop' as const,
+      startedAt: annaWorkflow?.started_at,
     },
     {
       name: 'Pitch Paul',
@@ -391,6 +443,10 @@ export default function AutomationStatus() {
       progressIcon: Mail,
       progressCount: workflowProgress.paulCount,
       progressLabel: 'E-Mails erstellt',
+      loopCount: paulWorkflow?.loop_count || 0,
+      maxLoops: workflowMaxLoops.paulMaxLoops,
+      phaseType: 'loop' as const,
+      startedAt: paulWorkflow?.started_at,
     },
     {
       name: 'Branding Britta',
@@ -399,6 +455,10 @@ export default function AutomationStatus() {
       progressIcon: Sparkles,
       progressCount: workflowProgress.brittaCount,
       progressLabel: 'E-Mails optimiert',
+      loopCount: brittaWorkflow?.loop_count || 0,
+      maxLoops: workflowMaxLoops.brittaMaxLoops,
+      phaseType: 'loop' as const,
+      startedAt: brittaWorkflow?.started_at,
     },
   ];
 
@@ -659,9 +719,16 @@ export default function AutomationStatus() {
                           <div className="pt-3">
                             <WorkflowProgressBadge
                               icon={phase.progressIcon}
-                              count={phase.progressCount}
+                              count={phase.phaseType === 'felix' && phase.workflow?.status === 'running'
+                                ? Math.max(0, 60 - Math.floor((Date.now() - new Date(phase.workflow.started_at).getTime()) / 1000))
+                                : phase.phaseType === 'loop' ? phase.loopCount : phase.progressCount}
                               label={phase.progressLabel}
-                              isLoading={workflowProgress.isLoading}
+                              isLoading={workflowProgress.isLoading || workflowMaxLoops.isLoading}
+                              maxCount={phase.phaseType === 'loop' ? phase.maxLoops : undefined}
+                              showRatio={phase.phaseType === 'loop'}
+                              timeRemaining={phase.phaseType === 'felix' && phase.workflow?.status === 'running'
+                                ? Math.max(0, 60 - Math.floor((Date.now() - new Date(phase.workflow.started_at).getTime()) / 1000))
+                                : undefined}
                             />
                           </div>
                         </CardHeader>
