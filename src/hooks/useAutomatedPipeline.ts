@@ -121,29 +121,36 @@ export const useAutomatedPipeline = (projectId?: string) => {
     projectId: string, 
     workflowName?: string
   ): Promise<'completed' | 'timeout'> => {
-    return new Promise(async (resolve, reject) => {
-      let lastUpdateTime = Date.now();
-      const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minuten
+    // Initial State Check AUSSERHALB der Promise
+    const { data: initialState, error: fetchError } = await supabase
+      .from('n8n_workflow_states')
+      .select('status, updated_at')
+      .eq('id', workflowId)
+      .single();
       
-      // Initial State Check
-      const { data: initialState, error: fetchError } = await supabase
-        .from('n8n_workflow_states')
-        .select('status, updated_at')
-        .eq('id', workflowId)
-        .single();
-        
-      if (fetchError) {
-        console.error(`[Pipeline] Error fetching initial workflow state for ${workflowId}:`, fetchError);
-      } else if (initialState) {
-        console.log(`[Pipeline] Initial status for ${workflowId}: ${initialState.status}`);
-        
-        if (initialState.status === 'completed') {
-          console.log('[Pipeline] Workflow already completed');
-          return resolve('completed');
-        }
-        
-        lastUpdateTime = new Date(initialState.updated_at || Date.now()).getTime();
+    if (fetchError) {
+      console.error(`[Pipeline] Error fetching initial workflow state for ${workflowId}:`, fetchError);
+    } else if (initialState) {
+      console.log(`[Pipeline] Initial status for ${workflowId}: ${initialState.status}`);
+      
+      // Direkt zurückgeben wenn bereits completed oder failed
+      if (initialState.status === 'completed') {
+        console.log('[Pipeline] Workflow already completed');
+        return 'completed';
       }
+      
+      if (initialState.status === 'failed') {
+        console.log('[Pipeline] Workflow already failed');
+        return 'timeout';
+      }
+    }
+    
+    // Promise ohne async Executor
+    return new Promise((resolve, reject) => {
+      let lastUpdateTime = initialState?.updated_at 
+        ? new Date(initialState.updated_at).getTime() 
+        : Date.now();
+      const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minuten
       
       
       // Inaktivitäts-Check (alle 30 Sekunden)
@@ -161,6 +168,22 @@ export const useAutomatedPipeline = (projectId?: string) => {
         
         console.log(`[Pipeline] Inactivity check - ${workflowId}: ${Math.floor(timeSinceUpdate / 1000)}s since last update`);
         
+        // Wenn completed → fertig
+        if (currentState.status === 'completed') {
+          console.log(`[Pipeline] Workflow ${workflowId} completed via inactivity check`);
+          cleanup();
+          resolve('completed');
+          return;
+        }
+        
+        // Wenn failed → timeout
+        if (currentState.status === 'failed') {
+          console.log(`[Pipeline] Workflow ${workflowId} failed via inactivity check`);
+          cleanup();
+          resolve('timeout');
+          return;
+        }
+        
         // Wenn 5 Minuten keine Updates → Timeout
         if (timeSinceUpdate >= INACTIVITY_TIMEOUT) {
           console.warn(`[Pipeline] Workflow ${workflowId} inactive for 5 minutes - marking as failed, pipeline continues`);
@@ -172,13 +195,8 @@ export const useAutomatedPipeline = (projectId?: string) => {
             .eq('id', workflowId);
           
           cleanup();
-          resolve('timeout'); // Pipeline läuft weiter!
-        }
-        
-        // Wenn completed → fertig
-        if (currentState.status === 'completed') {
-          cleanup();
-          resolve('completed');
+          resolve('timeout');
+          return;
         }
         
         // Update lastUpdateTime wenn es neue Updates gab
@@ -210,9 +228,11 @@ export const useAutomatedPipeline = (projectId?: string) => {
             if (status === 'completed') {
               cleanup();
               resolve('completed');
+              return;
             } else if (status === 'failed') {
               cleanup();
               resolve('timeout');
+              return;
             }
           }
         )
