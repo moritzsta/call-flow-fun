@@ -598,21 +598,27 @@ export default function AutomationStatus() {
                   <BarChart3 className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">Analysen</p>
-                    <p className="text-sm font-bold tabular-nums">{workflowProgress.annaCount}</p>
+                    <p className="text-sm font-bold tabular-nums">
+                      {workflowProgress.annaCount} <span className="text-muted-foreground text-xs">von {workflowMaxLoops.annaMaxLoops}</span>
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/50">
                   <Mail className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">Emails</p>
-                    <p className="text-sm font-bold tabular-nums">{workflowProgress.paulCount}</p>
+                    <p className="text-sm font-bold tabular-nums">
+                      {workflowProgress.paulCount} <span className="text-muted-foreground text-xs">von {workflowMaxLoops.paulMaxLoops}</span>
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/50">
                   <Sparkles className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                   <div className="min-w-0">
                     <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">Optimiert</p>
-                    <p className="text-sm font-bold tabular-nums">{workflowProgress.brittaCount}</p>
+                    <p className="text-sm font-bold tabular-nums">
+                      {workflowProgress.brittaCount} <span className="text-muted-foreground text-xs">von {workflowMaxLoops.brittaMaxLoops}</span>
+                    </p>
                   </div>
                 </div>
               </div>
