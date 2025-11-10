@@ -571,17 +571,51 @@ export default function AutomationStatus() {
               return null;
             })()}
 
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-xs">Gesamtfortschritt</span>
-                <span className="text-lg font-bold tabular-nums">{Math.round(progress)}%</span>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-xs">Gesamtfortschritt</span>
+                  <span className="text-lg font-bold tabular-nums">{Math.round(progress)}%</span>
+                </div>
+                <Progress 
+                  value={progress}
+                  showPulse={showProgressPulse}
+                  isActive={pipeline.status === 'running'}
+                  className="h-3"
+                />
               </div>
-              <Progress 
-                value={progress}
-                showPulse={showProgressPulse}
-                isActive={pipeline.status === 'running'}
-                className="h-3"
-              />
+
+              {/* Phase Details */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-1">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/50">
+                  <Building2 className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">Firmen</p>
+                    <p className="text-sm font-bold tabular-nums">{workflowProgress.felixCount}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/50">
+                  <BarChart3 className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">Analysen</p>
+                    <p className="text-sm font-bold tabular-nums">{workflowProgress.annaCount}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/50">
+                  <Mail className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">Emails</p>
+                    <p className="text-sm font-bold tabular-nums">{workflowProgress.paulCount}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/50">
+                  <Sparkles className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide truncate">Optimiert</p>
+                    <p className="text-sm font-bold tabular-nums">{workflowProgress.brittaCount}</p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {pipeline.error_message && (
