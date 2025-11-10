@@ -123,8 +123,7 @@ export const useAutomatedPipeline = (projectId?: string) => {
   ): Promise<'completed' | 'timeout'> => {
     return new Promise(async (resolve, reject) => {
       let lastUpdateTime = Date.now();
-      const INACTIVITY_TIMEOUT = 4 * 60 * 1000; // 4 Minuten
-      const MAX_TIMEOUT = workflowName === 'analyse_anna' ? 30 * 60 * 1000 : 10 * 60 * 1000;
+      const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minuten
       
       // Initial State Check
       const { data: initialState, error: fetchError } = await supabase
@@ -146,11 +145,6 @@ export const useAutomatedPipeline = (projectId?: string) => {
         lastUpdateTime = new Date(initialState.updated_at || Date.now()).getTime();
       }
       
-      // Max Timeout (absoluter Failsafe)
-      const maxTimeout = setTimeout(() => {
-        cleanup();
-        reject(new Error(`Workflow-Timeout nach ${MAX_TIMEOUT / 60000} Minuten`));
-      }, MAX_TIMEOUT);
       
       // Inaktivitäts-Check (alle 30 Sekunden)
       const inactivityCheck = setInterval(async () => {
@@ -167,9 +161,9 @@ export const useAutomatedPipeline = (projectId?: string) => {
         
         console.log(`[Pipeline] Inactivity check - ${workflowId}: ${Math.floor(timeSinceUpdate / 1000)}s since last update`);
         
-        // Wenn 4 Minuten keine Updates → Timeout
+        // Wenn 5 Minuten keine Updates → Timeout
         if (timeSinceUpdate >= INACTIVITY_TIMEOUT) {
-          console.warn(`[Pipeline] Workflow ${workflowId} inactive for 4 minutes - marking as failed but continuing pipeline`);
+          console.warn(`[Pipeline] Workflow ${workflowId} inactive for 5 minutes - marking as failed, pipeline continues`);
           
           // Status auf "failed" setzen
           await supabase
@@ -227,7 +221,6 @@ export const useAutomatedPipeline = (projectId?: string) => {
         });
       
       const cleanup = () => {
-        clearTimeout(maxTimeout);
         clearInterval(inactivityCheck);
         supabase.removeChannel(channel);
       };
