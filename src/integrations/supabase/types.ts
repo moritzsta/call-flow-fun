@@ -304,6 +304,7 @@ export type Database = {
           created_at: string
           id: string
           last_message_at: string | null
+          loop_count: number
           project_id: string
           result_summary: Json | null
           started_at: string
@@ -319,6 +320,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_message_at?: string | null
+          loop_count?: number
           project_id: string
           result_summary?: Json | null
           started_at?: string
@@ -334,6 +336,7 @@ export type Database = {
           created_at?: string
           id?: string
           last_message_at?: string | null
+          loop_count?: number
           project_id?: string
           result_summary?: Json | null
           started_at?: string
