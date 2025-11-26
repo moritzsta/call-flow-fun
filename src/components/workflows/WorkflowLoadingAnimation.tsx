@@ -10,7 +10,9 @@ const videoMap: Record<string, string> = {
   analyse_anna: '/videos/anna-ladeanimation.mp4',
   analyse_anna_auto: '/videos/anna-ladeanimation.mp4',
   pitch_paul: '/videos/paul-ladeanimation.mp4',
+  pitch_paul_auto: '/videos/paul-ladeanimation.mp4',
   branding_britta: '/videos/britta-ladeanimation.mp4',
+  branding_britta_auto: '/videos/britta-ladeanimation.mp4',
   timer: '/videos/timer-ladeanimation.mp4',
 };
 

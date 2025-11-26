@@ -77,9 +77,14 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
   }, [workflows, isRunning]);
   
   const getWorkflowByName = (name: string) => {
-    // Support both analyse_anna and analyse_anna_auto as "Anna"
     if (name === 'analyse_anna') {
       return workflows?.find((w) => w.workflow_name === 'analyse_anna' || w.workflow_name === 'analyse_anna_auto');
+    }
+    if (name === 'pitch_paul') {
+      return workflows?.find((w) => w.workflow_name === 'pitch_paul' || w.workflow_name === 'pitch_paul_auto');
+    }
+    if (name === 'branding_britta') {
+      return workflows?.find((w) => w.workflow_name === 'branding_britta' || w.workflow_name === 'branding_britta_auto');
     }
     return workflows?.find((w) => w.workflow_name === name);
   };
