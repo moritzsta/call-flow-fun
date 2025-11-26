@@ -186,7 +186,9 @@ export default function AutomationStatus() {
               analyse_anna: 'Analyse Anna',
               analyse_anna_auto: 'Analyse Anna',
               pitch_paul: 'Pitch Paul',
+              pitch_paul_auto: 'Pitch Paul',
               branding_britta: 'Branding Britta',
+              branding_britta_auto: 'Branding Britta',
             };
             
             toast.warning(
@@ -259,9 +261,14 @@ export default function AutomationStatus() {
   };
 
   const getWorkflowByName = (name: string) => {
-    // Support both analyse_anna and analyse_anna_auto as "Anna"
     if (name === 'analyse_anna') {
       return workflows.find((w) => w.workflow_name === 'analyse_anna' || w.workflow_name === 'analyse_anna_auto');
+    }
+    if (name === 'pitch_paul') {
+      return workflows.find((w) => w.workflow_name === 'pitch_paul' || w.workflow_name === 'pitch_paul_auto');
+    }
+    if (name === 'branding_britta') {
+      return workflows.find((w) => w.workflow_name === 'branding_britta' || w.workflow_name === 'branding_britta_auto');
     }
     return workflows.find((w) => w.workflow_name === name);
   };
@@ -546,7 +553,9 @@ export default function AutomationStatus() {
                         analyse_anna: 'Analyse Anna',
                         analyse_anna_auto: 'Analyse Anna',
                         pitch_paul: 'Pitch Paul',
+                        pitch_paul_auto: 'Pitch Paul',
                         branding_britta: 'Branding Britta',
+                        branding_britta_auto: 'Branding Britta',
                       };
                       const active = workflows.find(w => w.status === 'running' || w.status === 'alive');
                       if (active) return map[active.workflow_name] || active.workflow_name;

@@ -95,24 +95,9 @@ export const useAutomatedPipeline = (projectId?: string) => {
     };
   }, [activePipelineId, projectId, queryClient]);
 
-  // Initialize chat instances for each workflow
+  // Initialize chat instance only for Felix (others use auto-workflows)
   const felixChat = useWorkflowChat({
     workflowName: 'finder_felix',
-    projectId: projectId || '',
-  });
-
-  const annaChat = useWorkflowChat({
-    workflowName: 'analyse_anna',
-    projectId: projectId || '',
-  });
-
-  const paulChat = useWorkflowChat({
-    workflowName: 'pitch_paul',
-    projectId: projectId || '',
-  });
-
-  const brittaChat = useWorkflowChat({
-    workflowName: 'branding_britta',
     projectId: projectId || '',
   });
 
@@ -365,23 +350,50 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Waiting 2 minutes before starting Paul...');
         await new Promise(resolve => setTimeout(resolve, 120000));
 
-        // 4. Trigger Pitch Paul via Chat
-        console.log('[Pipeline] Starting Pitch Paul...');
+        // 4. Trigger Pitch Paul Auto (without chat)
+        console.log('[Pipeline] Starting Pitch Paul Auto...');
         setCurrentPhase('paul');
         
-        const paulMessage = `System-Message: Bitte generiere E-Mails für alle Firmen in der Datenbank, welche eine E-Mail-Adresse hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        const paulWorkflowId = await paulChat.sendMessage(paulMessage);
-        
-        if (!paulWorkflowId) {
-          throw new Error('Paul Workflow-State konnte nicht erstellt werden');
+        // Create workflow state directly
+        const { data: paulState, error: paulStateError } = await supabase
+          .from('n8n_workflow_states')
+          .insert({
+            project_id: projectId,
+            user_id: userId,
+            workflow_name: 'pitch_paul_auto',
+            status: 'pending',
+            trigger_data: { userGoal: config.vorhaben },
+          })
+          .select()
+          .single();
+
+        if (paulStateError || !paulState) {
+          throw new Error(`Paul Workflow-State konnte nicht erstellt werden: ${paulStateError?.message}`);
         }
+
+        const paulWorkflowId = paulState.id;
 
         await supabase
           .from('automation_pipelines')
           .update({ paul_workflow_id: paulWorkflowId })
           .eq('id', pipelineId);
 
-        const paulResult = await waitForWorkflowAndCheckActivity(paulWorkflowId, projectId, 'pitch_paul');
+        // Trigger Edge Function directly
+        const { error: paulTriggerError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+          body: {
+            workflow_name: 'pitch_paul_auto',
+            workflow_id: paulWorkflowId,
+            project_id: projectId,
+            user_id: userId,
+            trigger_data: { userGoal: config.vorhaben },
+          },
+        });
+
+        if (paulTriggerError) {
+          throw new Error(`Paul Workflow Trigger fehlgeschlagen: ${paulTriggerError.message}`);
+        }
+
+        const paulResult = await waitForWorkflowAndCheckActivity(paulWorkflowId, projectId, 'pitch_paul_auto');
         
         if (paulResult === 'timeout') {
           console.warn('[Pipeline] Paul timed out, but continuing pipeline...');
@@ -394,23 +406,50 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Waiting 2 minutes before starting Britta...');
         await new Promise(resolve => setTimeout(resolve, 120000));
 
-        // 5. Trigger Branding Britta via Chat
-        console.log('[Pipeline] Starting Branding Britta...');
+        // 5. Trigger Branding Britta Auto (without chat)
+        console.log('[Pipeline] Starting Branding Britta Auto...');
         setCurrentPhase('britta');
 
-        const brittaMessage = `System-Message: Bitte optimiere alle E-Mails in der Datenbank (Draft und Sent Status). Verbessere Betreffzeilen, Ansprache und Call-to-Actions für maximale Öffnungs- und Klickraten.`;
-        const brittaWorkflowId = await brittaChat.sendMessage(brittaMessage);
+        // Create workflow state directly
+        const { data: brittaState, error: brittaStateError } = await supabase
+          .from('n8n_workflow_states')
+          .insert({
+            project_id: projectId,
+            user_id: userId,
+            workflow_name: 'branding_britta_auto',
+            status: 'pending',
+            trigger_data: { userGoal: config.vorhaben },
+          })
+          .select()
+          .single();
 
-        if (!brittaWorkflowId) {
-          throw new Error('Britta Workflow-State konnte nicht erstellt werden');
+        if (brittaStateError || !brittaState) {
+          throw new Error(`Britta Workflow-State konnte nicht erstellt werden: ${brittaStateError?.message}`);
         }
+
+        const brittaWorkflowId = brittaState.id;
 
         await supabase
           .from('automation_pipelines')
           .update({ britta_workflow_id: brittaWorkflowId })
           .eq('id', pipelineId);
 
-        const brittaResult = await waitForWorkflowAndCheckActivity(brittaWorkflowId, projectId, 'branding_britta');
+        // Trigger Edge Function directly
+        const { error: brittaTriggerError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+          body: {
+            workflow_name: 'branding_britta_auto',
+            workflow_id: brittaWorkflowId,
+            project_id: projectId,
+            user_id: userId,
+            trigger_data: { userGoal: config.vorhaben },
+          },
+        });
+
+        if (brittaTriggerError) {
+          throw new Error(`Britta Workflow Trigger fehlgeschlagen: ${brittaTriggerError.message}`);
+        }
+
+        const brittaResult = await waitForWorkflowAndCheckActivity(brittaWorkflowId, projectId, 'branding_britta_auto');
         
         if (brittaResult === 'timeout') {
           console.warn('[Pipeline] Britta timed out, but continuing pipeline...');

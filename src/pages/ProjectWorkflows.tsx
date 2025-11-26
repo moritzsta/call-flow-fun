@@ -16,7 +16,9 @@ const workflowNameMap: Record<string, string> = {
   analyse_anna: 'Analyse Anna',
   analyse_anna_auto: 'Analyse Anna',
   pitch_paul: 'Pitch Paul',
+  pitch_paul_auto: 'Pitch Paul',
   branding_britta: 'Branding Britta',
+  branding_britta_auto: 'Branding Britta',
 };
 
 const workflowChatPaths: Record<string, string> = {

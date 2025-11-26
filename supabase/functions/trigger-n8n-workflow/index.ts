@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface WorkflowRequest {
-  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'branding_britta' | 'email_sender';
+  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'pitch_paul_auto' | 'branding_britta' | 'branding_britta_auto' | 'email_sender';
   workflow_id: string;
   project_id: string;
   user_id: string;
@@ -40,7 +40,9 @@ serve(async (req) => {
       analyse_anna: '/analyse-anna',
       analyse_anna_auto: '/analyse-anna-auto',
       pitch_paul: '/pitch-paul',
+      pitch_paul_auto: '/pitch-paul-auto',
       branding_britta: '/branding-britta',
+      branding_britta_auto: '/branding-britta-auto',
       email_sender: '/sende-susan',
     };
 
@@ -84,8 +86,16 @@ serve(async (req) => {
       requestBody.send_all = trigger_data.send_all || false;
     }
 
-    // Special handling for analyse_anna_auto workflow - extract userGoal
+    // Special handling for auto workflows - extract userGoal
     if (workflow_name === 'analyse_anna_auto' && trigger_data?.userGoal) {
+      requestBody.userGoal = trigger_data.userGoal;
+    }
+    
+    if (workflow_name === 'pitch_paul_auto' && trigger_data?.userGoal) {
+      requestBody.userGoal = trigger_data.userGoal;
+    }
+    
+    if (workflow_name === 'branding_britta_auto' && trigger_data?.userGoal) {
       requestBody.userGoal = trigger_data.userGoal;
     }
 
