@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface WorkflowRequest {
-  workflow_name: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'branding_britta' | 'email_sender';
+  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'branding_britta' | 'email_sender';
   workflow_id: string;
   project_id: string;
   user_id: string;
@@ -38,6 +38,7 @@ serve(async (req) => {
     const webhookPaths: Record<string, string> = {
       finder_felix: '/finder-felix',
       analyse_anna: '/analyse-anna',
+      analyse_anna_auto: '/analyse-anna-auto',
       pitch_paul: '/pitch-paul',
       branding_britta: '/branding-britta',
       email_sender: '/sende-susan',
@@ -81,6 +82,11 @@ serve(async (req) => {
       requestBody.emails = trigger_data; // Legacy structure
       requestBody.email_id = trigger_data.email_id;
       requestBody.send_all = trigger_data.send_all || false;
+    }
+
+    // Special handling for analyse_anna_auto workflow - extract userGoal
+    if (workflow_name === 'analyse_anna_auto' && trigger_data?.userGoal) {
+      requestBody.userGoal = trigger_data.userGoal;
     }
 
     // Special handling for finder_felix workflow - check for duplicates
