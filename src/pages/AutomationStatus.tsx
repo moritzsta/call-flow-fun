@@ -209,7 +209,7 @@ export default function AutomationStatus() {
     };
   }, [pipeline?.id, pipeline?.status, pipeline?.felix_workflow_id, pipeline?.anna_workflow_id, pipeline?.paul_workflow_id, pipeline?.britta_workflow_id, refetchWorkflows]);
 
-  // Calculate time until next phase (2 minutes between workflows)
+  // Calculate time until next phase (30 seconds between workflows)
   useEffect(() => {
     if (pipeline?.status !== 'running' || !workflows.length) {
       setTimeUntilNextPhase(null);
@@ -242,9 +242,9 @@ export default function AutomationStatus() {
       }
 
       const now = Date.now();
-      const nextPhaseTime = lastFinishTime + (2 * 60 * 1000); // 2 minutes gap
+      const nextPhaseTime = lastFinishTime + (30 * 1000); // 30 seconds gap
       const remaining = Math.max(0, Math.floor((nextPhaseTime - now) / 1000));
-      if (remaining > 0 && remaining <= 120) {
+      if (remaining > 0 && remaining <= 30) {
         setTimeUntilNextPhase(remaining);
       } else {
         setTimeUntilNextPhase(null);
