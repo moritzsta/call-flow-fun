@@ -184,6 +184,7 @@ export default function AutomationStatus() {
             const workflowLabels: Record<string, string> = {
               finder_felix: 'Finder Felix',
               analyse_anna: 'Analyse Anna',
+              analyse_anna_auto: 'Analyse Anna',
               pitch_paul: 'Pitch Paul',
               branding_britta: 'Branding Britta',
             };
@@ -258,6 +259,10 @@ export default function AutomationStatus() {
   };
 
   const getWorkflowByName = (name: string) => {
+    // Support both analyse_anna and analyse_anna_auto as "Anna"
+    if (name === 'analyse_anna') {
+      return workflows.find((w) => w.workflow_name === 'analyse_anna' || w.workflow_name === 'analyse_anna_auto');
+    }
     return workflows.find((w) => w.workflow_name === name);
   };
 
@@ -539,6 +544,7 @@ export default function AutomationStatus() {
                       const map: Record<string, string> = {
                         finder_felix: 'Finder Felix',
                         analyse_anna: 'Analyse Anna',
+                        analyse_anna_auto: 'Analyse Anna',
                         pitch_paul: 'Pitch Paul',
                         branding_britta: 'Branding Britta',
                       };
