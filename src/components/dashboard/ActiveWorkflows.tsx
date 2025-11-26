@@ -28,6 +28,7 @@ interface ActiveWorkflowsProps {
 const workflowNameMap: Record<string, string> = {
   finder_felix: 'Finder Felix',
   analyse_anna: 'Analyse Anna',
+  analyse_anna_auto: 'Analyse Anna',
   pitch_paul: 'Pitch Paul',
   email_sender: 'E-Mail Versand',
 };

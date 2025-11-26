@@ -8,6 +8,7 @@ interface WorkflowLoadingAnimationProps {
 const videoMap: Record<string, string> = {
   finder_felix: '/videos/felix-ladeanimation.mp4',
   analyse_anna: '/videos/anna-ladeanimation.mp4',
+  analyse_anna_auto: '/videos/anna-ladeanimation.mp4',
   pitch_paul: '/videos/paul-ladeanimation.mp4',
   branding_britta: '/videos/britta-ladeanimation.mp4',
   timer: '/videos/timer-ladeanimation.mp4',
