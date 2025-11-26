@@ -12,7 +12,7 @@ export interface WorkflowMessage {
 }
 
 interface UseWorkflowChatOptions {
-  workflowName: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'branding_britta';
+  workflowName: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'branding_britta';
   projectId: string;
   initialWorkflowStateId?: string;
 }

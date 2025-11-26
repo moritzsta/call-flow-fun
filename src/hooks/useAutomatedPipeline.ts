@@ -307,23 +307,52 @@ export const useAutomatedPipeline = (projectId?: string) => {
         console.log('[Pipeline] Waiting 2 minutes before starting Anna...');
         await new Promise(resolve => setTimeout(resolve, 120000));
 
-        // 3. Trigger Analyse Anna via Chat
-        console.log('[Pipeline] Starting Analyse Anna...');
+        // 3. Trigger Analyse Anna Auto (without chat)
+        console.log('[Pipeline] Starting Analyse Anna Auto...');
         setCurrentPhase('anna');
         
-        const annaMessage = `System-Message: Bitte analysiere alle Firmen in der Datenbank, welche eine Website-URL hinterlegt haben. Mein Vorhaben: ${config.vorhaben}`;
-        const annaWorkflowId = await annaChat.sendMessage(annaMessage);
-        
-        if (!annaWorkflowId) {
-          throw new Error('Anna Workflow-State konnte nicht erstellt werden');
+        // Create workflow state directly
+        const { data: annaState, error: annaStateError } = await supabase
+          .from('n8n_workflow_states')
+          .insert({
+            project_id: projectId,
+            user_id: userId,
+            workflow_name: 'analyse_anna_auto',
+            status: 'pending',
+            trigger_data: { userGoal: config.vorhaben },
+          })
+          .select()
+          .single();
+
+        if (annaStateError || !annaState) {
+          throw new Error(`Anna Workflow-State konnte nicht erstellt werden: ${annaStateError?.message}`);
         }
+
+        const annaWorkflowId = annaState.id;
 
         await supabase
           .from('automation_pipelines')
           .update({ anna_workflow_id: annaWorkflowId })
           .eq('id', pipelineId);
 
-        const annaResult = await waitForWorkflowAndCheckActivity(annaWorkflowId, projectId, 'analyse_anna');
+        // Trigger Edge Function directly
+        const { error: triggerError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+          body: {
+            workflow_name: 'analyse_anna_auto',
+            workflow_id: annaWorkflowId,
+            project_id: projectId,
+            user_id: userId,
+            trigger_data: {
+              userGoal: config.vorhaben,
+            },
+          },
+        });
+
+        if (triggerError) {
+          throw new Error(`Anna Workflow Trigger fehlgeschlagen: ${triggerError.message}`);
+        }
+
+        const annaResult = await waitForWorkflowAndCheckActivity(annaWorkflowId, projectId, 'analyse_anna_auto');
         
         if (annaResult === 'timeout') {
           console.warn('[Pipeline] Anna timed out, but continuing pipeline...');
