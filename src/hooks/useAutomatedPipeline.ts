@@ -288,9 +288,9 @@ export const useAutomatedPipeline = (projectId?: string) => {
           console.log('[Pipeline] Finder Felix completed');
         }
 
-        // 2 Minuten Wartezeit vor Anna
-        console.log('[Pipeline] Waiting 2 minutes before starting Anna...');
-        await new Promise(resolve => setTimeout(resolve, 120000));
+        // 30 Sekunden Wartezeit vor Anna
+        console.log('[Pipeline] Waiting 30 seconds before starting Anna...');
+        await new Promise(resolve => setTimeout(resolve, 30000));
 
         // 3. Trigger Analyse Anna Auto (without chat)
         console.log('[Pipeline] Starting Analyse Anna Auto...');
@@ -346,9 +346,9 @@ export const useAutomatedPipeline = (projectId?: string) => {
           console.log('[Pipeline] Analyse Anna completed');
         }
 
-        // 2 Minuten Wartezeit vor Paul
-        console.log('[Pipeline] Waiting 2 minutes before starting Paul...');
-        await new Promise(resolve => setTimeout(resolve, 120000));
+        // 30 Sekunden Wartezeit vor Paul
+        console.log('[Pipeline] Waiting 30 seconds before starting Paul...');
+        await new Promise(resolve => setTimeout(resolve, 30000));
 
         // 4. Trigger Pitch Paul Auto (without chat)
         console.log('[Pipeline] Starting Pitch Paul Auto...');
@@ -402,9 +402,9 @@ export const useAutomatedPipeline = (projectId?: string) => {
           console.log('[Pipeline] Pitch Paul completed');
         }
 
-        // 2 Minuten Wartezeit vor Britta
-        console.log('[Pipeline] Waiting 2 minutes before starting Britta...');
-        await new Promise(resolve => setTimeout(resolve, 120000));
+        // 30 Sekunden Wartezeit vor Britta
+        console.log('[Pipeline] Waiting 30 seconds before starting Britta...');
+        await new Promise(resolve => setTimeout(resolve, 30000));
 
         // 5. Trigger Branding Britta Auto (without chat)
         console.log('[Pipeline] Starting Branding Britta Auto...');
