@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.upsert-company]
 verify_jwt = false
+
+[functions.advance-pipeline]
+verify_jwt = false

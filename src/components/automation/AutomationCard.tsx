@@ -51,9 +51,11 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
 
     startPipeline(
       {
-        projectId,
-        userId: user.id,
-        config,
+        config: {
+          projectId,
+          userId: user.id,
+          searchCriteria: config,
+        },
       },
       {
         onSuccess: () => {
@@ -128,13 +130,13 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
     if (!isRunning) return null;
     
     switch (currentPhase) {
-      case 'felix':
+      case 'finder_felix':
         return 'Phase 1/4: Firmen finden...';
-      case 'anna':
+      case 'analyse_anna_auto':
         return 'Phase 2/4: Firmen analysieren...';
-      case 'paul':
+      case 'pitch_paul_auto':
         return 'Phase 3/4: E-Mails generieren...';
-      case 'britta':
+      case 'branding_britta_auto':
         return 'Phase 4/4: E-Mails optimieren...';
       default:
         return 'Pipeline läuft...';
@@ -145,13 +147,13 @@ export const AutomationCard = ({ projectId }: AutomationCardProps) => {
     if (!isRunning || !workflows) return null;
     
     switch (currentPhase) {
-      case 'felix':
+      case 'finder_felix':
         return `${workflowProgress.felixCount} Firmen gefunden`;
-      case 'anna':
+      case 'analyse_anna_auto':
         return `${workflowProgress.annaCount}/${workflowMaxLoops.annaMaxLoops} Firmen analysiert`;
-      case 'paul':
+      case 'pitch_paul_auto':
         return `${workflowProgress.paulCount}/${workflowMaxLoops.paulMaxLoops} E-Mails generiert`;
-      case 'britta':
+      case 'branding_britta_auto':
         return `${workflowProgress.brittaCount}/${workflowMaxLoops.brittaMaxLoops} E-Mails optimiert`;
       default:
         return null;
