@@ -197,7 +197,18 @@ export default function AutomationStatus() {
               { duration: 5000 }
             );
             
+            // Trigger advance-pipeline recovery to start next workflow
+            console.log('[AutomationStatus] Triggering pipeline recovery after timeout');
+            try {
+              await supabase.functions.invoke('advance-pipeline', {
+                body: { recover: true, pipeline_id: pipeline.id }
+              });
+            } catch (recoveryError) {
+              console.error('[AutomationStatus] Recovery trigger failed:', recoveryError);
+            }
+            
             // Trigger refetch to update UI
+            refetch();
             refetchWorkflows();
           }
         }
