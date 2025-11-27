@@ -53,8 +53,13 @@ serve(async (req) => {
 
     // Build normalized n8n webhook URL (ensure '/webhook' prefix and single slashes)
     const baseUrl = (N8N_WEBHOOK_BASE_URL || '').replace(/\/+$/, '');
-    const needsWebhookPrefix = !/\/webhook$/.test(baseUrl);
-    const n8nUrl = `${baseUrl}${needsWebhookPrefix ? '/webhook' : ''}${webhookPath}`;
+    
+    // TEMPORARY: Use webhook-test for finder_felix testing
+    const webhookPrefix = workflow_name === 'finder_felix' ? '/webhook-test' : '/webhook';
+    const needsWebhookPrefix = !/\/webhook(-test)?$/.test(baseUrl);
+    const n8nUrl = `${baseUrl}${needsWebhookPrefix ? webhookPrefix : ''}${webhookPath}`;
+    
+    console.log(`[trigger-n8n-workflow] Using ${webhookPrefix} for ${workflow_name}`);
     console.log(`[trigger-n8n-workflow] Calling n8n: ${n8nUrl}`);
 
     const headerName = Deno.env.get('N8N_WEBHOOK_HEADER_NAME') || 'X-Webhook-Secret';
