@@ -681,14 +681,14 @@ export default function AutomationStatus() {
               // 1. If active workflow found → show its animation
               if (activeWorkflow) {
                 return <div className="-mt-[100px] mb-[-80px]">
-                  <WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} />
+                  <WorkflowLoadingAnimation key={activeWorkflow.workflow_name} workflowName={activeWorkflow.workflow_name} />
                 </div>;
               }
               
               // 2. Check if we're waiting for next phase (30-second timer active)
               if (timeUntilNextPhase !== null && timeUntilNextPhase > 0) {
                 return <div className="-mt-[100px] mb-[-80px]">
-                  <WorkflowLoadingAnimation workflowName="timer" />
+                  <WorkflowLoadingAnimation key="timer" workflowName="timer" />
                 </div>;
               }
               
@@ -714,7 +714,7 @@ export default function AutomationStatus() {
                 // If current_phase is set but workflow doesn't exist yet → show timer (still waiting)
                 if (!currentPhaseWorkflow && pipeline.current_phase !== 'finder_felix' && pipeline.current_phase !== 'completed') {
                   return <div className="-mt-[100px] mb-[-80px]">
-                    <WorkflowLoadingAnimation workflowName="timer" />
+                    <WorkflowLoadingAnimation key="timer-waiting" workflowName="timer" />
                   </div>;
                 }
                 
@@ -722,7 +722,7 @@ export default function AutomationStatus() {
                 const workflowName = phaseToWorkflowMap[pipeline.current_phase];
                 if (workflowName) {
                   return <div className="-mt-[100px] mb-[-80px]">
-                    <WorkflowLoadingAnimation workflowName={workflowName} />
+                    <WorkflowLoadingAnimation key={workflowName} workflowName={workflowName} />
                   </div>;
                 }
               }
