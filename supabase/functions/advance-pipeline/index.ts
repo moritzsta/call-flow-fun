@@ -89,6 +89,27 @@ Deno.serve(async (req) => {
 
     console.log('Current workflow:', body.workflow_name, 'Next workflow:', nextWorkflow);
 
+    // Check if next workflow already exists (prevents duplicate triggers from out-of-order completions)
+    if (nextWorkflow) {
+      const nextWorkflowIdField = WORKFLOW_ID_MAPPING[nextWorkflow as keyof typeof WORKFLOW_ID_MAPPING];
+      const existingNextWorkflowId = pipeline[nextWorkflowIdField as keyof Pipeline];
+      
+      if (existingNextWorkflowId) {
+        console.log('Next workflow already exists:', nextWorkflow, existingNextWorkflowId);
+        console.log('Skipping trigger - workflow was likely already started via recovery');
+        
+        return new Response(
+          JSON.stringify({ 
+            message: 'Next workflow already exists, skipping trigger',
+            next_workflow: nextWorkflow,
+            existing_workflow_id: existingNextWorkflowId,
+            pipeline_id: pipeline.id
+          }),
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
     // Update current_phase
     const newPhase = nextWorkflow || 'completed';
     await supabase
