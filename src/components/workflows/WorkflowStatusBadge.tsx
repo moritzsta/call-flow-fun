@@ -3,7 +3,7 @@ import { Clock, Loader2, CheckCircle2, XCircle, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface WorkflowStatusBadgeProps {
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'alive' | 'cancelled';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'alive';
   className?: string;
   showIcon?: boolean;
 }
@@ -40,12 +40,6 @@ export const WorkflowStatusBadge = ({
     },
     failed: {
       label: 'Fehlgeschlagen',
-      variant: 'secondary' as const,
-      className: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
-      icon: XCircle,
-    },
-    cancelled: {
-      label: 'Abgebrochen',
       variant: 'secondary' as const,
       className: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
       icon: XCircle,
