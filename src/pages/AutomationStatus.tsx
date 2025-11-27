@@ -403,11 +403,11 @@ export default function AutomationStatus() {
           .in('status', ['running', 'alive', 'pending']);
       }
       
-      // Set pipeline to cancelled
+      // Set pipeline to failed with cancellation message
       const { error } = await supabase
         .from('automation_pipelines')
         .update({ 
-          status: 'cancelled',
+          status: 'failed',
           error_message: 'Pipeline wurde manuell abgebrochen'
         })
         .eq('id', pipeline.id);
