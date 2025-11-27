@@ -51,13 +51,15 @@ serve(async (req) => {
       throw new Error(`Unknown workflow: ${workflow_name}`);
     }
 
-    // Build normalized n8n webhook URL (ensure '/webhook' prefix and single slashes)
-    const baseUrl = (N8N_WEBHOOK_BASE_URL || '').replace(/\/+$/, '');
+    // Build normalized n8n webhook URL
+    let baseUrl = (N8N_WEBHOOK_BASE_URL || '').replace(/\/+$/, '');
+    
+    // Remove any existing /webhook or /webhook-test suffix from base URL
+    baseUrl = baseUrl.replace(/\/webhook(-test)?$/, '');
     
     // TEMPORARY: Use webhook-test for finder_felix testing
     const webhookPrefix = workflow_name === 'finder_felix' ? '/webhook-test' : '/webhook';
-    const needsWebhookPrefix = !/\/webhook(-test)?$/.test(baseUrl);
-    const n8nUrl = `${baseUrl}${needsWebhookPrefix ? webhookPrefix : ''}${webhookPath}`;
+    const n8nUrl = `${baseUrl}${webhookPrefix}${webhookPath}`;
     
     console.log(`[trigger-n8n-workflow] Using ${webhookPrefix} for ${workflow_name}`);
     console.log(`[trigger-n8n-workflow] Calling n8n: ${n8nUrl}`);
