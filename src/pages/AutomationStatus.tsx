@@ -552,9 +552,7 @@ export default function AutomationStatus() {
                 <Activity className={`h-4 w-4 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
                 Gesamtstatus
               </CardTitle>
-              {pipeline.status === 'running' && 
-               workflows.length > 0 && 
-               !workflows.some(w => w.status === 'running' || w.status === 'alive') && (
+              {pipeline.status === 'running' && (
                 <Button 
                   onClick={handleRecoverPipeline} 
                   variant="outline" 
