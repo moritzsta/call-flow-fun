@@ -27,7 +27,8 @@ import {
   Mail,
   Sparkles,
   Timer,
-  RefreshCcw
+  RefreshCcw,
+  XCircle
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
@@ -377,6 +378,51 @@ export default function AutomationStatus() {
     }
   };
 
+  // Cancel handler
+  const handleCancelPipeline = async () => {
+    if (!pipeline?.id) return;
+    
+    if (!window.confirm('Möchtest du die Pipeline wirklich abbrechen? Diese Aktion kann nicht rückgängig gemacht werden.')) {
+      return;
+    }
+    
+    try {
+      // Mark all active workflows as failed
+      const workflowIds = [
+        pipeline.felix_workflow_id,
+        pipeline.anna_workflow_id,
+        pipeline.paul_workflow_id,
+        pipeline.britta_workflow_id,
+      ].filter(Boolean);
+      
+      if (workflowIds.length > 0) {
+        await supabase
+          .from('n8n_workflow_states')
+          .update({ status: 'failed' })
+          .in('id', workflowIds)
+          .in('status', ['running', 'alive', 'pending']);
+      }
+      
+      // Set pipeline to cancelled
+      const { error } = await supabase
+        .from('automation_pipelines')
+        .update({ 
+          status: 'cancelled',
+          error_message: 'Pipeline wurde manuell abgebrochen'
+        })
+        .eq('id', pipeline.id);
+      
+      if (error) throw error;
+      
+      toast.success('Pipeline wurde abgebrochen');
+      refetch();
+      refetchWorkflows();
+    } catch (err) {
+      console.error('Cancel error:', err);
+      toast.error('Fehler beim Abbrechen der Pipeline');
+    }
+  };
+
   const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null): 'pending' | 'running' | 'completed' | 'failed' | 'alive' => {
     if (!workflow) return 'pending';
     return workflow.status;
@@ -564,15 +610,26 @@ export default function AutomationStatus() {
                 Gesamtstatus
               </CardTitle>
               {pipeline.status === 'running' && (
-                <Button 
-                  onClick={handleRecoverPipeline} 
-                  variant="outline" 
-                  size="sm"
-                  className="gap-2"
-                >
-                  <RefreshCcw className="h-4 w-4" />
-                  Pipeline fortsetzen
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={handleRecoverPipeline} 
+                    variant="outline" 
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <RefreshCcw className="h-4 w-4" />
+                    Pipeline fortsetzen
+                  </Button>
+                  <Button 
+                    onClick={handleCancelPipeline} 
+                    variant="destructive" 
+                    size="sm"
+                    className="gap-2"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Abbrechen
+                  </Button>
+                </div>
               )}
             </div>
           </CardHeader>
@@ -620,13 +677,31 @@ export default function AutomationStatus() {
             {/* Ladeanimation */}
             {(pipeline.status === 'running' || pipeline.status === 'alive') && (() => {
               const activeWorkflow = workflows.find(w => w.status === 'running' || w.status === 'alive');
+              
+              // If active workflow found → show its animation
               if (activeWorkflow) {
                 return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} /></div>;
               }
-              // Show timer animation during waiting period between workflows
+              
+              // Timer only during 30-second waiting period between phases
               if (timeUntilNextPhase !== null && timeUntilNextPhase > 0) {
                 return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName="timer" /></div>;
               }
+              
+              // Fallback based on pipeline.current_phase
+              if (pipeline.current_phase) {
+                const phaseToWorkflowMap: Record<string, string> = {
+                  finder_felix: 'finder_felix',
+                  analyse_anna: 'analyse_anna_auto',
+                  pitch_paul: 'pitch_paul_auto',
+                  branding_britta: 'branding_britta_auto',
+                };
+                const workflowName = phaseToWorkflowMap[pipeline.current_phase];
+                if (workflowName) {
+                  return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName={workflowName} /></div>;
+                }
+              }
+              
               return null;
             })()}
 
