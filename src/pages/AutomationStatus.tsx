@@ -26,7 +26,8 @@ import {
   BarChart3,
   Mail,
   Sparkles,
-  Timer
+  Timer,
+  RefreshCcw
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
@@ -346,6 +347,25 @@ export default function AutomationStatus() {
     }
   }, [felixWorkflow, annaWorkflow, paulWorkflow, brittaWorkflow]);
 
+  // Recovery handler
+  const handleRecoverPipeline = async () => {
+    if (!pipeline?.id) return;
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('advance-pipeline', {
+        body: { recover: true, pipeline_id: pipeline.id }
+      });
+      
+      if (error) throw error;
+      toast.success('Pipeline wird fortgesetzt...');
+      refetch();
+      refetchWorkflows();
+    } catch (err) {
+      console.error('Recovery error:', err);
+      toast.error('Fehler beim Fortsetzen der Pipeline');
+    }
+  };
+
   const getPhaseStatus = (workflow: WorkflowState | undefined, currentPhase: string | null): 'pending' | 'running' | 'completed' | 'failed' | 'alive' => {
     if (!workflow) return 'pending';
     return workflow.status;
@@ -527,10 +547,25 @@ export default function AutomationStatus() {
           ${pipeline.status === 'failed' ? 'ring-2 ring-destructive/30 shadow-lg shadow-destructive/10' : ''}
         `}>
           <CardHeader className="pb-1 pt-3">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Activity className={`h-4 w-4 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
-              Gesamtstatus
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Activity className={`h-4 w-4 ${pipeline.status === 'running' ? 'animate-pulse' : ''}`} />
+                Gesamtstatus
+              </CardTitle>
+              {pipeline.status === 'running' && 
+               workflows.length > 0 && 
+               !workflows.some(w => w.status === 'running' || w.status === 'alive') && (
+                <Button 
+                  onClick={handleRecoverPipeline} 
+                  variant="outline" 
+                  size="sm"
+                  className="gap-2"
+                >
+                  <RefreshCcw className="h-4 w-4" />
+                  Pipeline fortsetzen
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-1.5 pt-0 pb-3">
             <div className="grid md:grid-cols-2 gap-2">
