@@ -14,7 +14,8 @@ interface PipelineConfig {
     state?: string;
     city?: string;
     district?: string;
-    industry?: string;
+    category?: string;
+    vorhaben?: string;
   };
 }
 
@@ -123,7 +124,7 @@ export function useAutomatedPipeline(projectId: string) {
       if (config.searchCriteria.state) searchTerms.push(`Bundesland: ${config.searchCriteria.state}`);
       if (config.searchCriteria.city) searchTerms.push(`Stadt: ${config.searchCriteria.city}`);
       if (config.searchCriteria.district) searchTerms.push(`Bezirk: ${config.searchCriteria.district}`);
-      if (config.searchCriteria.industry) searchTerms.push(`Branche: ${config.searchCriteria.industry}`);
+      if (config.searchCriteria.category) searchTerms.push(`Branche: ${config.searchCriteria.category}`);
 
       const felixMessage = searchTerms.length > 0
         ? `Bitte finde Unternehmen mit folgenden Kriterien: ${searchTerms.join(', ')}`
