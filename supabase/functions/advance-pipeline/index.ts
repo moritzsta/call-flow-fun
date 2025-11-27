@@ -81,13 +81,18 @@ Deno.serve(async (req) => {
 
     console.log('Found pipeline:', pipeline.id, 'current_phase:', pipeline.current_phase);
 
+    // Normalize workflow name (convert dashes to underscores for consistency)
+    // This handles cases where n8n sends 'finder-felix' instead of 'finder_felix'
+    const normalizedWorkflowName = body.workflow_name.replace(/-/g, '_');
+    console.log('Normalized workflow name:', body.workflow_name, '→', normalizedWorkflowName);
+
     // Determine next workflow
-    const currentIndex = WORKFLOW_SEQUENCE.indexOf(body.workflow_name);
+    const currentIndex = WORKFLOW_SEQUENCE.indexOf(normalizedWorkflowName);
     const nextWorkflow = currentIndex >= 0 && currentIndex < WORKFLOW_SEQUENCE.length - 1
       ? WORKFLOW_SEQUENCE[currentIndex + 1]
       : null;
 
-    console.log('Current workflow:', body.workflow_name, 'Next workflow:', nextWorkflow);
+    console.log('Current workflow:', normalizedWorkflowName, 'Next workflow:', nextWorkflow);
 
     // Check if next workflow already exists (prevents duplicate triggers from out-of-order completions)
     if (nextWorkflow) {

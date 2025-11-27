@@ -678,27 +678,52 @@ export default function AutomationStatus() {
             {(pipeline.status === 'running' || pipeline.status === 'alive') && (() => {
               const activeWorkflow = workflows.find(w => w.status === 'running' || w.status === 'alive');
               
-              // If active workflow found → show its animation
+              // 1. If active workflow found → show its animation
               if (activeWorkflow) {
-                return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} /></div>;
+                return <div className="-mt-[100px] mb-[-80px]">
+                  <WorkflowLoadingAnimation workflowName={activeWorkflow.workflow_name} />
+                </div>;
               }
               
-              // Timer only during 30-second waiting period between phases
+              // 2. Check if we're waiting for next phase (30-second timer active)
               if (timeUntilNextPhase !== null && timeUntilNextPhase > 0) {
-                return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName="timer" /></div>;
+                return <div className="-mt-[100px] mb-[-80px]">
+                  <WorkflowLoadingAnimation workflowName="timer" />
+                </div>;
               }
               
-              // Fallback based on pipeline.current_phase
+              // 3. Check if current_phase workflow exists - if not, we're still waiting
+              // This handles the edge case where current_phase is updated but workflow not yet created
               if (pipeline.current_phase) {
                 const phaseToWorkflowMap: Record<string, string> = {
                   finder_felix: 'finder_felix',
                   analyse_anna: 'analyse_anna_auto',
+                  analyse_anna_auto: 'analyse_anna_auto',
                   pitch_paul: 'pitch_paul_auto',
+                  pitch_paul_auto: 'pitch_paul_auto',
                   branding_britta: 'branding_britta_auto',
+                  branding_britta_auto: 'branding_britta_auto',
                 };
+                
+                // Check if the current phase workflow actually exists
+                const currentPhaseWorkflow = workflows.find(w => 
+                  w.workflow_name === pipeline.current_phase ||
+                  w.workflow_name === phaseToWorkflowMap[pipeline.current_phase]
+                );
+                
+                // If current_phase is set but workflow doesn't exist yet → show timer (still waiting)
+                if (!currentPhaseWorkflow && pipeline.current_phase !== 'finder_felix' && pipeline.current_phase !== 'completed') {
+                  return <div className="-mt-[100px] mb-[-80px]">
+                    <WorkflowLoadingAnimation workflowName="timer" />
+                  </div>;
+                }
+                
+                // Workflow exists → show its animation
                 const workflowName = phaseToWorkflowMap[pipeline.current_phase];
                 if (workflowName) {
-                  return <div className="-mt-[100px] mb-[-80px]"><WorkflowLoadingAnimation workflowName={workflowName} /></div>;
+                  return <div className="-mt-[100px] mb-[-80px]">
+                    <WorkflowLoadingAnimation workflowName={workflowName} />
+                  </div>;
                 }
               }
               
