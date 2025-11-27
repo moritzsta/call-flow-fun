@@ -265,18 +265,24 @@ async function handleRecovery(supabase: any, pipelineId: string) {
     const workflowId = pipeline[workflowIdField];
 
     if (!workflowId) {
-      // This workflow hasn't been started yet, it's the next one
+      // This workflow hasn't been started yet, it's the next one to start
       nextWorkflowName = workflowName;
       break;
     }
 
     const workflowState = workflowStates?.find((ws: any) => ws.id === workflowId);
-    if (workflowState && workflowState.status !== 'completed') {
-      // Found stuck workflow
+    
+    // Skip completed or failed workflows - they're done
+    if (!workflowState || workflowState.status === 'completed' || workflowState.status === 'failed') {
+      continue;
+    }
+    
+    // Found a running/alive workflow - this is the stuck one
+    if (workflowState.status === 'running' || workflowState.status === 'alive') {
       stuckWorkflowName = workflowName;
       nextWorkflowName = i < WORKFLOW_SEQUENCE.length - 1 ? WORKFLOW_SEQUENCE[i + 1] : null;
       
-      // Mark as skipped
+      // Mark current as failed
       await supabase
         .from('n8n_workflow_states')
         .update({ status: 'failed' })
@@ -305,6 +311,27 @@ async function handleRecovery(supabase: any, pipelineId: string) {
   }
 
   console.log('Recovering: stuck workflow =', stuckWorkflowName, 'next workflow =', nextWorkflowName);
+
+  // Check if next workflow already exists and is active
+  const nextWorkflowIdField = WORKFLOW_ID_MAPPING[nextWorkflowName as keyof typeof WORKFLOW_ID_MAPPING];
+  const existingNextWorkflowId = pipeline[nextWorkflowIdField];
+  
+  if (existingNextWorkflowId) {
+    const existingWorkflow = workflowStates?.find((ws: any) => ws.id === existingNextWorkflowId);
+    
+    // If next workflow already exists and is running/alive/pending, don't create duplicate
+    if (existingWorkflow && (existingWorkflow.status === 'running' || existingWorkflow.status === 'alive' || existingWorkflow.status === 'pending')) {
+      console.log('Next workflow already exists and is active:', nextWorkflowName, existingNextWorkflowId);
+      return new Response(
+        JSON.stringify({ 
+          message: 'Next workflow already running, skipping duplicate trigger',
+          next_workflow: nextWorkflowName,
+          existing_workflow_id: existingNextWorkflowId
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+  }
 
   // Update pipeline phase
   await supabase
