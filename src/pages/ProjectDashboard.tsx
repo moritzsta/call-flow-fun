@@ -14,8 +14,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
 import { useCompanies } from '@/hooks/useCompanies';
 import { useEmails } from '@/hooks/useEmails';
+import { useSingleWorkflowStatus } from '@/hooks/useSingleWorkflowStatus';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { AutomationCard } from '@/components/automation/AutomationCard';
+import { SingleFinderFelixDialog } from '@/components/workflows/SingleFinderFelixDialog';
+import { SingleAnalyseAnnaDialog } from '@/components/workflows/SingleAnalyseAnnaDialog';
+import { SinglePitchPaulDialog } from '@/components/workflows/SinglePitchPaulDialog';
+import { SingleBrandingBrittaDialog } from '@/components/workflows/SingleBrandingBrittaDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { 
   ArrowLeft, 
   Building2, 
@@ -32,9 +39,18 @@ export default function ProjectDashboard() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [finderFelixOpen, setFinderFelixOpen] = useState(false);
-  const [analyseAnnaOpen, setAnalyseAnnaOpen] = useState(false);
-  const [pitchPaulOpen, setPitchPaulOpen] = useState(false);
+  
+  // Dialog states
+  const [felixDialogOpen, setFelixDialogOpen] = useState(false);
+  const [annaDialogOpen, setAnnaDialogOpen] = useState(false);
+  const [paulDialogOpen, setPaulDialogOpen] = useState(false);
+  const [brittaDialogOpen, setBrittaDialogOpen] = useState(false);
+  
+  // Trigger states
+  const [isTriggeringFelix, setIsTriggeringFelix] = useState(false);
+  const [isTriggeringAnna, setIsTriggeringAnna] = useState(false);
+  const [isTriggeringPaul, setIsTriggeringPaul] = useState(false);
+  const [isTriggeringBritta, setIsTriggeringBritta] = useState(false);
 
   const { organizations, isLoading: orgsLoading } = useOrganizations();
   
@@ -83,6 +99,185 @@ export default function ProjectDashboard() {
   const draftEmails = emails.filter((e) => e.status === 'draft').length;
   const sentEmails = emails.filter((e) => e.status === 'sent').length;
   const improvedEmails = emails.filter((e) => e.body_improved && e.body_improved.length > 0).length;
+  
+  // Single workflow status tracking
+  const { workflow: felixWorkflow, isRunning: felixRunning } = useSingleWorkflowStatus(id || '', 'finder_felix');
+  const { workflow: annaWorkflow, isRunning: annaRunning } = useSingleWorkflowStatus(id || '', 'analyse_anna_auto');
+  const { workflow: paulWorkflow, isRunning: paulRunning } = useSingleWorkflowStatus(id || '', 'pitch_paul_auto');
+  const { workflow: brittaWorkflow, isRunning: brittaRunning } = useSingleWorkflowStatus(id || '', 'branding_britta_auto');
+  
+  // Counts for dialogs
+  const companiesWithWebsite = companies.filter((c) => c.website && c.website.length > 0).length;
+  const emailsWithoutImprovement = emails.filter((e) => !e.body_improved || e.body_improved.length === 0).length;
+  
+  // Trigger functions
+  const triggerFelix = async (config: { city: string; state: string; category: string; maxCompanies?: number }) => {
+    if (!id || !user?.id) return;
+    setIsTriggeringFelix(true);
+    
+    try {
+      const { data: workflowState, error: dbError } = await supabase
+        .from('n8n_workflow_states')
+        .insert({
+          project_id: id,
+          user_id: user.id,
+          workflow_name: 'finder_felix',
+          status: 'running',
+          trigger_data: config,
+        })
+        .select()
+        .single();
+      
+      if (dbError) throw dbError;
+      
+      const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+        body: {
+          workflow_name: 'finder_felix',
+          workflow_id: workflowState.id,
+          project_id: id,
+          user_id: user.id,
+          trigger_data: config,
+        },
+      });
+      
+      if (functionError) throw functionError;
+      
+      toast.success('Finder Felix wurde gestartet');
+      setFelixDialogOpen(false);
+      navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+    } catch (error: any) {
+      console.error('Error triggering Felix:', error);
+      toast.error(`Fehler: ${error.message}`);
+    } finally {
+      setIsTriggeringFelix(false);
+    }
+  };
+  
+  const triggerAnna = async () => {
+    if (!id || !user?.id) return;
+    setIsTriggeringAnna(true);
+    
+    try {
+      const { data: workflowState, error: dbError } = await supabase
+        .from('n8n_workflow_states')
+        .insert({
+          project_id: id,
+          user_id: user.id,
+          workflow_name: 'analyse_anna_auto',
+          status: 'running',
+          trigger_data: {},
+        })
+        .select()
+        .single();
+      
+      if (dbError) throw dbError;
+      
+      const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+        body: {
+          workflow_name: 'analyse_anna_auto',
+          workflow_id: workflowState.id,
+          project_id: id,
+          user_id: user.id,
+          trigger_data: {},
+        },
+      });
+      
+      if (functionError) throw functionError;
+      
+      toast.success('Analyse Anna wurde gestartet');
+      setAnnaDialogOpen(false);
+      navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+    } catch (error: any) {
+      console.error('Error triggering Anna:', error);
+      toast.error(`Fehler: ${error.message}`);
+    } finally {
+      setIsTriggeringAnna(false);
+    }
+  };
+  
+  const triggerPaul = async (vorhaben: string) => {
+    if (!id || !user?.id) return;
+    setIsTriggeringPaul(true);
+    
+    try {
+      const { data: workflowState, error: dbError } = await supabase
+        .from('n8n_workflow_states')
+        .insert({
+          project_id: id,
+          user_id: user.id,
+          workflow_name: 'pitch_paul_auto',
+          status: 'running',
+          trigger_data: { userGoal: vorhaben },
+        })
+        .select()
+        .single();
+      
+      if (dbError) throw dbError;
+      
+      const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+        body: {
+          workflow_name: 'pitch_paul_auto',
+          workflow_id: workflowState.id,
+          project_id: id,
+          user_id: user.id,
+          trigger_data: { userGoal: vorhaben },
+        },
+      });
+      
+      if (functionError) throw functionError;
+      
+      toast.success('Pitch Paul wurde gestartet');
+      setPaulDialogOpen(false);
+      navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+    } catch (error: any) {
+      console.error('Error triggering Paul:', error);
+      toast.error(`Fehler: ${error.message}`);
+    } finally {
+      setIsTriggeringPaul(false);
+    }
+  };
+  
+  const triggerBritta = async () => {
+    if (!id || !user?.id) return;
+    setIsTriggeringBritta(true);
+    
+    try {
+      const { data: workflowState, error: dbError } = await supabase
+        .from('n8n_workflow_states')
+        .insert({
+          project_id: id,
+          user_id: user.id,
+          workflow_name: 'branding_britta_auto',
+          status: 'running',
+          trigger_data: {},
+        })
+        .select()
+        .single();
+      
+      if (dbError) throw dbError;
+      
+      const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+        body: {
+          workflow_name: 'branding_britta_auto',
+          workflow_id: workflowState.id,
+          project_id: id,
+          user_id: user.id,
+          trigger_data: {},
+        },
+      });
+      
+      if (functionError) throw functionError;
+      
+      toast.success('Branding Britta wurde gestartet');
+      setBrittaDialogOpen(false);
+      navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+    } catch (error: any) {
+      console.error('Error triggering Britta:', error);
+      toast.error(`Fehler: ${error.message}`);
+    } finally {
+      setIsTriggeringBritta(false);
+    }
+  };
 
   if (orgsLoading || membersLoading) {
     return (
@@ -300,115 +495,211 @@ export default function ProjectDashboard() {
                 {/* Finder Felix Card */}
                 <Card className="border-2 border-primary/20 hover:border-primary/40 transition-colors">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Search className="h-4 w-4 text-primary" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <Search className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base">Finder Felix</CardTitle>
+                          <CardDescription className="text-xs">
+                            Firmen finden
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-base">Finder Felix</CardTitle>
-                        <CardDescription className="text-xs">
-                          Firmen finden
-                        </CardDescription>
-                      </div>
+                      {felixRunning && <WorkflowStatusBadge status="running" />}
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <Button 
-                      size="sm"
-                      className="w-full" 
-                      disabled={!canManage}
-                      onClick={() => navigate(`/projects/${id}/finder-felix`)}
-                    >
-                      <Search className="mr-2 h-3 w-3" />
-                      Mit Felix chatten
-                    </Button>
+                  <CardContent className="pt-0 space-y-2">
+                    {felixRunning ? (
+                      <Button 
+                        size="sm"
+                        className="w-full" 
+                        onClick={() => navigate(`/projects/${id}/workflow-status/${felixWorkflow?.id}`)}
+                      >
+                        Details anzeigen
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          disabled={!canManage}
+                          onClick={() => navigate(`/projects/${id}/finder-felix`)}
+                        >
+                          <Search className="mr-2 h-3 w-3" />
+                          Mit Felix chatten
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="w-full" 
+                          disabled={!canManage}
+                          onClick={() => setFelixDialogOpen(true)}
+                        >
+                          Batch starten
+                        </Button>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
                 {/* Analyse Anna Card */}
                 <Card className="border-2 border-accent/20 hover:border-accent/40 transition-colors">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
-                        <BarChart3 className="h-4 w-4 text-accent" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center shrink-0">
+                          <BarChart3 className="h-4 w-4 text-accent" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base">Analyse Anna</CardTitle>
+                          <CardDescription className="text-xs">
+                            Firmen analysieren
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-base">Analyse Anna</CardTitle>
-                        <CardDescription className="text-xs">
-                          Firmen analysieren
-                        </CardDescription>
-                      </div>
+                      {annaRunning && <WorkflowStatusBadge status="running" />}
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <Button 
-                      size="sm"
-                      className="w-full" 
-                      variant="outline" 
-                      disabled={!canManage}
-                      onClick={() => navigate(`/projects/${id}/analyse-anna`)}
-                    >
-                      <BarChart3 className="mr-2 h-3 w-3" />
-                      Mit Anna chatten
-                    </Button>
+                  <CardContent className="pt-0 space-y-2">
+                    {annaRunning ? (
+                      <Button 
+                        size="sm"
+                        className="w-full" 
+                        onClick={() => navigate(`/projects/${id}/workflow-status/${annaWorkflow?.id}`)}
+                      >
+                        Details anzeigen
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          variant="outline" 
+                          disabled={!canManage}
+                          onClick={() => navigate(`/projects/${id}/analyse-anna`)}
+                        >
+                          <BarChart3 className="mr-2 h-3 w-3" />
+                          Mit Anna chatten
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="w-full" 
+                          disabled={!canManage}
+                          onClick={() => setAnnaDialogOpen(true)}
+                        >
+                          Batch starten
+                        </Button>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
                 {/* Pitch Paul Card */}
                 <Card className="border-2 border-secondary/50 hover:border-secondary transition-colors">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-secondary/50 flex items-center justify-center shrink-0">
-                        <Mail className="h-4 w-4 text-foreground" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-secondary/50 flex items-center justify-center shrink-0">
+                          <Mail className="h-4 w-4 text-foreground" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base">Pitch Paul</CardTitle>
+                          <CardDescription className="text-xs">
+                            E-Mails generieren
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-base">Pitch Paul</CardTitle>
-                        <CardDescription className="text-xs">
-                          E-Mails generieren
-                        </CardDescription>
-                      </div>
+                      {paulRunning && <WorkflowStatusBadge status="running" />}
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <Button 
-                      size="sm"
-                      className="w-full" 
-                      variant="outline" 
-                      disabled={!canManage}
-                      onClick={() => navigate(`/projects/${id}/pitch-paul`)}
-                    >
-                      <Mail className="mr-2 h-3 w-3" />
-                      Mit Paul chatten
-                    </Button>
+                  <CardContent className="pt-0 space-y-2">
+                    {paulRunning ? (
+                      <Button 
+                        size="sm"
+                        className="w-full" 
+                        onClick={() => navigate(`/projects/${id}/workflow-status/${paulWorkflow?.id}`)}
+                      >
+                        Details anzeigen
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          variant="outline" 
+                          disabled={!canManage}
+                          onClick={() => navigate(`/projects/${id}/pitch-paul`)}
+                        >
+                          <Mail className="mr-2 h-3 w-3" />
+                          Mit Paul chatten
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="w-full" 
+                          disabled={!canManage}
+                          onClick={() => setPaulDialogOpen(true)}
+                        >
+                          Batch starten
+                        </Button>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
                 {/* Branding Britta Card */}
                 <Card className="border-2 border-purple-500/20 hover:border-purple-500/40 transition-colors">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
-                        <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0">
+                          <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base">Branding Britta</CardTitle>
+                          <CardDescription className="text-xs">
+                            E-Mails verschönern
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-base">Branding Britta</CardTitle>
-                        <CardDescription className="text-xs">
-                          E-Mails verschönern
-                        </CardDescription>
-                      </div>
+                      {brittaRunning && <WorkflowStatusBadge status="running" />}
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <Button 
-                      size="sm"
-                      className="w-full" 
-                      variant="outline" 
-                      disabled={!canManage}
-                      onClick={() => navigate(`/projects/${id}/branding-britta`)}
-                    >
-                      <Sparkles className="mr-2 h-3 w-3" />
-                      Mit Britta chatten
-                    </Button>
+                  <CardContent className="pt-0 space-y-2">
+                    {brittaRunning ? (
+                      <Button 
+                        size="sm"
+                        className="w-full" 
+                        onClick={() => navigate(`/projects/${id}/workflow-status/${brittaWorkflow?.id}`)}
+                      >
+                        Details anzeigen
+                      </Button>
+                    ) : (
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          variant="outline" 
+                          disabled={!canManage}
+                          onClick={() => navigate(`/projects/${id}/branding-britta`)}
+                        >
+                          <Sparkles className="mr-2 h-3 w-3" />
+                          Mit Britta chatten
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="w-full" 
+                          disabled={!canManage}
+                          onClick={() => setBrittaDialogOpen(true)}
+                        >
+                          Batch starten
+                        </Button>
+                      </>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -455,7 +746,37 @@ export default function ProjectDashboard() {
         </div>
       </div>
 
-      {/* Workflow Dialogs - Removed, now using dedicated pages */}
+      {/* Workflow Dialogs */}
+      <SingleFinderFelixDialog
+        open={felixDialogOpen}
+        onOpenChange={setFelixDialogOpen}
+        onStart={triggerFelix}
+        isStarting={isTriggeringFelix}
+      />
+      
+      <SingleAnalyseAnnaDialog
+        open={annaDialogOpen}
+        onOpenChange={setAnnaDialogOpen}
+        onStart={triggerAnna}
+        isStarting={isTriggeringAnna}
+        companiesCount={companiesWithWebsite}
+      />
+      
+      <SinglePitchPaulDialog
+        open={paulDialogOpen}
+        onOpenChange={setPaulDialogOpen}
+        onStart={triggerPaul}
+        isStarting={isTriggeringPaul}
+        companiesCount={analyzedCompanies}
+      />
+      
+      <SingleBrandingBrittaDialog
+        open={brittaDialogOpen}
+        onOpenChange={setBrittaDialogOpen}
+        onStart={triggerBritta}
+        isStarting={isTriggeringBritta}
+        emailsCount={emailsWithoutImprovement}
+      />
     </SidebarProvider>
   );
 }

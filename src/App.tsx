@@ -27,6 +27,7 @@ import WorkflowAnalyseAnna from "./pages/WorkflowAnalyseAnna";
 import WorkflowPitchPaul from "./pages/WorkflowPitchPaul";
 import WorkflowBrandingBritta from "./pages/WorkflowBrandingBritta";
 import AutomationStatus from "./pages/AutomationStatus";
+import WorkflowStatus from "./pages/WorkflowStatus";
 import ProjectWorkflows from "./pages/ProjectWorkflows";
 import About from "./pages/About";
 import Pricing from "./pages/Pricing";
@@ -139,6 +140,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <AutomationStatus />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/workflow-status/:workflowId" 
+              element={
+                <ProtectedRoute>
+                  <WorkflowStatus />
                 </ProtectedRoute>
               } 
             />
