@@ -40,13 +40,12 @@ const templateSchema = z.object({
 type TemplateFormData = z.infer<typeof templateSchema>;
 
 export default function EmailTemplates() {
-  const { organizationId } = useParams<{ organizationId: string }>();
   const navigate = useNavigate();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState<EmailTemplate | null>(null);
 
-  const { templates, isLoading, createTemplate, updateTemplate, deleteTemplate } = useEmailTemplates(organizationId);
+  const { templates, isLoading, createTemplate, updateTemplate, deleteTemplate } = useEmailTemplates();
 
   const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateSchema),
@@ -58,10 +57,7 @@ export default function EmailTemplates() {
   });
 
   const handleCreate = (data: TemplateFormData) => {
-    if (!organizationId) return;
-
     createTemplate({
-      organization_id: organizationId,
       title: data.title,
       subject_template: data.subject_template,
       body_template: data.body_template,

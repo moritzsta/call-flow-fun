@@ -170,8 +170,8 @@ export type Database = {
         Row: {
           body_template: string
           created_at: string
+          enum_name: string
           id: string
-          organization_id: string
           subject_template: string
           title: string
           updated_at: string
@@ -179,8 +179,8 @@ export type Database = {
         Insert: {
           body_template: string
           created_at?: string
+          enum_name?: string
           id?: string
-          organization_id: string
           subject_template: string
           title: string
           updated_at?: string
@@ -188,21 +188,13 @@ export type Database = {
         Update: {
           body_template?: string
           created_at?: string
+          enum_name?: string
           id?: string
-          organization_id?: string
           subject_template?: string
           title?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "email_templates_organization_id_fkey"
-            columns: ["organization_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       german_cities: {
         Row: {

@@ -3,17 +3,15 @@ import { Label } from '@/components/ui/label';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/useEmailTemplates';
 
 interface TemplateSelectorProps {
-  organizationId: string;
   onTemplateSelect: (template: EmailTemplate | null) => void;
   selectedTemplateId?: string;
 }
 
 export const TemplateSelector = ({
-  organizationId,
   onTemplateSelect,
   selectedTemplateId,
 }: TemplateSelectorProps) => {
-  const { templates, isLoading } = useEmailTemplates(organizationId);
+  const { templates, isLoading } = useEmailTemplates();
 
   const handleValueChange = (value: string) => {
     if (value === 'none') {

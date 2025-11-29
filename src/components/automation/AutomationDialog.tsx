@@ -9,7 +9,16 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { AdaptiveDialog } from '@/components/ui/adaptive-dialog';
 import { useCitySearch } from '@/hooks/useCitySearch';
+import { useEmailTemplates } from '@/hooks/useEmailTemplates';
+import { PaulWorkflowConfig } from '@/types/workflow';
 import { Loader2, X } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const automationSchema = z.object({
   city: z.string().min(1, 'Bitte wählen Sie eine Stadt'),
@@ -17,6 +26,12 @@ const automationSchema = z.object({
   category: z.string().min(1, 'Kategorie ist erforderlich').max(200),
   vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(1000),
   maxCompanies: z.number().positive('Bitte geben Sie eine positive Zahl ein').optional().or(z.literal(undefined)),
+  templateId: z.string().optional(),
+  sellerName: z.string().min(2, 'Name erforderlich'),
+  sellerCompany: z.string().min(2, 'Firma erforderlich'),
+  sellerAddress: z.string().optional(),
+  sellerPhone: z.string().optional(),
+  sellerWebsite: z.string().url('Ungültige URL').optional().or(z.literal('')),
 });
 
 type AutomationFormData = z.infer<typeof automationSchema>;
@@ -38,6 +53,8 @@ export const AutomationDialog = ({
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
+  const { templates, isLoading: templatesLoading } = useEmailTemplates();
+
   const {
     register,
     handleSubmit,
@@ -53,11 +70,18 @@ export const AutomationDialog = ({
       category: '',
       vorhaben: '',
       maxCompanies: undefined,
+      templateId: '',
+      sellerName: '',
+      sellerCompany: '',
+      sellerAddress: '',
+      sellerPhone: '',
+      sellerWebsite: '',
     },
   });
 
   const selectedCity = watch('city');
   const selectedState = watch('state');
+  const selectedTemplateId = watch('templateId');
 
   // Debounce Effect (500ms)
   useEffect(() => {
@@ -76,7 +100,23 @@ export const AutomationDialog = ({
   );
 
   const onSubmit = (data: AutomationFormData) => {
-    onStart(data);
+    const selectedTemplate = templates.find(t => t.id === data.templateId);
+    
+    // Build extended config
+    const extendedData = {
+      ...data,
+      templateEnumName: selectedTemplate?.enum_name,
+      templateContent: selectedTemplate?.body_template,
+      sellerContact: {
+        name: data.sellerName,
+        company: data.sellerCompany,
+        address: data.sellerAddress || '',
+        phone: data.sellerPhone || '',
+        website: data.sellerWebsite || '',
+      },
+    };
+    
+    onStart(extendedData);
     reset();
     setSearchTerm('');
   };
@@ -225,6 +265,99 @@ export const AutomationDialog = ({
           <p className="text-xs text-muted-foreground">
             Leer lassen für unbegrenzte Suche
           </p>
+        </div>
+
+        {/* Email Template */}
+        <div className="space-y-2">
+          <Label htmlFor="templateId">E-Mail Template *</Label>
+          <Select
+            value={selectedTemplateId}
+            onValueChange={(value) => setValue('templateId', value, { shouldValidate: true })}
+            disabled={isStarting || templatesLoading}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Template auswählen..." />
+            </SelectTrigger>
+            <SelectContent>
+              {templates.map((template) => (
+                <SelectItem key={template.id} value={template.id}>
+                  {template.title}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.templateId && (
+            <p className="text-sm text-destructive">{errors.templateId.message}</p>
+          )}
+        </div>
+
+        {/* Seller Contact Data */}
+        <div className="space-y-4 border-t pt-4">
+          <h3 className="font-semibold text-sm">Verkäufer-Kontaktdaten</h3>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="sellerName">Name *</Label>
+              <Input
+                id="sellerName"
+                placeholder="Max Mustermann"
+                {...register('sellerName')}
+                disabled={isStarting}
+              />
+              {errors.sellerName && (
+                <p className="text-sm text-destructive">{errors.sellerName.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="sellerCompany">Firma *</Label>
+              <Input
+                id="sellerCompany"
+                placeholder="MusterFirma GmbH"
+                {...register('sellerCompany')}
+                disabled={isStarting}
+              />
+              {errors.sellerCompany && (
+                <p className="text-sm text-destructive">{errors.sellerCompany.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="sellerAddress">Adresse (optional)</Label>
+            <Input
+              id="sellerAddress"
+              placeholder="Musterstraße 123, 12345 Musterstadt"
+              {...register('sellerAddress')}
+              disabled={isStarting}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="sellerPhone">Telefon (optional)</Label>
+              <Input
+                id="sellerPhone"
+                placeholder="+49 123 456789"
+                {...register('sellerPhone')}
+                disabled={isStarting}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="sellerWebsite">Website (optional)</Label>
+              <Input
+                id="sellerWebsite"
+                type="url"
+                placeholder="https://example.com"
+                {...register('sellerWebsite')}
+                disabled={isStarting}
+              />
+              {errors.sellerWebsite && (
+                <p className="text-sm text-destructive">{errors.sellerWebsite.message}</p>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Actions */}
