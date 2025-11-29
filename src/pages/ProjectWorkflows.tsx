@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { useWorkflowStatus } from '@/hooks/useWorkflowStatus';
+import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
 import { ArrowLeft, Zap, MessageSquare, Activity, CheckCircle2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -32,6 +33,7 @@ export default function ProjectWorkflows() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { workflows, counts, isLoading } = useWorkflowStatus(id || '');
+  const { cancelWorkflow, isCancelling } = useWorkflowCancel();
 
   if (isLoading) {
     return (
@@ -177,6 +179,20 @@ export default function ProjectWorkflows() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
+                                {(workflow.status === 'running' || workflow.status === 'alive' || workflow.status === 'pending') && (
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    disabled={isCancelling}
+                                    onClick={() => cancelWorkflow(
+                                      workflow.id, 
+                                      workflowNameMap[workflow.workflow_name] || workflow.workflow_name
+                                    )}
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Abbrechen
+                                  </Button>
+                                )}
                                 {workflowChatPaths[workflow.workflow_name] && (
                                   <Button
                                     size="sm"

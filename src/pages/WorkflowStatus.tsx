@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { WorkflowLoadingAnimation } from '@/components/workflows/WorkflowLoadingAnimation';
 import { useWorkflowMaxLoops } from '@/hooks/useWorkflowMaxLoops';
-import { ArrowLeft, MessageSquare } from 'lucide-react';
+import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
+import { ArrowLeft, MessageSquare, XCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { useEffect } from 'react';
@@ -39,6 +40,7 @@ const workflowLabels: Record<string, string> = {
 export default function WorkflowStatus() {
   const { id: projectId, workflowId } = useParams<{ id: string; workflowId: string }>();
   const navigate = useNavigate();
+  const { cancelWorkflow, isCancelling } = useWorkflowCancel();
 
   const { data: workflow, isLoading, refetch } = useQuery({
     queryKey: ['workflow-state', workflowId],
@@ -157,7 +159,20 @@ export default function WorkflowStatus() {
               <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-lg p-8 border">
                 <div className="flex items-center justify-between mb-4">
                   <h1 className="text-3xl font-bold">{workflowLabel}</h1>
-                  <WorkflowStatusBadge status={workflow.status} />
+                  <div className="flex items-center gap-2">
+                    <WorkflowStatusBadge status={workflow.status} />
+                    {isActive && (
+                      <Button 
+                        size="sm"
+                        variant="destructive"
+                        disabled={isCancelling}
+                        onClick={() => cancelWorkflow(workflow.id, workflowLabel)}
+                      >
+                        <XCircle className="mr-2 h-4 w-4" />
+                        Abbrechen
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 <p className="text-muted-foreground">
                   Gestartet {formatDistanceToNow(new Date(workflow.started_at), { addSuffix: true, locale: de })}

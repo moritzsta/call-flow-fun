@@ -33,8 +33,10 @@ import {
   BarChart3, 
   Send,
   Settings,
-  Sparkles
+  Sparkles,
+  XCircle
 } from 'lucide-react';
+import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
 
 export default function ProjectDashboard() {
   const { id } = useParams<{ id: string }>();
@@ -106,6 +108,9 @@ export default function ProjectDashboard() {
   const { workflow: annaWorkflow, isRunning: annaRunning } = useSingleWorkflowStatus(id || '', 'analyse_anna_auto');
   const { workflow: paulWorkflow, isRunning: paulRunning } = useSingleWorkflowStatus(id || '', 'pitch_paul_auto');
   const { workflow: brittaWorkflow, isRunning: brittaRunning } = useSingleWorkflowStatus(id || '', 'branding_britta_auto');
+  
+  // Cancel workflow hook
+  const { cancelWorkflow, isCancelling } = useWorkflowCancel();
   
   // Counts for dialogs
   const companiesWithWebsite = companies.filter((c) => c.website && c.website.length > 0).length;
@@ -521,13 +526,25 @@ export default function ProjectDashboard() {
                   </CardHeader>
                   <CardContent className="pt-0 space-y-2">
                     {felixRunning ? (
-                      <Button 
-                        size="sm"
-                        className="w-full" 
-                        onClick={() => navigate(`/projects/${id}/workflow-status/${felixWorkflow?.id}`)}
-                      >
-                        Details anzeigen
-                      </Button>
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          onClick={() => navigate(`/projects/${id}/workflow-status/${felixWorkflow?.id}`)}
+                        >
+                          Details anzeigen
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isCancelling}
+                          onClick={() => felixWorkflow && cancelWorkflow(felixWorkflow.id, 'Finder Felix')}
+                        >
+                          <XCircle className="mr-2 h-3 w-3" />
+                          Abbrechen
+                        </Button>
+                      </>
                     ) : (
                       <>
                         <Button 
@@ -573,13 +590,25 @@ export default function ProjectDashboard() {
                   </CardHeader>
                   <CardContent className="pt-0 space-y-2">
                     {annaRunning ? (
-                      <Button 
-                        size="sm"
-                        className="w-full" 
-                        onClick={() => navigate(`/projects/${id}/workflow-status/${annaWorkflow?.id}`)}
-                      >
-                        Details anzeigen
-                      </Button>
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          onClick={() => navigate(`/projects/${id}/workflow-status/${annaWorkflow?.id}`)}
+                        >
+                          Details anzeigen
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isCancelling}
+                          onClick={() => annaWorkflow && cancelWorkflow(annaWorkflow.id, 'Analyse Anna')}
+                        >
+                          <XCircle className="mr-2 h-3 w-3" />
+                          Abbrechen
+                        </Button>
+                      </>
                     ) : (
                       <>
                         <Button 
@@ -626,13 +655,25 @@ export default function ProjectDashboard() {
                   </CardHeader>
                   <CardContent className="pt-0 space-y-2">
                     {paulRunning ? (
-                      <Button 
-                        size="sm"
-                        className="w-full" 
-                        onClick={() => navigate(`/projects/${id}/workflow-status/${paulWorkflow?.id}`)}
-                      >
-                        Details anzeigen
-                      </Button>
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          onClick={() => navigate(`/projects/${id}/workflow-status/${paulWorkflow?.id}`)}
+                        >
+                          Details anzeigen
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isCancelling}
+                          onClick={() => paulWorkflow && cancelWorkflow(paulWorkflow.id, 'Pitch Paul')}
+                        >
+                          <XCircle className="mr-2 h-3 w-3" />
+                          Abbrechen
+                        </Button>
+                      </>
                     ) : (
                       <>
                         <Button 
@@ -679,13 +720,25 @@ export default function ProjectDashboard() {
                   </CardHeader>
                   <CardContent className="pt-0 space-y-2">
                     {brittaRunning ? (
-                      <Button 
-                        size="sm"
-                        className="w-full" 
-                        onClick={() => navigate(`/projects/${id}/workflow-status/${brittaWorkflow?.id}`)}
-                      >
-                        Details anzeigen
-                      </Button>
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          onClick={() => navigate(`/projects/${id}/workflow-status/${brittaWorkflow?.id}`)}
+                        >
+                          Details anzeigen
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isCancelling}
+                          onClick={() => brittaWorkflow && cancelWorkflow(brittaWorkflow.id, 'Branding Britta')}
+                        >
+                          <XCircle className="mr-2 h-3 w-3" />
+                          Abbrechen
+                        </Button>
+                      </>
                     ) : (
                       <>
                         <Button 
