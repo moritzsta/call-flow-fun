@@ -8,9 +8,25 @@ interface CompanyDataTagsProps {
   className?: string;
 }
 
+// Helper function to check if a value is a valid data entry
+const isValidData = (value: string | null | undefined): boolean => {
+  if (!value) return false;
+  
+  const invalidValues = [
+    'unbekannt',
+    'unknown', 
+    'n/a',
+    'na',
+    '-',
+    ''
+  ];
+  
+  return !invalidValues.includes(value.toLowerCase().trim());
+};
+
 export const CompanyDataTags = ({ company, className }: CompanyDataTagsProps) => {
-  const hasWebsite = !!company.website;
-  const hasEmail = !!company.email;
+  const hasWebsite = isValidData(company.website);
+  const hasEmail = isValidData(company.email);
   const isAnalyzed = !!company.analysis;
 
   return (
