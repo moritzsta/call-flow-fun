@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 interface WorkflowState {
   id: string;
   workflow_name: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'alive';
   project_id: string;
   user_id: string;
   trigger_data: Record<string, any> | null;
