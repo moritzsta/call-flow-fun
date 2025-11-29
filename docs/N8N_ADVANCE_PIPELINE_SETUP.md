@@ -91,6 +91,35 @@ Platziere den HTTP Request Node:
 - **Vor** dem abschließenden Response-Node (falls vorhanden)
 - Als **letzten Schritt** im Workflow
 
+### ⚠️ KRITISCH: Position bei Loop-Workflows
+
+**Wenn dein Workflow einen Loop oder parallele Branches hat:**
+
+❌ **FALSCH:** Der `advance-pipeline` Node darf **NICHT innerhalb des Loops** sein!
+```
+Loop Over Items (20x)
+  ├─ Branch 1 → Process → advance-pipeline ❌ (20x aufgerufen!)
+  ├─ Branch 2 → Process → advance-pipeline ❌ (20x aufgerufen!)
+  └─ Branch N → Process → advance-pipeline ❌ (20x aufgerufen!)
+```
+
+✅ **RICHTIG:** Der `advance-pipeline` Node muss **NACH dem Loop** sein!
+```
+Loop Over Items (20x)
+  ├─ Branch 1 → Process
+  ├─ Branch 2 → Process
+  └─ Branch N → Process
+      ↓ (Done Output)
+advance-pipeline ✅ (nur 1x aufgerufen!)
+```
+
+**So verbindest du es richtig:**
+1. Klicke auf den **"Loop Over Items"** Node (oder ähnlichen Loop-Node)
+2. Nutze den **"Done"** Output (nicht den "Loop" Output!)
+3. Verbinde den "Done" Output mit dem `advance-pipeline` Node
+
+**Warum?** Wenn `advance-pipeline` innerhalb des Loops ist, wird es für **jedes Item** aufgerufen (z.B. 20x bei 20 Items). Das führt zu dupliziertem Workflow-Triggering und Race Conditions!
+
 ## Error Handling
 
 Falls der HTTP-Call fehlschlägt:
