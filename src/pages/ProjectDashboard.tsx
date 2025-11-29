@@ -210,9 +210,7 @@ export default function ProjectDashboard() {
           status: 'running' as const,
           trigger_data: { 
             userGoal: config.vorhaben,
-            templateId: config.templateId,
             templateEnumName: config.templateEnumName,
-            templateContent: config.templateContent,
             sellerContact: config.sellerContact,
           } as any,
         }])
@@ -229,9 +227,7 @@ export default function ProjectDashboard() {
           user_id: user.id,
           trigger_data: { 
             userGoal: config.vorhaben,
-            templateId: config.templateId,
             templateEnumName: config.templateEnumName,
-            templateContent: config.templateContent,
             sellerContact: config.sellerContact,
           } as any,
         },

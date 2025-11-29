@@ -74,9 +74,7 @@ export const SinglePitchPaulDialog = ({
     
     const config: PaulWorkflowConfig = {
       vorhaben: data.vorhaben,
-      templateId: data.templateId,
       templateEnumName: selectedTemplate?.enum_name,
-      templateContent: selectedTemplate?.body_template,
       sellerContact: {
         name: data.sellerName,
         company: data.sellerCompany,

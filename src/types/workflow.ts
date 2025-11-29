@@ -8,8 +8,6 @@ export interface SellerContactData {
 
 export interface PaulWorkflowConfig {
   vorhaben: string;
-  templateId?: string;
   templateEnumName?: string;
-  templateContent?: string;
   sellerContact?: SellerContactData;
 }

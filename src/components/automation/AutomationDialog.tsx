@@ -102,11 +102,10 @@ export const AutomationDialog = ({
   const onSubmit = (data: AutomationFormData) => {
     const selectedTemplate = templates.find(t => t.id === data.templateId);
     
-    // Build extended config
+    // Build extended config (only pass enum_name, not id or content)
     const extendedData = {
       ...data,
       templateEnumName: selectedTemplate?.enum_name,
-      templateContent: selectedTemplate?.body_template,
       sellerContact: {
         name: data.sellerName,
         company: data.sellerCompany,
