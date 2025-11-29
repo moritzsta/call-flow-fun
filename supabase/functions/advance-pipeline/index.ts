@@ -157,6 +157,16 @@ Deno.serve(async (req) => {
     console.log('Waiting 30 seconds before triggering next workflow...');
     await new Promise(resolve => setTimeout(resolve, 30000));
 
+    // After analyse_anna_auto and before pitch_paul_auto: Cleanup companies to limit
+    if (normalizedWorkflowName === 'analyse_anna_auto' && nextWorkflow === 'pitch_paul_auto') {
+      const maxCompanies = pipeline.config?.maxCompanies;
+      
+      if (maxCompanies && maxCompanies > 0) {
+        console.log(`Cleanup: Reducing companies to max ${maxCompanies} for project ${pipeline.project_id}`);
+        await cleanupCompaniesToLimit(supabase, pipeline.project_id, maxCompanies);
+      }
+    }
+
     // Create new workflow state for next workflow
     const { data: newWorkflowState, error: workflowStateError } = await supabase
       .from('n8n_workflow_states')
@@ -410,4 +420,155 @@ async function handleRecovery(supabase: any, pipelineId: string) {
     }),
     { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
   );
+}
+
+// ============= Company Cleanup Functions =============
+
+async function cleanupCompaniesToLimit(
+  supabase: any, 
+  projectId: string, 
+  maxCompanies: number
+): Promise<void> {
+  // 1. Count current companies
+  const { count: currentCount } = await supabase
+    .from('companies')
+    .select('*', { count: 'exact', head: true })
+    .eq('project_id', projectId);
+
+  if (!currentCount || currentCount <= maxCompanies) {
+    console.log(`Cleanup: Already at or below limit (${currentCount}/${maxCompanies})`);
+    return;
+  }
+
+  let toDelete = currentCount - maxCompanies;
+  console.log(`Cleanup: Need to delete ${toDelete} companies (current: ${currentCount}, limit: ${maxCompanies})`);
+
+  // Priority 1: Without website
+  if (toDelete > 0) {
+    const deleted = await deleteCompaniesWithoutField(
+      supabase, projectId, 'website', toDelete
+    );
+    toDelete -= deleted;
+    console.log(`Cleanup: Deleted ${deleted} companies without website, ${toDelete} remaining`);
+  }
+
+  // Priority 2: Without analysis
+  if (toDelete > 0) {
+    const deleted = await deleteCompaniesWithoutAnalysis(
+      supabase, projectId, toDelete
+    );
+    toDelete -= deleted;
+    console.log(`Cleanup: Deleted ${deleted} companies without analysis, ${toDelete} remaining`);
+  }
+
+  // Priority 3: Without email
+  if (toDelete > 0) {
+    const deleted = await deleteCompaniesWithoutField(
+      supabase, projectId, 'email', toDelete
+    );
+    toDelete -= deleted;
+    console.log(`Cleanup: Deleted ${deleted} companies without email, ${toDelete} remaining`);
+  }
+
+  // Priority 4: Any remaining (oldest first)
+  if (toDelete > 0) {
+    const deleted = await deleteAnyCompanies(supabase, projectId, toDelete);
+    console.log(`Cleanup: Deleted ${deleted} remaining companies (oldest first)`);
+  }
+
+  // Final count
+  const { count: finalCount } = await supabase
+    .from('companies')
+    .select('*', { count: 'exact', head: true })
+    .eq('project_id', projectId);
+
+  console.log(`Cleanup completed: ${currentCount} → ${finalCount} companies (target: ${maxCompanies})`);
+}
+
+async function deleteCompaniesWithoutField(
+  supabase: any,
+  projectId: string,
+  field: 'website' | 'email',
+  limit: number
+): Promise<number> {
+  // Find IDs of companies to delete
+  const { data: toDelete } = await supabase
+    .from('companies')
+    .select('id')
+    .eq('project_id', projectId)
+    .or(`${field}.is.null,${field}.eq.`)
+    .order('created_at', { ascending: true })
+    .limit(limit);
+
+  if (!toDelete || toDelete.length === 0) return 0;
+
+  const ids = toDelete.map((c: any) => c.id);
+  const { error } = await supabase
+    .from('companies')
+    .delete()
+    .in('id', ids);
+
+  if (error) {
+    console.error(`Error deleting companies without ${field}:`, error);
+    return 0;
+  }
+
+  return ids.length;
+}
+
+async function deleteCompaniesWithoutAnalysis(
+  supabase: any,
+  projectId: string,
+  limit: number
+): Promise<number> {
+  const { data: toDelete } = await supabase
+    .from('companies')
+    .select('id')
+    .eq('project_id', projectId)
+    .is('analysis', null)
+    .order('created_at', { ascending: true })
+    .limit(limit);
+
+  if (!toDelete || toDelete.length === 0) return 0;
+
+  const ids = toDelete.map((c: any) => c.id);
+  const { error } = await supabase
+    .from('companies')
+    .delete()
+    .in('id', ids);
+
+  if (error) {
+    console.error('Error deleting companies without analysis:', error);
+    return 0;
+  }
+
+  return ids.length;
+}
+
+async function deleteAnyCompanies(
+  supabase: any,
+  projectId: string,
+  limit: number
+): Promise<number> {
+  const { data: toDelete } = await supabase
+    .from('companies')
+    .select('id')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: true })
+    .limit(limit);
+
+  if (!toDelete || toDelete.length === 0) return 0;
+
+  const ids = toDelete.map((c: any) => c.id);
+  const { error } = await supabase
+    .from('companies')
+    .delete()
+    .in('id', ids);
+
+  if (error) {
+    console.error('Error deleting any companies:', error);
+    return 0;
+  }
+
+  return ids.length;
 }
