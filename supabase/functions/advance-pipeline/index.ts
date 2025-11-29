@@ -96,23 +96,25 @@ Deno.serve(async (req) => {
 
     // Atomic reservation: Check and reserve the next workflow slot atomically
     if (nextWorkflow) {
-      const nextWorkflowIdField = WORKFLOW_ID_MAPPING[nextWorkflow as keyof typeof WORKFLOW_ID_MAPPING];
-      
-      // Try to atomically reserve the slot by updating it to 'RESERVING' (only if currently NULL)
+      // Try to atomically reserve the slot by updating current_phase to 'nextWorkflow_reserving'
+      // Only succeeds if current_phase matches the normalizedWorkflowName (previous phase)
       const { data: reserved, error: reserveError } = await supabase
         .from('automation_pipelines')
         .update({ 
-          [nextWorkflowIdField]: 'RESERVING',
-          current_phase: nextWorkflow 
+          current_phase: `${nextWorkflow}_reserving`
         })
         .eq('id', pipeline.id)
-        .is(nextWorkflowIdField, null)
+        .eq('current_phase', normalizedWorkflowName)
         .select()
         .single();
 
+      if (reserveError) {
+        console.error('Error during atomic reservation:', reserveError);
+      }
+
       if (!reserved) {
         console.log('Another request already reserved this workflow slot:', nextWorkflow);
-        console.log('Skipping trigger - workflow is being created by another parallel request');
+        console.log('Skipping trigger - workflow is being created by another parallel request or phase already changed');
         
         return new Response(
           JSON.stringify({ 
@@ -175,11 +177,14 @@ Deno.serve(async (req) => {
 
     console.log('Created new workflow state:', newWorkflowState.id);
 
-    // Update pipeline with new workflow_id
+    // Update pipeline with new workflow_id and finalize the phase transition
     const workflowIdField = WORKFLOW_ID_MAPPING[nextWorkflow as keyof typeof WORKFLOW_ID_MAPPING];
     await supabase
       .from('automation_pipelines')
-      .update({ [workflowIdField]: newWorkflowState.id })
+      .update({ 
+        [workflowIdField]: newWorkflowState.id,
+        current_phase: nextWorkflow  // Finalize: from 'xxx_reserving' to 'xxx'
+      })
       .eq('id', pipeline.id);
 
     // Trigger next workflow via trigger-n8n-workflow edge function
