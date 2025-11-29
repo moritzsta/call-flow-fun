@@ -94,38 +94,53 @@ Deno.serve(async (req) => {
 
     console.log('Current workflow:', normalizedWorkflowName, 'Next workflow:', nextWorkflow);
 
-    // Check if next workflow already exists (prevents duplicate triggers from out-of-order completions)
+    // Atomic reservation: Check and reserve the next workflow slot atomically
     if (nextWorkflow) {
       const nextWorkflowIdField = WORKFLOW_ID_MAPPING[nextWorkflow as keyof typeof WORKFLOW_ID_MAPPING];
-      const existingNextWorkflowId = pipeline[nextWorkflowIdField as keyof Pipeline];
       
-      if (existingNextWorkflowId) {
-        console.log('Next workflow already exists:', nextWorkflow, existingNextWorkflowId);
-        console.log('Skipping trigger - workflow was likely already started via recovery');
+      // Try to atomically reserve the slot by updating it to 'RESERVING' (only if currently NULL)
+      const { data: reserved, error: reserveError } = await supabase
+        .from('automation_pipelines')
+        .update({ 
+          [nextWorkflowIdField]: 'RESERVING',
+          current_phase: nextWorkflow 
+        })
+        .eq('id', pipeline.id)
+        .is(nextWorkflowIdField, null)
+        .select()
+        .single();
+
+      if (!reserved) {
+        console.log('Another request already reserved this workflow slot:', nextWorkflow);
+        console.log('Skipping trigger - workflow is being created by another parallel request');
         
         return new Response(
           JSON.stringify({ 
-            message: 'Next workflow already exists, skipping trigger',
+            message: 'Next workflow already being created by another request, skipping duplicate trigger',
             next_workflow: nextWorkflow,
-            existing_workflow_id: existingNextWorkflowId,
-            pipeline_id: pipeline.id
+            pipeline_id: pipeline.id,
+            skipped: true
           }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
+      
+      console.log('Successfully reserved workflow slot:', nextWorkflow);
     }
 
-    // Update current_phase
-    const newPhase = nextWorkflow || 'completed';
-    await supabase
-      .from('automation_pipelines')
-      .update({ 
-        current_phase: newPhase,
-        ...(newPhase === 'completed' ? { status: 'completed', completed_at: new Date().toISOString() } : {})
-      })
-      .eq('id', pipeline.id);
-
-    console.log('Updated pipeline phase to:', newPhase);
+    // Update pipeline status if completed (no atomic update needed here since reservation already done)
+    if (!nextWorkflow) {
+      await supabase
+        .from('automation_pipelines')
+        .update({ 
+          current_phase: 'completed',
+          status: 'completed', 
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', pipeline.id);
+      
+      console.log('Updated pipeline status to completed');
+    }
 
     // If no next workflow, mark as completed
     if (!nextWorkflow) {
