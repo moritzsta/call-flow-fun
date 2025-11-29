@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface WorkflowState {
   id: string;
@@ -118,6 +119,49 @@ export const useWorkflowStatus = (projectId: string) => {
       supabase.removeChannel(channel);
     };
   }, [projectId, queryClient]);
+
+  // Watchdog: Automatisch erkennen wenn Workflows stecken bleiben (5 Minuten Timeout)
+  useEffect(() => {
+    if (!workflows || workflows.length === 0) return;
+
+    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minuten
+    const CHECK_INTERVAL = 30 * 1000; // Check alle 30 Sekunden
+
+    console.log('[useWorkflowStatus] Starting watchdog for project:', projectId);
+
+    const watchdog = setInterval(async () => {
+      // Alle running/alive Workflows aus DB holen
+      const { data: activeWorkflows } = await supabase
+        .from('n8n_workflow_states')
+        .select('id, workflow_name, status, updated_at')
+        .eq('project_id', projectId)
+        .in('status', ['running', 'alive']);
+
+      if (!activeWorkflows || activeWorkflows.length === 0) return;
+
+      // Prüfe jeden Workflow auf Timeout
+      for (const workflow of activeWorkflows) {
+        const timeSinceUpdate = Date.now() - new Date(workflow.updated_at).getTime();
+        
+        if (timeSinceUpdate >= INACTIVITY_TIMEOUT) {
+          console.warn(`[useWorkflowStatus] Workflow ${workflow.workflow_name} (${workflow.id}) stuck for ${Math.floor(timeSinceUpdate / 1000)}s - marking as failed`);
+          
+          // Workflow als failed markieren
+          await supabase
+            .from('n8n_workflow_states')
+            .update({ status: 'failed' })
+            .eq('id', workflow.id);
+
+          toast.error(
+            `Workflow "${workflow.workflow_name}" wurde nach 5 Minuten Inaktivität als fehlgeschlagen markiert.`,
+            { duration: 5000 }
+          );
+        }
+      }
+    }, CHECK_INTERVAL);
+
+    return () => clearInterval(watchdog);
+  }, [workflows, projectId]);
 
   return {
     workflows,

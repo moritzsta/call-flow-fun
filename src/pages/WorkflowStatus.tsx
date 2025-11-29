@@ -13,7 +13,6 @@ import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 
 interface WorkflowState {
   id: string;
@@ -96,53 +95,6 @@ export default function WorkflowStatus() {
       supabase.removeChannel(channel);
     };
   }, [workflowId, refetch]);
-
-  // Watchdog: Automatisch erkennen wenn Workflow stecken bleibt
-  useEffect(() => {
-    if (!workflow || (workflow.status !== 'running' && workflow.status !== 'alive')) return;
-
-    const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 Minuten
-    const CHECK_INTERVAL = 30 * 1000; // Check alle 30 Sekunden
-
-    console.log('[WorkflowStatus] Starting watchdog for workflow:', workflowId);
-
-    const watchdog = setInterval(async () => {
-      // Aktuellen Status aus DB holen
-      const { data: currentWorkflow } = await supabase
-        .from('n8n_workflow_states')
-        .select('id, workflow_name, status, updated_at')
-        .eq('id', workflowId)
-        .maybeSingle();
-
-      if (!currentWorkflow) return;
-      if (currentWorkflow.status !== 'running' && currentWorkflow.status !== 'alive') {
-        clearInterval(watchdog);
-        return;
-      }
-
-      const timeSinceUpdate = Date.now() - new Date(currentWorkflow.updated_at).getTime();
-      
-      if (timeSinceUpdate >= INACTIVITY_TIMEOUT) {
-        console.warn(`[WorkflowStatus] Workflow stuck for ${Math.floor(timeSinceUpdate / 1000)}s - marking as failed`);
-        
-        // Workflow als failed markieren
-        await supabase
-          .from('n8n_workflow_states')
-          .update({ status: 'failed' })
-          .eq('id', workflowId);
-
-        toast.error(
-          `${workflowLabels[currentWorkflow.workflow_name] || currentWorkflow.workflow_name} wurde nach 5 Minuten Inaktivität als fehlgeschlagen markiert.`,
-          { duration: 5000 }
-        );
-        
-        refetch();
-        clearInterval(watchdog);
-      }
-    }, CHECK_INTERVAL);
-
-    return () => clearInterval(watchdog);
-  }, [workflow?.status, workflowId, refetch]);
 
   if (isLoading) {
     return (
