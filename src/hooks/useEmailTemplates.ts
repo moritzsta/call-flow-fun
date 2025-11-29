@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 export interface EmailTemplate {
   id: string;
-  organization_id: string;
+  enum_name: string;
   title: string;
   subject_template: string;
   body_template: string;
@@ -13,30 +13,27 @@ export interface EmailTemplate {
 }
 
 export interface EmailTemplateInsert {
-  organization_id: string;
+  enum_name?: string;
   title: string;
   subject_template: string;
   body_template: string;
 }
 
-export const useEmailTemplates = (organizationId?: string) => {
+export const useEmailTemplates = () => {
   const queryClient = useQueryClient();
 
-  // Fetch templates
+  // Fetch all templates (no longer organization-specific)
   const {
     data: templates = [],
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['email_templates', organizationId],
+    queryKey: ['email_templates'],
     queryFn: async () => {
-      if (!organizationId) return [];
-
       const { data, error } = await supabase
         .from('email_templates')
         .select('*')
-        .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -46,7 +43,6 @@ export const useEmailTemplates = (organizationId?: string) => {
 
       return data as EmailTemplate[];
     },
-    enabled: !!organizationId,
   });
 
   // Create template
@@ -62,7 +58,7 @@ export const useEmailTemplates = (organizationId?: string) => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['email_templates', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['email_templates'] });
       toast.success('Template erfolgreich erstellt');
     },
     onError: (error: Error) => {
@@ -85,7 +81,7 @@ export const useEmailTemplates = (organizationId?: string) => {
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['email_templates', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['email_templates'] });
       toast.success('Template erfolgreich aktualisiert');
     },
     onError: (error: Error) => {
@@ -105,7 +101,7 @@ export const useEmailTemplates = (organizationId?: string) => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['email_templates', organizationId] });
+      queryClient.invalidateQueries({ queryKey: ['email_templates'] });
       toast.success('Template erfolgreich gelöscht');
     },
     onError: (error: Error) => {

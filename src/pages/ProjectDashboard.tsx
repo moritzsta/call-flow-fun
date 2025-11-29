@@ -23,6 +23,7 @@ import { SinglePitchPaulDialog } from '@/components/workflows/SinglePitchPaulDia
 import { SingleBrandingBrittaDialog } from '@/components/workflows/SingleBrandingBrittaDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { PaulWorkflowConfig } from '@/types/workflow';
 import { 
   ArrowLeft, 
   Building2, 
@@ -195,20 +196,26 @@ export default function ProjectDashboard() {
     }
   };
   
-  const triggerPaul = async (vorhaben: string) => {
+  const triggerPaul = async (config: PaulWorkflowConfig) => {
     if (!id || !user?.id) return;
     setIsTriggeringPaul(true);
     
     try {
       const { data: workflowState, error: dbError } = await supabase
         .from('n8n_workflow_states')
-        .insert({
+        .insert([{
           project_id: id,
           user_id: user.id,
           workflow_name: 'pitch_paul_auto',
-          status: 'running',
-          trigger_data: { userGoal: vorhaben },
-        })
+          status: 'running' as const,
+          trigger_data: { 
+            userGoal: config.vorhaben,
+            templateId: config.templateId,
+            templateEnumName: config.templateEnumName,
+            templateContent: config.templateContent,
+            sellerContact: config.sellerContact,
+          } as any,
+        }])
         .select()
         .single();
       
@@ -220,7 +227,13 @@ export default function ProjectDashboard() {
           workflow_id: workflowState.id,
           project_id: id,
           user_id: user.id,
-          trigger_data: { userGoal: vorhaben },
+          trigger_data: { 
+            userGoal: config.vorhaben,
+            templateId: config.templateId,
+            templateEnumName: config.templateEnumName,
+            templateContent: config.templateContent,
+            sellerContact: config.sellerContact,
+          } as any,
         },
       });
       
