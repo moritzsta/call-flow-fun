@@ -132,6 +132,30 @@ export const AutomationDialog = ({
     setSearchTerm('');
   };
 
+  const handleFillTestData = () => {
+    // Stadt direkt setzen (bypassed die Suche)
+    setValue('city', 'Leinfelden-Echterdingen', { shouldValidate: true });
+    setValue('state', 'Baden-Württemberg', { shouldValidate: true });
+    
+    // Restliche Felder
+    setValue('category', 'Fitnessstudios', { shouldValidate: true });
+    setValue('vorhaben', 'Ich habe eine Kalorienzählerapp mit innovativen KI Features entwickelt, welche ich gerne verkaufen möchte!', { shouldValidate: true });
+    setValue('maxCompanies', 10, { shouldValidate: true });
+    
+    // Template anhand enum_name finden
+    const salesTemplate = templates.find(t => t.enum_name === 'sales');
+    if (salesTemplate) {
+      setValue('templateId', salesTemplate.id, { shouldValidate: true });
+    }
+    
+    // Verkäufer-Daten
+    setValue('sellerName', 'Moritz', { shouldValidate: true });
+    setValue('sellerCompany', 'up2summit', { shouldValidate: true });
+    
+    // Suchfeld zurücksetzen
+    setSearchTerm('');
+  };
+
   return (
     <AdaptiveDialog
       open={open}
@@ -360,25 +384,40 @@ export const AutomationDialog = ({
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 justify-end">
+        <div className="flex gap-3 justify-between">
+          {/* DEV: Testdaten Button - links */}
           <Button
             type="button"
-            variant="outline"
-            onClick={() => onOpenChange(false)}
+            variant="ghost"
+            size="sm"
+            onClick={handleFillTestData}
             disabled={isStarting}
+            className="text-muted-foreground"
           >
-            Abbrechen
+            🧪 Testdaten
           </Button>
-          <Button type="submit" disabled={isStarting}>
-            {isStarting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Wird gestartet...
-              </>
-            ) : (
-              'Pipeline starten'
-            )}
-          </Button>
+          
+          {/* Abbrechen & Starten - rechts */}
+          <div className="flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isStarting}
+            >
+              Abbrechen
+            </Button>
+            <Button type="submit" disabled={isStarting}>
+              {isStarting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Wird gestartet...
+                </>
+              ) : (
+                'Pipeline starten'
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </AdaptiveDialog>
