@@ -61,14 +61,22 @@ export default function ProjectDashboard() {
   // Rate Limits states
   const [rateLimitsOpen, setRateLimitsOpen] = useState(false);
   const [isLoadingLimits, setIsLoadingLimits] = useState(false);
-  const [rateLimits, setRateLimits] = useState<{
-    limitRequests: string | null;
-    remainingRequests: string | null;
-    limitTokens: string | null;
-    remainingTokens: string | null;
-    resetRequests: string | null;
-    resetTokens: string | null;
-    timestamp: string;
+  const [rateLimitsData, setRateLimitsData] = useState<{
+    success: boolean;
+    rateLimits: {
+      limitRequests: string | null;
+      remainingRequests: string | null;
+      limitTokens: string | null;
+      remainingTokens: string | null;
+      resetRequests: string | null;
+      resetTokens: string | null;
+      timestamp: string;
+    } | null;
+    error?: {
+      status: number;
+      type: string;
+      message: string;
+    };
   } | null>(null);
 
   const { organizations, isLoading: orgsLoading } = useOrganizations();
@@ -316,12 +324,9 @@ export default function ProjectDashboard() {
       
       if (error) throw error;
       
-      if (data?.success && data.rateLimits) {
-        setRateLimits(data.rateLimits);
-        setRateLimitsOpen(true);
-      } else {
-        throw new Error(data?.error || 'Unbekannter Fehler');
-      }
+      // Daten speichern und Modal öffnen (auch bei Fehlern)
+      setRateLimitsData(data);
+      setRateLimitsOpen(true);
     } catch (error: any) {
       console.error('Error fetching OpenAI limits:', error);
       toast.error(`Fehler beim Abrufen der Limits: ${error.message}`);
@@ -894,67 +899,158 @@ export default function ProjectDashboard() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Activity className="h-5 w-5" />
-              OpenAI Rate Limits
+              OpenAI API Status
             </DialogTitle>
           </DialogHeader>
           
-          {rateLimits && (
+          {rateLimitsData && (
             <div className="space-y-6 py-4">
-              {/* Requests */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">📊 Requests</span>
-                  <span className="text-muted-foreground">
-                    {rateLimits.remainingRequests} / {rateLimits.limitRequests}
-                  </span>
+              {/* Error State - Quota exhausted */}
+              {!rateLimitsData.success && rateLimitsData.error?.type === 'insufficient_quota' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">⚠️</div>
+                      <div className="space-y-2 flex-1">
+                        <p className="font-semibold text-destructive">Kein API-Guthaben mehr</p>
+                        <p className="text-sm text-muted-foreground">
+                          {rateLimitsData.error.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                    <p className="text-sm font-medium">💡 Lösung:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Guthaben auf OpenAI aufladen, um die API weiter zu nutzen.
+                    </p>
+                    <a 
+                      href="https://platform.openai.com/settings/organization/billing/overview"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-sm text-primary hover:underline"
+                    >
+                      Zu OpenAI Billing →
+                    </a>
+                  </div>
                 </div>
-                <Progress 
-                  value={
-                    rateLimits.remainingRequests && rateLimits.limitRequests
-                      ? (parseInt(rateLimits.remainingRequests) / parseInt(rateLimits.limitRequests)) * 100
-                      : 0
-                  } 
-                  className="h-2"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Verbleibend: {rateLimits.remainingRequests} | Reset: {rateLimits.resetRequests}
-                </p>
-              </div>
+              )}
               
-              {/* Tokens */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">🎯 Tokens</span>
-                  <span className="text-muted-foreground">
-                    {rateLimits.remainingTokens && rateLimits.limitTokens
-                      ? `${(parseInt(rateLimits.remainingTokens) / 1000).toFixed(0)}k / ${(parseInt(rateLimits.limitTokens) / 1000).toFixed(0)}k`
-                      : 'N/A'
-                    }
-                  </span>
+              {/* Error State - Rate Limited */}
+              {!rateLimitsData.success && rateLimitsData.error?.type === 'rate_limit_exceeded' && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl">⏱️</div>
+                      <div className="space-y-2 flex-1">
+                        <p className="font-semibold text-destructive">Zu viele Anfragen</p>
+                        <p className="text-sm text-muted-foreground">
+                          {rateLimitsData.error.message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+                    <p className="text-sm font-medium">💡 Lösung:</p>
+                    <p className="text-sm text-muted-foreground">
+                      Bitte warten Sie einige Minuten und versuchen Sie es erneut.
+                    </p>
+                  </div>
                 </div>
-                <Progress 
-                  value={
-                    rateLimits.remainingTokens && rateLimits.limitTokens
-                      ? (parseInt(rateLimits.remainingTokens) / parseInt(rateLimits.limitTokens)) * 100
-                      : 0
-                  } 
-                  className="h-2"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Verbleibend: {rateLimits.remainingTokens ? (parseInt(rateLimits.remainingTokens) / 1000).toFixed(0) + 'k' : 'N/A'} | Reset: {rateLimits.resetTokens}
-                </p>
-              </div>
+              )}
               
-              {/* Timestamp */}
-              <div className="pt-4 border-t border-border">
-                <p className="text-xs text-muted-foreground text-center">
-                  Abgerufen: {new Date(rateLimits.timestamp).toLocaleString('de-DE')}
-                </p>
-              </div>
+              {/* Other errors */}
+              {!rateLimitsData.success && rateLimitsData.error?.type !== 'insufficient_quota' && rateLimitsData.error?.type !== 'rate_limit_exceeded' && (
+                <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="text-2xl">❌</div>
+                    <div className="space-y-2 flex-1">
+                      <p className="font-semibold text-destructive">API-Fehler</p>
+                      <p className="text-sm text-muted-foreground">
+                        {rateLimitsData.error?.message || 'Unbekannter Fehler'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Rate Limits (bei Erfolg oder falls trotz Fehler verfügbar) */}
+              {rateLimitsData.rateLimits && (
+                <div className="space-y-4">
+                  {!rateLimitsData.success && (
+                    <p className="text-xs text-muted-foreground text-center pb-2 border-b border-border">
+                      📊 Letzte bekannte Limits
+                    </p>
+                  )}
+                  
+                  {/* Requests */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">📊 Requests</span>
+                      <span className="text-muted-foreground">
+                        {rateLimitsData.rateLimits.remainingRequests} / {rateLimitsData.rateLimits.limitRequests}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={
+                        rateLimitsData.rateLimits.remainingRequests && rateLimitsData.rateLimits.limitRequests
+                          ? (parseInt(rateLimitsData.rateLimits.remainingRequests) / parseInt(rateLimitsData.rateLimits.limitRequests)) * 100
+                          : 0
+                      } 
+                      className="h-2"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Verbleibend: {rateLimitsData.rateLimits.remainingRequests} | Reset: {rateLimitsData.rateLimits.resetRequests}
+                    </p>
+                  </div>
+                  
+                  {/* Tokens */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">🎯 Tokens</span>
+                      <span className="text-muted-foreground">
+                        {rateLimitsData.rateLimits.remainingTokens && rateLimitsData.rateLimits.limitTokens
+                          ? `${(parseInt(rateLimitsData.rateLimits.remainingTokens) / 1000).toFixed(0)}k / ${(parseInt(rateLimitsData.rateLimits.limitTokens) / 1000).toFixed(0)}k`
+                          : 'N/A'
+                        }
+                      </span>
+                    </div>
+                    <Progress 
+                      value={
+                        rateLimitsData.rateLimits.remainingTokens && rateLimitsData.rateLimits.limitTokens
+                          ? (parseInt(rateLimitsData.rateLimits.remainingTokens) / parseInt(rateLimitsData.rateLimits.limitTokens)) * 100
+                          : 0
+                      } 
+                      className="h-2"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Verbleibend: {rateLimitsData.rateLimits.remainingTokens ? (parseInt(rateLimitsData.rateLimits.remainingTokens) / 1000).toFixed(0) + 'k' : 'N/A'} | Reset: {rateLimitsData.rateLimits.resetTokens}
+                    </p>
+                  </div>
+                  
+                  {/* Timestamp */}
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Abgerufen: {new Date(rateLimitsData.rateLimits.timestamp).toLocaleString('de-DE')}
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              {/* Success Message */}
+              {rateLimitsData.success && (
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                  <p className="text-sm text-center text-green-700 dark:text-green-400">
+                    ✅ API ist verfügbar
+                  </p>
+                </div>
+              )}
             </div>
           )}
           
-          {!rateLimits && (
+          {!rateLimitsData && (
             <div className="py-8 text-center text-muted-foreground">
               Keine Daten verfügbar
             </div>
