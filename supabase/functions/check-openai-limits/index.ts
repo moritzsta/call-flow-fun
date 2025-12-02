@@ -32,13 +32,7 @@ serve(async (req) => {
       }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenAI API error:", response.status, errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
-    }
-
-    // Rate Limit Headers extrahieren
+    // Rate Limit Headers IMMER extrahieren (auch bei Fehlern)
     const rateLimits = {
       limitRequests: response.headers.get("x-ratelimit-limit-requests"),
       remainingRequests: response.headers.get("x-ratelimit-remaining-requests"),
@@ -48,6 +42,31 @@ serve(async (req) => {
       resetTokens: response.headers.get("x-ratelimit-reset-tokens"),
       timestamp: new Date().toISOString(),
     };
+
+    if (!response.ok) {
+      let errorBody;
+      try {
+        errorBody = await response.json();
+      } catch {
+        errorBody = { error: { message: await response.text() } };
+      }
+      
+      console.error("OpenAI API error:", response.status, errorBody);
+      
+      // Strukturierte Fehler-Response mit verfügbaren Rate-Limit-Headers
+      return new Response(JSON.stringify({ 
+        success: false,
+        rateLimits: rateLimits, // Headers auch bei Fehlern zurückgeben
+        error: {
+          status: response.status,
+          type: errorBody.error?.type || 'unknown',
+          message: errorBody.error?.message || 'Unknown error',
+        }
+      }), {
+        status: 200, // 200, damit Frontend die Response verarbeiten kann
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     console.log("Rate limits retrieved:", rateLimits);
 
