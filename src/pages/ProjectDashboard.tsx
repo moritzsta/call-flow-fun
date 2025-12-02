@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
 import { useProjects } from '@/hooks/useProjects';
 import { useOrganizations } from '@/hooks/useOrganizations';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
@@ -34,7 +36,8 @@ import {
   Send,
   Settings,
   Sparkles,
-  XCircle
+  XCircle,
+  Activity
 } from 'lucide-react';
 import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
 
@@ -54,6 +57,19 @@ export default function ProjectDashboard() {
   const [isTriggeringAnna, setIsTriggeringAnna] = useState(false);
   const [isTriggeringPaul, setIsTriggeringPaul] = useState(false);
   const [isTriggeringBritta, setIsTriggeringBritta] = useState(false);
+  
+  // Rate Limits states
+  const [rateLimitsOpen, setRateLimitsOpen] = useState(false);
+  const [isLoadingLimits, setIsLoadingLimits] = useState(false);
+  const [rateLimits, setRateLimits] = useState<{
+    limitRequests: string | null;
+    remainingRequests: string | null;
+    limitTokens: string | null;
+    remainingTokens: string | null;
+    resetRequests: string | null;
+    resetTokens: string | null;
+    timestamp: string;
+  } | null>(null);
 
   const { organizations, isLoading: orgsLoading } = useOrganizations();
   
@@ -292,6 +308,27 @@ export default function ProjectDashboard() {
       setIsTriggeringBritta(false);
     }
   };
+  
+  const fetchOpenAILimits = async () => {
+    setIsLoadingLimits(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-openai-limits');
+      
+      if (error) throw error;
+      
+      if (data?.success && data.rateLimits) {
+        setRateLimits(data.rateLimits);
+        setRateLimitsOpen(true);
+      } else {
+        throw new Error(data?.error || 'Unbekannter Fehler');
+      }
+    } catch (error: any) {
+      console.error('Error fetching OpenAI limits:', error);
+      toast.error(`Fehler beim Abrufen der Limits: ${error.message}`);
+    } finally {
+      setIsLoadingLimits(false);
+    }
+  };
 
   if (orgsLoading || membersLoading) {
     return (
@@ -375,13 +412,24 @@ export default function ProjectDashboard() {
                     )}
                   </div>
                   {canManage && (
-                    <Button
-                      variant="outline"
-                      onClick={() => navigate(`/projects/${id}/settings`)}
-                    >
-                      <Settings className="mr-2 h-4 w-4" />
-                      Einstellungen
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={fetchOpenAILimits}
+                        disabled={isLoadingLimits}
+                        title="OpenAI Rate Limits prüfen"
+                      >
+                        <Activity className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => navigate(`/projects/${id}/settings`)}
+                      >
+                        <Settings className="mr-2 h-4 w-4" />
+                        Einstellungen
+                      </Button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -839,6 +887,80 @@ export default function ProjectDashboard() {
         isStarting={isTriggeringBritta}
         emailsCount={emailsWithoutImprovement}
       />
+      
+      {/* OpenAI Rate Limits Dialog */}
+      <Dialog open={rateLimitsOpen} onOpenChange={setRateLimitsOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              OpenAI Rate Limits
+            </DialogTitle>
+          </DialogHeader>
+          
+          {rateLimits && (
+            <div className="space-y-6 py-4">
+              {/* Requests */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">📊 Requests</span>
+                  <span className="text-muted-foreground">
+                    {rateLimits.remainingRequests} / {rateLimits.limitRequests}
+                  </span>
+                </div>
+                <Progress 
+                  value={
+                    rateLimits.remainingRequests && rateLimits.limitRequests
+                      ? (parseInt(rateLimits.remainingRequests) / parseInt(rateLimits.limitRequests)) * 100
+                      : 0
+                  } 
+                  className="h-2"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Verbleibend: {rateLimits.remainingRequests} | Reset: {rateLimits.resetRequests}
+                </p>
+              </div>
+              
+              {/* Tokens */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">🎯 Tokens</span>
+                  <span className="text-muted-foreground">
+                    {rateLimits.remainingTokens && rateLimits.limitTokens
+                      ? `${(parseInt(rateLimits.remainingTokens) / 1000).toFixed(0)}k / ${(parseInt(rateLimits.limitTokens) / 1000).toFixed(0)}k`
+                      : 'N/A'
+                    }
+                  </span>
+                </div>
+                <Progress 
+                  value={
+                    rateLimits.remainingTokens && rateLimits.limitTokens
+                      ? (parseInt(rateLimits.remainingTokens) / parseInt(rateLimits.limitTokens)) * 100
+                      : 0
+                  } 
+                  className="h-2"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Verbleibend: {rateLimits.remainingTokens ? (parseInt(rateLimits.remainingTokens) / 1000).toFixed(0) + 'k' : 'N/A'} | Reset: {rateLimits.resetTokens}
+                </p>
+              </div>
+              
+              {/* Timestamp */}
+              <div className="pt-4 border-t border-border">
+                <p className="text-xs text-muted-foreground text-center">
+                  Abgerufen: {new Date(rateLimits.timestamp).toLocaleString('de-DE')}
+                </p>
+              </div>
+            </div>
+          )}
+          
+          {!rateLimits && (
+            <div className="py-8 text-center text-muted-foreground">
+              Keine Daten verfügbar
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   );
 }

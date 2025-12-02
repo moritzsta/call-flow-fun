@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.advance-pipeline]
 verify_jwt = false
+
+[functions.check-openai-limits]
+verify_jwt = false
