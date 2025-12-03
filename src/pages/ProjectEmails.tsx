@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Mail, RefreshCw, Send } from 'lucide-react';
+import { ArrowLeft, Mail, RefreshCw, Send, Trash2, Loader2 } from 'lucide-react';
 import { useEmails, EmailFilters as Filters, EmailSortConfig } from '@/hooks/useEmails';
 import { EmailFilters } from '@/components/emails/EmailFilters';
 import { EmailsTable } from '@/components/emails/EmailsTable';
@@ -12,6 +12,19 @@ import { EmailStats } from '@/components/emails/EmailStats';
 import { ExportEmailsButton } from '@/components/emails/ExportEmailsButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function ProjectEmails() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +37,7 @@ export default function ProjectEmails() {
     field: 'created_at',
     ascending: false,
   });
+  const [isRemovingDuplicates, setIsRemovingDuplicates] = useState(false);
 
   const {
     emails,
@@ -38,6 +52,38 @@ export default function ProjectEmails() {
   const readyToSendCount = emails.filter(
     e => e.status === 'draft' || e.status === 'ready_to_send'
   ).length;
+
+  const handleRemoveDuplicates = async () => {
+    if (!id) return;
+    
+    setIsRemovingDuplicates(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('remove-duplicate-companies', {
+        body: { project_id: id, type: 'emails' }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        const deletedCount = data.deleted_count;
+        if (deletedCount > 0) {
+          toast.success(`${deletedCount} Duplikate entfernt`);
+          refetch();
+        } else {
+          toast.info('Keine Duplikate gefunden');
+        }
+      } else {
+        throw new Error(data.error || 'Unbekannter Fehler');
+      }
+    } catch (error) {
+      console.error('Error removing duplicates:', error);
+      toast.error('Fehler beim Entfernen der Duplikate');
+    } finally {
+      setIsRemovingDuplicates(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -83,6 +129,40 @@ export default function ProjectEmails() {
             <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
               <ExportEmailsButton projectId={id!} />
               
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    disabled={isRemovingDuplicates}
+                    className={isMobile ? 'w-full' : ''}
+                  >
+                    {isRemovingDuplicates ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Duplikate entfernen
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Duplikate entfernen?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Diese Aktion entfernt alle E-Mails mit derselben Empfänger-Adresse. 
+                      Die jeweils älteste E-Mail wird behalten.
+                      <br /><br />
+                      <strong>Diese Aktion kann nicht rückgängig gemacht werden.</strong>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRemoveDuplicates}>
+                      Duplikate löschen
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
               <Button variant="outline" onClick={() => refetch()} className={isMobile ? 'w-full' : ''}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Aktualisieren

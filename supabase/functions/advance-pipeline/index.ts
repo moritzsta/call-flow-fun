@@ -160,16 +160,16 @@ Deno.serve(async (req) => {
     // After analyse_anna_auto and before pitch_paul_auto: Remove duplicates and cleanup
     if (normalizedWorkflowName === 'analyse_anna_auto' && nextWorkflow === 'pitch_paul_auto') {
       // Step 1: Remove duplicate companies (same phone, email, or website)
-      console.log(`Removing duplicates for project ${pipeline.project_id}`);
+      console.log(`Removing company duplicates for project ${pipeline.project_id}`);
       const { data: duplicateResult, error: duplicateError } = await supabase.functions.invoke(
         'remove-duplicate-companies',
-        { body: { project_id: pipeline.project_id } }
+        { body: { project_id: pipeline.project_id, type: 'companies' } }
       );
       
       if (duplicateError) {
-        console.error('Error removing duplicates:', duplicateError);
+        console.error('Error removing company duplicates:', duplicateError);
       } else {
-        console.log('Duplicate removal result:', duplicateResult);
+        console.log('Company duplicate removal result:', duplicateResult);
       }
 
       // Step 2: Cleanup companies to limit (if configured)
@@ -178,6 +178,21 @@ Deno.serve(async (req) => {
       if (maxCompanies && maxCompanies > 0) {
         console.log(`Cleanup: Reducing companies to max ${maxCompanies} for project ${pipeline.project_id}`);
         await cleanupCompaniesToLimit(supabase, pipeline.project_id, maxCompanies);
+      }
+    }
+
+    // After pitch_paul_auto and before branding_britta_auto: Remove email duplicates
+    if (normalizedWorkflowName === 'pitch_paul_auto' && nextWorkflow === 'branding_britta_auto') {
+      console.log(`Removing email duplicates for project ${pipeline.project_id}`);
+      const { data: emailDuplicateResult, error: emailDuplicateError } = await supabase.functions.invoke(
+        'remove-duplicate-companies',
+        { body: { project_id: pipeline.project_id, type: 'emails' } }
+      );
+      
+      if (emailDuplicateError) {
+        console.error('Error removing email duplicates:', emailDuplicateError);
+      } else {
+        console.log('Email duplicate removal result:', emailDuplicateResult);
       }
     }
 
