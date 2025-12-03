@@ -27,23 +27,26 @@ export interface CreateProjectInput {
 export const useProjects = (organizationId?: string) => {
   const queryClient = useQueryClient();
 
-  // Fetch all projects for an organization
+  // Fetch projects - wenn organizationId angegeben, nur für diese Org
+  // Wenn nicht angegeben, lade ALLE Projekte des Users
   const { data: projects = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['projects', organizationId],
+    queryKey: organizationId ? ['projects', organizationId] : ['projects', 'all'],
     queryFn: async () => {
-      if (!organizationId) return [];
-
-      const { data, error } = await supabase
+      let query = supabase
         .from('projects')
         .select('*')
-        .eq('organization_id', organizationId)
         .eq('archived', false)
         .order('created_at', { ascending: false });
+
+      if (organizationId) {
+        query = query.eq('organization_id', organizationId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       return data as Project[];
     },
-    enabled: !!organizationId,
   });
 
   // Create project
