@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.remove-duplicate-companies]
 verify_jwt = false
+
+[functions.remove-duplicate-emails]
+verify_jwt = false

@@ -58,8 +58,8 @@ export default function ProjectEmails() {
     
     setIsRemovingDuplicates(true);
     try {
-      const { data, error } = await supabase.functions.invoke('remove-duplicate-companies', {
-        body: { project_id: id, type: 'emails' }
+      const { data, error } = await supabase.functions.invoke('remove-duplicate-emails', {
+        body: { project_id: id }
       });
 
       if (error) {
