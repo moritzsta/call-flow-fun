@@ -7,16 +7,24 @@ const corsHeaders = {
 
 interface RemoveDuplicatesRequest {
   project_id: string;
+  type?: 'companies' | 'emails' | 'both';  // Default: 'companies' for backwards compatibility
+}
+
+interface CompanyDuplicateDetails {
+  by_phone: number;
+  by_email: number;
+  by_website: number;
+}
+
+interface EmailDuplicateDetails {
+  by_recipient_email: number;
 }
 
 interface DuplicateRemovalResult {
   success: boolean;
   deleted_count: number;
-  details: {
-    by_phone: number;
-    by_email: number;
-    by_website: number;
-  };
+  companies?: CompanyDuplicateDetails;
+  emails?: EmailDuplicateDetails;
 }
 
 Deno.serve(async (req) => {
@@ -40,7 +48,24 @@ Deno.serve(async (req) => {
       );
     }
 
-    const result = await removeDuplicateCompanies(supabase, body.project_id);
+    const type = body.type || 'companies';
+    let result: DuplicateRemovalResult;
+
+    if (type === 'companies') {
+      result = await removeDuplicateCompanies(supabase, body.project_id);
+    } else if (type === 'emails') {
+      result = await removeDuplicateEmails(supabase, body.project_id);
+    } else {
+      // Both
+      const companyResult = await removeDuplicateCompanies(supabase, body.project_id);
+      const emailResult = await removeDuplicateEmails(supabase, body.project_id);
+      result = {
+        success: true,
+        deleted_count: companyResult.deleted_count + emailResult.deleted_count,
+        companies: companyResult.companies,
+        emails: emailResult.emails,
+      };
+    }
 
     console.log('Duplicate removal result:', result);
 
@@ -65,7 +90,7 @@ async function removeDuplicateCompanies(
   supabase: any, 
   projectId: string
 ): Promise<DuplicateRemovalResult> {
-  const details = {
+  const details: CompanyDuplicateDetails = {
     by_phone: 0,
     by_email: 0,
     by_website: 0,
@@ -157,6 +182,88 @@ async function removeDuplicateCompanies(
   return {
     success: true,
     deleted_count: totalDeleted,
-    details,
+    companies: details,
+  };
+}
+
+async function removeDuplicateEmails(
+  supabase: any,
+  projectId: string
+): Promise<DuplicateRemovalResult> {
+  console.log('Processing duplicate emails for project:', projectId);
+
+  // Fetch all emails with non-empty recipient_email
+  const { data: emails, error } = await supabase
+    .from('project_emails')
+    .select('id, created_at, recipient_email')
+    .eq('project_id', projectId)
+    .not('recipient_email', 'is', null)
+    .neq('recipient_email', '')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching emails:', error);
+    return {
+      success: false,
+      deleted_count: 0,
+      emails: { by_recipient_email: 0 },
+    };
+  }
+
+  if (!emails || emails.length === 0) {
+    console.log('No emails found');
+    return {
+      success: true,
+      deleted_count: 0,
+      emails: { by_recipient_email: 0 },
+    };
+  }
+
+  console.log(`Found ${emails.length} emails`);
+
+  // Group by recipient_email (case-insensitive, trimmed)
+  const groups = new Map<string, string[]>();
+
+  for (const email of emails) {
+    const value = email.recipient_email?.toString().toLowerCase().trim();
+    if (!value) continue;
+
+    if (!groups.has(value)) {
+      groups.set(value, []);
+    }
+    groups.get(value)!.push(email.id);
+  }
+
+  // Collect IDs to delete (all except first/oldest in each group)
+  const idsToDelete: string[] = [];
+
+  for (const [value, ids] of groups) {
+    if (ids.length > 1) {
+      const duplicates = ids.slice(1);
+      idsToDelete.push(...duplicates);
+      console.log(`Found ${ids.length} duplicates for recipient_email="${value}", keeping oldest, deleting ${duplicates.length}`);
+    }
+  }
+
+  if (idsToDelete.length > 0) {
+    // Delete in batches of 100
+    for (let i = 0; i < idsToDelete.length; i += 100) {
+      const batch = idsToDelete.slice(i, i + 100);
+      const { error: deleteError } = await supabase
+        .from('project_emails')
+        .delete()
+        .in('id', batch);
+
+      if (deleteError) {
+        console.error('Error deleting duplicate emails:', deleteError);
+      }
+    }
+    console.log(`Deleted ${idsToDelete.length} duplicate emails`);
+  }
+
+  return {
+    success: true,
+    deleted_count: idsToDelete.length,
+    emails: { by_recipient_email: idsToDelete.length },
   };
 }
