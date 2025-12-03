@@ -23,6 +23,7 @@ import { SingleFinderFelixDialog } from '@/components/workflows/SingleFinderFeli
 import { SingleAnalyseAnnaDialog } from '@/components/workflows/SingleAnalyseAnnaDialog';
 import { SinglePitchPaulDialog } from '@/components/workflows/SinglePitchPaulDialog';
 import { SingleBrandingBrittaDialog } from '@/components/workflows/SingleBrandingBrittaDialog';
+import { SingleSendeSusanDialog } from '@/components/workflows/SingleSendeSusanDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PaulWorkflowConfig } from '@/types/workflow';
@@ -51,12 +52,14 @@ export default function ProjectDashboard() {
   const [annaDialogOpen, setAnnaDialogOpen] = useState(false);
   const [paulDialogOpen, setPaulDialogOpen] = useState(false);
   const [brittaDialogOpen, setBrittaDialogOpen] = useState(false);
+  const [susanDialogOpen, setSusanDialogOpen] = useState(false);
   
   // Trigger states
   const [isTriggeringFelix, setIsTriggeringFelix] = useState(false);
   const [isTriggeringAnna, setIsTriggeringAnna] = useState(false);
   const [isTriggeringPaul, setIsTriggeringPaul] = useState(false);
   const [isTriggeringBritta, setIsTriggeringBritta] = useState(false);
+  const [isTriggeringSusan, setIsTriggeringSusan] = useState(false);
   
   // Rate Limits states
   const [rateLimitsOpen, setRateLimitsOpen] = useState(false);
@@ -132,6 +135,7 @@ export default function ProjectDashboard() {
   const { workflow: annaWorkflow, isRunning: annaRunning } = useSingleWorkflowStatus(id || '', 'analyse_anna_auto');
   const { workflow: paulWorkflow, isRunning: paulRunning } = useSingleWorkflowStatus(id || '', 'pitch_paul_auto');
   const { workflow: brittaWorkflow, isRunning: brittaRunning } = useSingleWorkflowStatus(id || '', 'branding_britta_auto');
+  const { workflow: susanWorkflow, isRunning: susanRunning } = useSingleWorkflowStatus(id || '', 'sende_susan');
   
   // Cancel workflow hook
   const { cancelWorkflow, isCancelling } = useWorkflowCancel();
@@ -139,6 +143,7 @@ export default function ProjectDashboard() {
   // Counts for dialogs
   const companiesWithWebsite = companies.filter((c) => c.website && c.website.length > 0).length;
   const emailsWithoutImprovement = emails.filter((e) => !e.body_improved || e.body_improved.length === 0).length;
+  const emailsToSend = emails.filter((e) => e.status === 'draft' || e.status === 'ready_to_send').length;
   
   // Trigger functions
   const triggerFelix = async (config: { city: string; state: string; category: string; maxCompanies?: number }) => {
@@ -314,6 +319,48 @@ export default function ProjectDashboard() {
       toast.error(`Fehler: ${error.message}`);
     } finally {
       setIsTriggeringBritta(false);
+    }
+  };
+  
+  const triggerSusan = async () => {
+    if (!id || !user?.id) return;
+    setIsTriggeringSusan(true);
+    
+    try {
+      const { data: workflowState, error: dbError } = await supabase
+        .from('n8n_workflow_states')
+        .insert({
+          project_id: id,
+          user_id: user.id,
+          workflow_name: 'sende_susan',
+          status: 'running',
+          trigger_data: { send_all: true },
+        })
+        .select()
+        .single();
+      
+      if (dbError) throw dbError;
+      
+      const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+        body: {
+          workflow_name: 'sende_susan',
+          workflow_id: workflowState.id,
+          project_id: id,
+          user_id: user.id,
+          trigger_data: { send_all: true },
+        },
+      });
+      
+      if (functionError) throw functionError;
+      
+      toast.success('Sende Susan wurde gestartet');
+      setSusanDialogOpen(false);
+      navigate(`/projects/${id}/sende-susan/${workflowState.id}`);
+    } catch (error: any) {
+      console.error('Error triggering Susan:', error);
+      toast.error(`Fehler: ${error.message}`);
+    } finally {
+      setIsTriggeringSusan(false);
     }
   };
   
@@ -818,26 +865,57 @@ export default function ProjectDashboard() {
                   </CardContent>
                 </Card>
 
-                {/* Email Versand Card */}
+                {/* Sende Susan Card */}
                 <Card className="border-2 border-green-500/20 hover:border-green-500/40 transition-colors">
                   <CardHeader className="pb-3">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                        <Send className="h-4 w-4 text-green-600" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                          <Send className="h-4 w-4 text-green-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base">Sende Susan</CardTitle>
+                          <CardDescription className="text-xs">
+                            E-Mails versenden
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <CardTitle className="text-base">E-Mail Versand</CardTitle>
-                        <CardDescription className="text-xs">
-                          E-Mails versenden
-                        </CardDescription>
-                      </div>
+                      {susanRunning && <WorkflowStatusBadge status="running" />}
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0">
-                    <Button size="sm" className="w-full" variant="outline" disabled={!canManage}>
-                      <Send className="mr-2 h-3 w-3" />
-                      E-Mails senden
-                    </Button>
+                  <CardContent className="pt-0 space-y-2">
+                    {susanRunning ? (
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          onClick={() => navigate(`/projects/${id}/sende-susan/${susanWorkflow?.id}`)}
+                        >
+                          Details anzeigen
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isCancelling}
+                          onClick={() => susanWorkflow && cancelWorkflow(susanWorkflow.id, 'Sende Susan')}
+                        >
+                          <XCircle className="mr-2 h-3 w-3" />
+                          Abbrechen
+                        </Button>
+                      </>
+                    ) : (
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        className="w-full" 
+                        disabled={!canManage || emailsToSend === 0}
+                        onClick={() => setSusanDialogOpen(true)}
+                      >
+                        <Send className="mr-2 h-3 w-3" />
+                        Batch starten ({emailsToSend})
+                      </Button>
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -891,6 +969,14 @@ export default function ProjectDashboard() {
         onStart={triggerBritta}
         isStarting={isTriggeringBritta}
         emailsCount={emailsWithoutImprovement}
+      />
+      
+      <SingleSendeSusanDialog
+        open={susanDialogOpen}
+        onOpenChange={setSusanDialogOpen}
+        onConfirm={triggerSusan}
+        emailCount={emailsToSend}
+        isLoading={isTriggeringSusan}
       />
       
       {/* OpenAI Rate Limits Dialog */}

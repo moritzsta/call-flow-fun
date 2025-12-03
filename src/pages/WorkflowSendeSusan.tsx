@@ -6,11 +6,11 @@ import { AppSidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { WorkflowLoadingAnimation } from '@/components/workflows/WorkflowLoadingAnimation';
-import { useWorkflowMaxLoops } from '@/hooks/useWorkflowMaxLoops';
 import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
-import { ArrowLeft, MessageSquare, XCircle } from 'lucide-react';
+import { ArrowLeft, XCircle, Mail, CheckCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { useEffect } from 'react';
@@ -25,24 +25,15 @@ interface WorkflowState {
   trigger_data: any;
   result_summary: any;
   loop_count: number;
-  conversation_active: boolean | null;
-  last_message_at: string | null;
   project_id: string;
 }
 
-const workflowLabels: Record<string, string> = {
-  finder_felix: 'Finder Felix',
-  analyse_anna_auto: 'Analyse Anna',
-  pitch_paul_auto: 'Pitch Paul',
-  branding_britta_auto: 'Branding Britta',
-  sende_susan: 'Sende Susan',
-};
-
-export default function WorkflowStatus() {
+export default function WorkflowSendeSusan() {
   const { id: projectId, workflowId } = useParams<{ id: string; workflowId: string }>();
   const navigate = useNavigate();
   const { cancelWorkflow, isCancelling } = useWorkflowCancel();
 
+  // Workflow state query
   const { data: workflow, isLoading, refetch } = useQuery({
     queryKey: ['workflow-state', workflowId],
     queryFn: async () => {
@@ -58,28 +49,37 @@ export default function WorkflowStatus() {
     enabled: !!workflowId,
   });
 
+  // Email counts for progress
+  const { data: emailCounts, refetch: refetchEmails } = useQuery({
+    queryKey: ['susan-email-counts', projectId],
+    queryFn: async () => {
+      const { data: emails, error } = await supabase
+        .from('project_emails')
+        .select('id, status')
+        .eq('project_id', projectId!);
+
+      if (error) throw error;
+
+      const total = emails?.length || 0;
+      const sent = emails?.filter(e => e.status === 'sent').length || 0;
+
+      return { total, sent };
+    },
+    enabled: !!projectId,
+    refetchInterval: workflow?.status === 'running' || workflow?.status === 'alive' ? 3000 : false,
+  });
+
   const isActive = workflow?.status === 'running' || workflow?.status === 'alive';
-  const { annaMaxLoops, paulMaxLoops, brittaMaxLoops } = useWorkflowMaxLoops(
-    workflow?.project_id,
-    isActive
-  );
+  const progress = emailCounts && emailCounts.total > 0 
+    ? (emailCounts.sent / emailCounts.total) * 100 
+    : 0;
 
-  // Determine max loops based on workflow name
-  const getMaxLoops = (workflowName: string): number => {
-    if (workflowName.includes('anna')) return annaMaxLoops;
-    if (workflowName.includes('paul')) return paulMaxLoops;
-    if (workflowName.includes('britta')) return brittaMaxLoops;
-    return 0;
-  };
-
-  const maxLoopsValue = workflow ? getMaxLoops(workflow.workflow_name) : 0;
-
-  // Realtime subscription
+  // Realtime subscription for workflow state
   useEffect(() => {
     if (!workflowId) return;
 
     const channel = supabase
-      .channel(`workflow-detail-${workflowId}`)
+      .channel(`susan-workflow-${workflowId}`)
       .on(
         'postgres_changes',
         {
@@ -98,6 +98,31 @@ export default function WorkflowStatus() {
       supabase.removeChannel(channel);
     };
   }, [workflowId, refetch]);
+
+  // Realtime subscription for email updates
+  useEffect(() => {
+    if (!projectId || !isActive) return;
+
+    const channel = supabase
+      .channel(`susan-emails-${projectId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'project_emails',
+          filter: `project_id=eq.${projectId}`,
+        },
+        () => {
+          refetchEmails();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [projectId, isActive, refetchEmails]);
 
   if (isLoading) {
     return (
@@ -138,9 +163,6 @@ export default function WorkflowStatus() {
     );
   }
 
-  const workflowLabel = workflowLabels[workflow.workflow_name] || workflow.workflow_name;
-  const progress = maxLoopsValue > 0 ? Math.min((workflow.loop_count / maxLoopsValue) * 100, 100) : 0;
-
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
@@ -159,7 +181,12 @@ export default function WorkflowStatus() {
 
               <div className="bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-lg p-8 border">
                 <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-3xl font-bold">{workflowLabel}</h1>
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Mail className="h-5 w-5 text-primary" />
+                    </div>
+                    <h1 className="text-3xl font-bold">Sende Susan</h1>
+                  </div>
                   <div className="flex items-center gap-2">
                     <WorkflowStatusBadge status={workflow.status} />
                     {isActive && (
@@ -167,7 +194,7 @@ export default function WorkflowStatus() {
                         size="sm"
                         variant="destructive"
                         disabled={isCancelling}
-                        onClick={() => cancelWorkflow(workflow.id, workflowLabel)}
+                        onClick={() => cancelWorkflow(workflow.id, 'Sende Susan')}
                       >
                         <XCircle className="mr-2 h-4 w-4" />
                         Abbrechen
@@ -189,60 +216,48 @@ export default function WorkflowStatus() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Status Details</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Mail className="h-5 w-5" />
+                    E-Mail Versand Fortschritt
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fortschritt</p>
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium">
-                          {workflow.loop_count} / {maxLoopsValue > 0 ? maxLoopsValue : '∞'} Durchläufe
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {progress.toFixed(0)}%
-                        </span>
+                <CardContent className="space-y-6">
+                  {/* Progress Display */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-primary" />
+                        <span className="text-sm font-medium">Versendet</span>
                       </div>
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
+                      <span className="text-2xl font-bold">
+                        {emailCounts?.sent ?? 0} / {emailCounts?.total ?? 0}
+                      </span>
                     </div>
+                    
+                    <Progress value={progress} className="h-3" />
+                    
+                    <p className="text-sm text-muted-foreground text-center">
+                      {progress.toFixed(0)}% abgeschlossen
+                    </p>
                   </div>
 
-                  {workflow.trigger_data && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">Trigger-Daten</p>
-                      <div className="bg-muted p-3 rounded-md text-xs font-mono">
-                        <pre className="whitespace-pre-wrap">
-                          {JSON.stringify(workflow.trigger_data, null, 2)}
-                        </pre>
-                      </div>
+                  {/* Status Summary */}
+                  {workflow.status === 'completed' && (
+                    <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 text-center">
+                      <CheckCircle className="h-8 w-8 text-primary mx-auto mb-2" />
+                      <p className="font-medium text-primary">
+                        Alle E-Mails wurden erfolgreich versendet!
+                      </p>
                     </div>
                   )}
 
-                  {workflow.conversation_active && (
-                    <Button
-                      onClick={() => {
-                        const workflowRoutes: Record<string, string> = {
-                          finder_felix: 'finder-felix',
-                          analyse_anna_auto: 'analyse-anna',
-                          pitch_paul_auto: 'pitch-paul',
-                          branding_britta_auto: 'branding-britta',
-                        };
-                        const route = workflowRoutes[workflow.workflow_name];
-                        if (route) {
-                          navigate(`/projects/${projectId}/${route}`);
-                        }
-                      }}
-                      variant="outline"
-                      className="w-full"
-                    >
-                      <MessageSquare className="mr-2 h-4 w-4" />
-                      Chat öffnen
-                    </Button>
+                  {workflow.status === 'failed' && (
+                    <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 text-center">
+                      <XCircle className="h-8 w-8 text-destructive mx-auto mb-2" />
+                      <p className="font-medium text-destructive">
+                        Der Versand wurde abgebrochen oder ist fehlgeschlagen.
+                      </p>
+                    </div>
                   )}
                 </CardContent>
               </Card>
