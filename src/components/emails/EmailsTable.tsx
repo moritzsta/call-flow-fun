@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ProjectEmail, EmailSortConfig } from '@/hooks/useEmails';
-import { MoreHorizontal, ArrowUpDown, Trash2, Eye, Send, Mail, Building } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Trash2, Eye, Send, Mail, Building, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -42,9 +42,10 @@ interface EmailsTableProps {
   onSortChange: (config: EmailSortConfig) => void;
 }
 
-const statusMap = {
+const statusMap: Record<ProjectEmail['status'], { label: string; className: string }> = {
   draft: { label: 'Entwurf', className: 'bg-gray-500/10 text-gray-700 dark:text-gray-400' },
   ready_to_send: { label: 'Bereit', className: 'bg-blue-500/10 text-blue-700 dark:text-blue-400' },
+  sending: { label: 'Wird versendet...', className: 'bg-orange-500/10 text-orange-700 dark:text-orange-400' },
   sent: { label: 'Versendet', className: 'bg-green-500/10 text-green-700 dark:text-green-400' },
   failed: { label: 'Fehlgeschlagen', className: 'bg-red-500/10 text-red-700 dark:text-red-400' },
 };
@@ -82,6 +83,14 @@ export const EmailsTable = ({
   };
 
   const getStatusBadge = (status: ProjectEmail['status']) => {
+    if (status === 'sending') {
+      return (
+        <Badge variant="secondary" className={`${statusMap[status].className} animate-pulse`}>
+          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+          {statusMap[status].label}
+        </Badge>
+      );
+    }
     return (
       <Badge variant="secondary" className={statusMap[status].className}>
         {statusMap[status].label}
@@ -146,6 +155,12 @@ export const EmailsTable = ({
                     >
                       <Send className="mr-2 h-4 w-4" />
                       Versenden
+                    </DropdownMenuItem>
+                  )}
+                  {email.status === 'sending' && (
+                    <DropdownMenuItem disabled>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Wird versendet...
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem
@@ -279,6 +294,12 @@ export const EmailsTable = ({
                         >
                           <Send className="mr-2 h-4 w-4" />
                           Versenden
+                        </DropdownMenuItem>
+                      )}
+                      {email.status === 'sending' && (
+                        <DropdownMenuItem disabled>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Wird versendet...
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem
