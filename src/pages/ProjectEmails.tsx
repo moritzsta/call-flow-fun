@@ -4,7 +4,9 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Mail, RefreshCw, Send, Trash2, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, Mail, RefreshCw, Send, Trash2, Loader2, TestTube } from 'lucide-react';
 import { useEmails, EmailFilters as Filters, EmailSortConfig } from '@/hooks/useEmails';
 import { EmailFilters } from '@/components/emails/EmailFilters';
 import { EmailsTable } from '@/components/emails/EmailsTable';
@@ -26,6 +28,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function ProjectEmails() {
   const { id } = useParams<{ id: string }>();
@@ -39,6 +49,8 @@ export default function ProjectEmails() {
     ascending: false,
   });
   const [isRemovingDuplicates, setIsRemovingDuplicates] = useState(false);
+  const [testEmailDialogOpen, setTestEmailDialogOpen] = useState(false);
+  const [testEmail, setTestEmail] = useState('');
 
   const {
     emails,
@@ -48,6 +60,8 @@ export default function ProjectEmails() {
     sendEmail,
     sendAllEmails,
     isSendingAll,
+    updateAllRecipients,
+    isUpdatingRecipients,
   } = useEmails(id, filters, sortConfig);
 
   const readyToSendCount = emails.filter(
@@ -158,8 +172,17 @@ export default function ProjectEmails() {
                 </div>
               </div>
             </div>
-            <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : ''}`}>
+            <div className={`flex gap-2 ${isMobile ? 'w-full flex-col' : 'flex-wrap'}`}>
               <ExportEmailsButton projectId={id!} />
+              
+              <Button 
+                variant="outline" 
+                onClick={() => setTestEmailDialogOpen(true)}
+                className={isMobile ? 'w-full' : ''}
+              >
+                <TestTube className="mr-2 h-4 w-4" />
+                Test-E-Mail setzen
+              </Button>
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -235,6 +258,55 @@ export default function ProjectEmails() {
             />
           </CardContent>
         </Card>
+
+        {/* Test-E-Mail Dialog */}
+        <Dialog open={testEmailDialogOpen} onOpenChange={setTestEmailDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Test-E-Mail-Adresse setzen</DialogTitle>
+              <DialogDescription>
+                Alle Empfänger-E-Mail-Adressen in diesem Projekt werden auf die 
+                angegebene Test-Adresse geändert. Dies ist nützlich zum Testen 
+                des E-Mail-Versands.
+                <br /><br />
+                <strong className="text-destructive">
+                  ⚠️ Achtung: Diese Aktion überschreibt alle {emails.length} 
+                  Empfänger-Adressen unwiderruflich!
+                </strong>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Label htmlFor="test-email">Neue E-Mail-Adresse</Label>
+              <Input
+                id="test-email"
+                type="email"
+                placeholder="test@example.com"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setTestEmailDialogOpen(false)}>
+                Abbrechen
+              </Button>
+              <Button 
+                variant="destructive"
+                onClick={() => {
+                  updateAllRecipients({ projectId: id!, newEmail: testEmail });
+                  setTestEmailDialogOpen(false);
+                  setTestEmail('');
+                }}
+                disabled={!testEmail || !testEmail.includes('@') || isUpdatingRecipients}
+              >
+                {isUpdatingRecipients ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                Alle Adressen ändern
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
