@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import '@/i18n/config';
 import Index from "./pages/Index";
@@ -40,190 +41,192 @@ import Terms from "./pages/Terms";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <ErrorBoundary>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/contact" element={<Contact />} />
-              <Route path="/imprint" element={<Imprint />} />
-              <Route path="/privacy" element={<Privacy />} />
-              <Route path="/terms" element={<Terms />} />
-            <Route
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/organizations" 
-              element={
-                <ProtectedRoute>
-                  <Organizations />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/organizations/:id" 
-              element={
-                <ProtectedRoute>
-                  <OrganizationSettings />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects" 
-              element={
-                <ProtectedRoute>
-                  <Projects />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id" 
-              element={
-                <ProtectedRoute>
-                  <ProjectDashboard />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/settings" 
-              element={
-                <ProtectedRoute>
-                  <ProjectSettings />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/finder-felix" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowFinderFelix />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/analyse-anna" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowAnalyseAnna />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/pitch-paul" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowPitchPaul />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/branding-britta" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowBrandingBritta />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/automation-status" 
-              element={
-                <ProtectedRoute>
-                  <AutomationStatus />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/workflow-status/:workflowId" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowStatus />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/workflows" 
-              element={
-                <ProtectedRoute>
-                  <ProjectWorkflows />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/sende-susan/:workflowId" 
-              element={
-                <ProtectedRoute>
-                  <WorkflowSendeSusan />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/companies"
-              element={
-                <ProtectedRoute>
-                  <ProjectCompanies />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/companies/:companyId" 
-              element={
-                <ProtectedRoute>
-                  <CompanyDetail />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/projects/:id/emails" 
-              element={
-                <ProtectedRoute>
-                  <ProjectEmails />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/emails/:emailId" 
-              element={
-                <ProtectedRoute>
-                  <EmailDetail />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/organizations/:organizationId/templates" 
-              element={
-                <ProtectedRoute>
-                  <EmailTemplates />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } 
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-      </ErrorBoundary>
-    </AuthProvider>
-  </QueryClientProvider>
+  <ThemeProvider defaultTheme="system">
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ErrorBoundary>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/imprint" element={<Imprint />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+              <Route
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/organizations" 
+                element={
+                  <ProtectedRoute>
+                    <Organizations />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/organizations/:id" 
+                element={
+                  <ProtectedRoute>
+                    <OrganizationSettings />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects" 
+                element={
+                  <ProtectedRoute>
+                    <Projects />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id" 
+                element={
+                  <ProtectedRoute>
+                    <ProjectDashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/settings" 
+                element={
+                  <ProtectedRoute>
+                    <ProjectSettings />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/finder-felix" 
+                element={
+                  <ProtectedRoute>
+                    <WorkflowFinderFelix />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/analyse-anna" 
+                element={
+                  <ProtectedRoute>
+                    <WorkflowAnalyseAnna />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/pitch-paul" 
+                element={
+                  <ProtectedRoute>
+                    <WorkflowPitchPaul />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/branding-britta" 
+                element={
+                  <ProtectedRoute>
+                    <WorkflowBrandingBritta />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/automation-status" 
+                element={
+                  <ProtectedRoute>
+                    <AutomationStatus />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/workflow-status/:workflowId" 
+                element={
+                  <ProtectedRoute>
+                    <WorkflowStatus />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/workflows" 
+                element={
+                  <ProtectedRoute>
+                    <ProjectWorkflows />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/sende-susan/:workflowId" 
+                element={
+                  <ProtectedRoute>
+                    <WorkflowSendeSusan />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/companies"
+                element={
+                  <ProtectedRoute>
+                    <ProjectCompanies />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/companies/:companyId" 
+                element={
+                  <ProtectedRoute>
+                    <CompanyDetail />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/projects/:id/emails" 
+                element={
+                  <ProtectedRoute>
+                    <ProjectEmails />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/emails/:emailId" 
+                element={
+                  <ProtectedRoute>
+                    <EmailDetail />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/organizations/:organizationId/templates" 
+                element={
+                  <ProtectedRoute>
+                    <EmailTemplates />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/profile" 
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } 
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+        </ErrorBoundary>
+      </AuthProvider>
+    </QueryClientProvider>
+  </ThemeProvider>
 );
 
 export default App;
