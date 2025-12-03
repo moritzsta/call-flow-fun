@@ -33,7 +33,8 @@ const workflowNameMap: Record<string, string> = {
   pitch_paul_auto: 'Pitch Paul',
   branding_britta: 'Branding Britta',
   branding_britta_auto: 'Branding Britta',
-  email_sender: 'E-Mail Versand',
+  sende_susan: 'E-Mail Batch-Versand',
+  sende_susan_single: 'Einzelne E-Mail',
 };
 
 export const ActiveWorkflows = ({
