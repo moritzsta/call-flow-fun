@@ -157,8 +157,22 @@ Deno.serve(async (req) => {
     console.log('Waiting 30 seconds before triggering next workflow...');
     await new Promise(resolve => setTimeout(resolve, 30000));
 
-    // After analyse_anna_auto and before pitch_paul_auto: Cleanup companies to limit
+    // After analyse_anna_auto and before pitch_paul_auto: Remove duplicates and cleanup
     if (normalizedWorkflowName === 'analyse_anna_auto' && nextWorkflow === 'pitch_paul_auto') {
+      // Step 1: Remove duplicate companies (same phone, email, or website)
+      console.log(`Removing duplicates for project ${pipeline.project_id}`);
+      const { data: duplicateResult, error: duplicateError } = await supabase.functions.invoke(
+        'remove-duplicate-companies',
+        { body: { project_id: pipeline.project_id } }
+      );
+      
+      if (duplicateError) {
+        console.error('Error removing duplicates:', duplicateError);
+      } else {
+        console.log('Duplicate removal result:', duplicateResult);
+      }
+
+      // Step 2: Cleanup companies to limit (if configured)
       const maxCompanies = pipeline.config?.maxCompanies;
       
       if (maxCompanies && maxCompanies > 0) {
