@@ -163,7 +163,7 @@ Deno.serve(async (req) => {
       console.log(`Removing company duplicates for project ${pipeline.project_id}`);
       const { data: duplicateResult, error: duplicateError } = await supabase.functions.invoke(
         'remove-duplicate-companies',
-        { body: { project_id: pipeline.project_id, type: 'companies' } }
+        { body: { project_id: pipeline.project_id } }
       );
       
       if (duplicateError) {
@@ -185,8 +185,8 @@ Deno.serve(async (req) => {
     if (normalizedWorkflowName === 'pitch_paul_auto' && nextWorkflow === 'branding_britta_auto') {
       console.log(`Removing email duplicates for project ${pipeline.project_id}`);
       const { data: emailDuplicateResult, error: emailDuplicateError } = await supabase.functions.invoke(
-        'remove-duplicate-companies',
-        { body: { project_id: pipeline.project_id, type: 'emails' } }
+        'remove-duplicate-emails',
+        { body: { project_id: pipeline.project_id } }
       );
       
       if (emailDuplicateError) {
