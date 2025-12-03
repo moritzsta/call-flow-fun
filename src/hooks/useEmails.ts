@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { 
   notifyEmailSent, 
   notifyEmailSendError,
@@ -235,6 +236,33 @@ export const useEmails = (
     },
   });
 
+  // Alle Empfänger-E-Mails auf eine Test-Adresse aktualisieren
+  const updateAllRecipientsMutation = useMutation({
+    mutationFn: async ({ 
+      projectId, 
+      newEmail 
+    }: { 
+      projectId: string; 
+      newEmail: string;
+    }) => {
+      const { data, error } = await supabase
+        .from('project_emails')
+        .update({ recipient_email: newEmail, updated_at: new Date().toISOString() })
+        .eq('project_id', projectId)
+        .select('id');
+
+      if (error) throw error;
+      return { updatedCount: data?.length || 0 };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['project_emails', projectId] });
+      toast.success(`${result.updatedCount} E-Mail-Adressen aktualisiert`);
+    },
+    onError: (error: Error) => {
+      notifyCrudError('Aktualisieren der E-Mail-Adressen', error.message);
+    },
+  });
+
   return {
     emails,
     totalCount,
@@ -247,5 +275,7 @@ export const useEmails = (
     isSendingAll: sendAllEmailsMutation.isPending,
     updateEmailStatus: updateEmailStatusMutation.mutate,
     deleteEmail: deleteEmailMutation.mutate,
+    updateAllRecipients: updateAllRecipientsMutation.mutate,
+    isUpdatingRecipients: updateAllRecipientsMutation.isPending,
   };
 };
