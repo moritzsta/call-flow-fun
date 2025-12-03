@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Building2, RefreshCw, Search } from 'lucide-react';
+import { ArrowLeft, Building2, RefreshCw, Search, Trash2, Loader2 } from 'lucide-react';
 import { useCompanies, CompanyFilters as Filters, CompanySortConfig, Company } from '@/hooks/useCompanies';
 import { CompanyFilters } from '@/components/companies/CompanyFilters';
 import { CompaniesTable } from '@/components/companies/CompaniesTable';
@@ -17,6 +17,17 @@ import { ViewControls, ViewMode, Density, VisibleColumns } from '@/components/co
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function ProjectCompanies() {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +57,7 @@ export default function ProjectCompanies() {
     status: true,
     created: true,
   });
+  const [isRemovingDuplicates, setIsRemovingDuplicates] = useState(false);
 
   const {
     companies,
@@ -55,6 +67,43 @@ export default function ProjectCompanies() {
     deleteCompany,
     updateCompanyStatus,
   } = useCompanies(id, filters, sortConfig, { page: 0, pageSize: 10000 });
+
+  const handleRemoveDuplicates = async () => {
+    if (!id) return;
+    
+    setIsRemovingDuplicates(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('remove-duplicate-companies', {
+        body: { project_id: id }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        const { deleted_count, details } = data;
+        if (deleted_count > 0) {
+          toast.success(
+            `${deleted_count} Duplikate entfernt`, 
+            { 
+              description: `Telefon: ${details.by_phone}, E-Mail: ${details.by_email}, Website: ${details.by_website}` 
+            }
+          );
+          refetch();
+        } else {
+          toast.info('Keine Duplikate gefunden');
+        }
+      } else {
+        throw new Error(data.error || 'Unbekannter Fehler');
+      }
+    } catch (error) {
+      console.error('Error removing duplicates:', error);
+      toast.error('Fehler beim Entfernen der Duplikate');
+    } finally {
+      setIsRemovingDuplicates(false);
+    }
+  };
 
   // Bulk Actions Handlers
   const handleBulkStatusChange = async (status: Company['status']) => {
@@ -154,10 +203,45 @@ export default function ProjectCompanies() {
                 </div>
               </div>
             </div>
-            <Button variant="outline" onClick={() => refetch()} className={isMobile ? 'w-full' : ''}>
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Aktualisieren
-            </Button>
+            <div className={`flex gap-2 ${isMobile ? 'flex-col w-full' : ''}`}>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    disabled={isRemovingDuplicates}
+                    className={isMobile ? 'w-full' : ''}
+                  >
+                    {isRemovingDuplicates ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Duplikate entfernen
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Duplikate entfernen?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Diese Aktion entfernt alle Firmen mit doppelter Telefonnummer, E-Mail-Adresse oder Website. 
+                      Die jeweils älteste Firma wird behalten.
+                      <br /><br />
+                      <strong>Diese Aktion kann nicht rückgängig gemacht werden.</strong>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleRemoveDuplicates}>
+                      Duplikate löschen
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button variant="outline" onClick={() => refetch()} className={isMobile ? 'w-full' : ''}>
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Aktualisieren
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.check-openai-limits]
 verify_jwt = false
+
+[functions.remove-duplicate-companies]
+verify_jwt = false
