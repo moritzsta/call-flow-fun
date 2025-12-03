@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
       .eq('project_id', body.project_id)
       .not('recipient_email', 'is', null)
       .neq('recipient_email', '')
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching emails:', error);
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       if (ids.length > 1) {
         const duplicates = ids.slice(1);
         idsToDelete.push(...duplicates);
-        console.log(`Found ${ids.length} duplicates for recipient_email="${value}", keeping oldest, deleting ${duplicates.length}`);
+        console.log(`Found ${ids.length} duplicates for recipient_email="${value}", keeping newest, deleting ${duplicates.length}`);
       }
     }
 
