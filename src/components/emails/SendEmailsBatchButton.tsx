@@ -72,14 +72,18 @@ export const SendEmailsBatchButton = ({
       const emailId = selectedEmails[i];
 
       try {
-        // Call n8n webhook via Edge Function
+        // Call n8n webhook via Edge Function - use sende_susan_single for each email
         const { error: functionError } = await supabase.functions.invoke(
           'trigger-n8n-workflow',
           {
             body: {
-              workflow_name: 'email_sender',
-              project_email_id: emailId,
+              workflow_name: 'sende_susan_single',
+              workflow_id: crypto.randomUUID(),
+              project_id: projectId,
               user_id: user.id,
+              trigger_data: {
+                email_id: emailId,
+              },
             },
           }
         );

@@ -107,6 +107,7 @@ export const useEmails = (
   const emails = result?.data || [];
   const totalCount = result?.count || 0;
 
+  // Einzelne E-Mail versenden über sende_susan_single
   const sendEmailMutation = useMutation({
     mutationFn: async ({ 
       emailId, 
@@ -121,13 +122,12 @@ export const useEmails = (
         'trigger-n8n-workflow',
         {
           body: {
-            workflow_name: 'email_sender',
+            workflow_name: 'sende_susan_single',
             workflow_id: crypto.randomUUID(),
             project_id: projectId,
             user_id: userId,
             trigger_data: {
               email_id: emailId,
-              send_all: false
             }
           }
         }
@@ -145,6 +145,7 @@ export const useEmails = (
     }
   });
 
+  // Batch E-Mail versenden über sende_susan
   const sendAllEmailsMutation = useMutation({
     mutationFn: async ({ 
       projectId, 
@@ -157,7 +158,7 @@ export const useEmails = (
         'trigger-n8n-workflow',
         {
           body: {
-            workflow_name: 'email_sender',
+            workflow_name: 'sende_susan',
             workflow_id: crypto.randomUUID(),
             project_id: projectId,
             user_id: userId,

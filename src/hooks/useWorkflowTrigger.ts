@@ -6,7 +6,7 @@ import {
 } from '@/lib/notifications';
 
 interface TriggerWorkflowParams {
-  workflowName: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'email_sender';
+  workflowName: 'finder_felix' | 'analyse_anna' | 'pitch_paul' | 'sende_susan' | 'sende_susan_single';
   projectId: string;
   userId: string;
   triggerData: Record<string, any>;

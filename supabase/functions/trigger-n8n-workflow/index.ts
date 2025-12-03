@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface WorkflowRequest {
-  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'pitch_paul_auto' | 'branding_britta' | 'branding_britta_auto' | 'email_sender' | 'sende_susan';
+  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'pitch_paul_auto' | 'branding_britta' | 'branding_britta_auto' | 'sende_susan' | 'sende_susan_single';
   workflow_id: string;
   project_id: string;
   user_id: string;
@@ -43,8 +43,8 @@ serve(async (req) => {
       pitch_paul_auto: '/pitch-paul-auto',
       branding_britta: '/branding-britta',
       branding_britta_auto: '/branding-britta-auto',
-      email_sender: '/sende-susan',
-      sende_susan: '/sende-susan-auto',
+      sende_susan: '/sende-susan-auto',        // Batch E-Mail versand
+      sende_susan_single: '/sende-susan',      // Einzelne E-Mail versenden
     };
 
     const webhookPath = webhookPaths[workflow_name];
@@ -58,8 +58,8 @@ serve(async (req) => {
     // Remove any existing /webhook or /webhook-test suffix from base URL
     baseUrl = baseUrl.replace(/\/webhook(-test)?$/, '');
     
-    // TEMPORARY: Use webhook-test for finder_felix and sende_susan testing
-    const testModeWorkflows = ['finder_felix', 'sende_susan'];
+    // TEMPORARY: Use webhook-test for workflows in test mode
+    const testModeWorkflows = ['finder_felix', 'sende_susan', 'sende_susan_single'];
     const webhookPrefix = testModeWorkflows.includes(workflow_name) ? '/webhook-test' : '/webhook';
     const n8nUrl = `${baseUrl}${webhookPrefix}${webhookPath}`;
     
@@ -88,16 +88,15 @@ serve(async (req) => {
       requestBody.message = trigger_data.message;
     }
 
-    // Special handling for email_sender workflow
-    if (workflow_name === 'email_sender' && trigger_data) {
-      requestBody.emails = trigger_data; // Legacy structure
-      requestBody.email_id = trigger_data.email_id;
-      requestBody.send_all = trigger_data.send_all || false;
-    }
-
-    // Special handling for sende_susan workflow
+    // Special handling for sende_susan workflow (Batch)
     if (workflow_name === 'sende_susan' && trigger_data) {
       requestBody.send_all = trigger_data.send_all || true;
+    }
+
+    // Special handling for sende_susan_single workflow (Einzelne E-Mail)
+    if (workflow_name === 'sende_susan_single' && trigger_data) {
+      requestBody.email_id = trigger_data.email_id;
+      requestBody.project_id = project_id;
     }
 
     // Special handling for auto workflows - extract userGoal
