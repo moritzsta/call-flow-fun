@@ -28,6 +28,7 @@ import WorkflowPitchPaul from "./pages/WorkflowPitchPaul";
 import WorkflowBrandingBritta from "./pages/WorkflowBrandingBritta";
 import AutomationStatus from "./pages/AutomationStatus";
 import WorkflowStatus from "./pages/WorkflowStatus";
+import WorkflowSendeSusan from "./pages/WorkflowSendeSusan";
 import ProjectWorkflows from "./pages/ProjectWorkflows";
 import About from "./pages/About";
 import Pricing from "./pages/Pricing";
@@ -156,6 +157,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ProjectWorkflows />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/projects/:id/sende-susan/:workflowId" 
+              element={
+                <ProtectedRoute>
+                  <WorkflowSendeSusan />
                 </ProtectedRoute>
               } 
             />

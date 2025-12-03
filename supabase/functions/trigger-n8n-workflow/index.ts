@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface WorkflowRequest {
-  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'pitch_paul_auto' | 'branding_britta' | 'branding_britta_auto' | 'email_sender';
+  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'pitch_paul_auto' | 'branding_britta' | 'branding_britta_auto' | 'email_sender' | 'sende_susan';
   workflow_id: string;
   project_id: string;
   user_id: string;
@@ -44,6 +44,7 @@ serve(async (req) => {
       branding_britta: '/branding-britta',
       branding_britta_auto: '/branding-britta-auto',
       email_sender: '/sende-susan',
+      sende_susan: '/sende-susan',
     };
 
     const webhookPath = webhookPaths[workflow_name];
@@ -57,8 +58,9 @@ serve(async (req) => {
     // Remove any existing /webhook or /webhook-test suffix from base URL
     baseUrl = baseUrl.replace(/\/webhook(-test)?$/, '');
     
-    // TEMPORARY: Use webhook-test for finder_felix testing
-    const webhookPrefix = workflow_name === 'finder_felix' ? '/webhook-test' : '/webhook';
+    // TEMPORARY: Use webhook-test for finder_felix and sende_susan testing
+    const testModeWorkflows = ['finder_felix', 'sende_susan'];
+    const webhookPrefix = testModeWorkflows.includes(workflow_name) ? '/webhook-test' : '/webhook';
     const n8nUrl = `${baseUrl}${webhookPrefix}${webhookPath}`;
     
     console.log(`[trigger-n8n-workflow] Using ${webhookPrefix} for ${workflow_name}`);
@@ -91,6 +93,11 @@ serve(async (req) => {
       requestBody.emails = trigger_data; // Legacy structure
       requestBody.email_id = trigger_data.email_id;
       requestBody.send_all = trigger_data.send_all || false;
+    }
+
+    // Special handling for sende_susan workflow
+    if (workflow_name === 'sende_susan' && trigger_data) {
+      requestBody.send_all = trigger_data.send_all || true;
     }
 
     // Special handling for auto workflows - extract userGoal
