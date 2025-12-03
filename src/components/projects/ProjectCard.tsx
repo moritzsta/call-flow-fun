@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FolderOpen, Settings, Archive, Trash2 } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
+import { useProjectStats } from '@/hooks/useProjectStats';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +33,7 @@ interface ProjectCardProps {
 export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
   const navigate = useNavigate();
   const { archiveProject, deleteProject, isArchiving, isDeleting } = useProjects(project.organization_id);
+  const { data: stats, isLoading: statsLoading } = useProjectStats(project.id);
 
   const handleArchive = () => {
     archiveProject(project.id);
@@ -126,11 +128,15 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
         <div className="flex items-center gap-4 text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <span>Firmen:</span>
-            <Badge variant="secondary">-</Badge>
+            <Badge variant="secondary">
+              {statsLoading ? '...' : stats?.companiesCount ?? 0}
+            </Badge>
           </div>
           <div className="flex items-center gap-1">
             <span>E-Mails:</span>
-            <Badge variant="secondary">-</Badge>
+            <Badge variant="secondary">
+              {statsLoading ? '...' : stats?.emailsCount ?? 0}
+            </Badge>
           </div>
         </div>
 
