@@ -1,0 +1,667 @@
+{
+  "name": "Pitch-Paul Auto v2",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pitch-paul-auto",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "5336f40b-d222-4d33-804f-8fad882d924d",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -3440,
+        304
+      ],
+      "webhookId": "0cfe2332-f939-4fb9-a609-019df86b16ba",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CE0Gh6v865OGseDN",
+          "name": "Lovable Header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse Webhook Input - ERWEITERT\nconst body = $input.item.json.body;\n\nreturn {\n  workflow_name: body.workflow_name,\n  workflow_id: body.workflow_id,\n  project_id: body.project_id,\n  user_id: body.user_id,\n  trigger_data: body.trigger_data || {},\n  message: body.trigger_data?.message || '',\n  userGoal: body.userGoal || body.trigger_data?.userGoal || '',\n  \n  // NEU: Template-Name\n  templateEnumName: body.trigger_data?.templateEnumName || 'cold_outreach',\n  \n  // NEU: Verkäufer-Kontaktdaten\n  sellerContact: body.trigger_data?.sellerContact || {\n    name: 'Unbekannt',\n    company: 'Unbekannt',\n    address: '',\n    phone: '',\n    website: ''\n  }\n};"
+      },
+      "id": "167c75cb-7d4a-47e3-b118-17f46ed018b2",
+      "name": "Parse Webhook Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3248,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "51746dd0-2087-430b-aef5-76424ac07607",
+              "name": "supabaseProjectID",
+              "value": "={{ $('Parse Webhook Input').item.json.project_id }}",
+              "type": "string"
+            },
+            {
+              "id": "6775cd0c-e308-4cc2-8230-db33a6c7a190",
+              "name": "bearerToken",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "dab89b33-ac10-4f2c-b3a5-9fa945dde434",
+      "name": "ENV",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -3040,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Parse Auto Input').item.json.output.startPitch }}",
+              "operation": "isTrue"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c7764924-49fa-4f96-b59c-af18ce2bdf34",
+      "name": "Start Pitch?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1536,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "emails",
+              "name": "emails",
+              "value": "={{ $('Parse Auto Input').item.json.output.emails }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "71c5e130-4b7b-4723-87e8-5b62b4554265",
+      "name": "Split Out Emails",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1312,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "emails",
+        "options": {}
+      },
+      "id": "f873a4e0-e0ef-4e86-8f20-a400d262d348",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1136,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7c44a6f8-4a3c-4752-84db-6c0e3f9dd221",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -960,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "companies",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $json.emails }}"
+            },
+            {
+              "keyName": "project_id",
+              "keyValue": "={{ $('Parse Webhook Input').first().json.project_id }}"
+            }
+          ]
+        }
+      },
+      "id": "e286890e-7829-4177-959b-c1da72061ec9",
+      "name": "Get General Info",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        256
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "7jkQKf9NKPyaMFV8",
+          "name": "Supabase ColdCalling"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=##############################################\n# INPUT\n##############################################\n\nInput:\n1. Firma (JSON oder Objekt):\n{{ $('Get General Info').all().toJsonString() }}\n\n\n2. Firmenanalyse von Analyse-Anna (WICHTIG):\n{{ $json.analysis }}\n\n3. User Goal:\n{{ $('Parse Auto Input').item.json.output.vorhaben }}\n\n4. Email Template: \n{{ $('Prepare Email Template').first().json.template_text }}\n\n5. Kontakdaten es Verkäufers\nVerwende für den Abschluss folgende Kontaktdaten:\n- Name: {{ $('Parse Webhook Input').first().json.sellerContact.name }}\n- Firma: {{ $('Parse Webhook Input').first().json.sellerContact.company }}\n- Adresse: {{ $('Parse Webhook Input').first().json.sellerContact.address }}\n- Telefon: {{ $('Parse Webhook Input').first().json.sellerContact.phone }}\n- Website: {{ $('Parse Webhook Input').first().json.sellerContact.website }}\n\n\n\n\n##############################################\n# ANWEISUNG\n##############################################\n\nErstelle eine personalisierte E-Mail im HTML-Format basierend auf:\n- Den Firmendaten und der Analyse (Input 1 & 2)\n- Dem User Goal (Input 3)\n- Dem Email-Template (Input 4)\n\nVerwende die Verkäufer-Kontaktdaten (Input 5) für die Signatur am Ende der E-Mail.\n\nAchte besonders auf:\n✓ Personalisierte Anrede (Name falls vorhanden, sonst \"Sehr geehrte Damen und Herren\")\n✓ Bezug zur Firmenanalyse - nutze konkrete Insights aus der Analyse\n✓ Klarer Mehrwert basierend auf dem User Goal\n✓ Professioneller Ton mit überzeugendem Call-to-Action\n✓ Korrekte Verkäufer-Kontaktdaten in der Signatur\n\n\n##############################################\n# OUTPUT\n##############################################\n\n{\n  \"subject\": \"...\",\n  \"emailText\": \"...\"\n}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "e8f9f009-5955-4377-8178-7654d787a413",
+      "name": "Write Email",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -480,
+        288
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "kNNXBonZDcVDoOzp",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "project_emails",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "project_id",
+              "fieldValue": "={{ $('ENV').first().json.project_id }}"
+            },
+            {
+              "fieldId": "company_id",
+              "fieldValue": "={{ $('Get General Info').item.json.id }}"
+            },
+            {
+              "fieldId": "subject",
+              "fieldValue": "={{ $json.message.content.subject }}"
+            },
+            {
+              "fieldId": "body",
+              "fieldValue": "={{ $json.message.content.emailText }}"
+            },
+            {
+              "fieldId": "recipient_email",
+              "fieldValue": "={{ $('Get General Info').item.json.email }}"
+            }
+          ]
+        }
+      },
+      "id": "cba44680-824d-420f-825b-c71e03398229",
+      "name": "Save Email to DB",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        336
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "7jkQKf9NKPyaMFV8",
+          "name": "Supabase ColdCalling"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "n8n_workflow_states",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ ($item(0).$node[\"Parse Webhook Input\"].json.workflow_state_id || $item(0).$node[\"Parse Webhook Input\"].json.workflow_id).trim() }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "completed"
+            },
+            {
+              "fieldId": "completed_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "conversation_active",
+              "fieldValue": "false"
+            },
+            {
+              "fieldId": "result_summary",
+              "fieldValue": "=alle emails geschrieben"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        32
+      ],
+      "id": "8630ce76-288e-4d14-b302-fd331ec0c261",
+      "name": "Update Workflow State",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7jkQKf9NKPyaMFV8",
+          "name": "Supabase ColdCalling"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "n8n_workflow_states",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ ($item(0).$node[\"Parse Webhook Input\"].json.workflow_state_id || $item(0).$node[\"Parse Webhook Input\"].json.workflow_id).trim() }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "alive"
+            },
+            {
+              "fieldId": "completed_at",
+              "fieldValue": "={{ $now.toISO() }}"
+            },
+            {
+              "fieldId": "conversation_active",
+              "fieldValue": "false"
+            },
+            {
+              "fieldId": "result_summary",
+              "fieldValue": "=alle emails geschrieben"
+            },
+            {
+              "fieldId": "loop_count",
+              "fieldValue": "={{ $runIndex + 1 }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        528
+      ],
+      "id": "321523d6-7337-4a3a-914a-523f32147a35",
+      "name": "Update Workflow State Alive",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7jkQKf9NKPyaMFV8",
+          "name": "Supabase ColdCalling"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "companies",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "project_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Parse Webhook Input').first().json.project_id }}"
+            },
+            {
+              "keyName": "email",
+              "condition": "neq",
+              "keyValue": "=null"
+            },
+            {
+              "keyName": "email",
+              "condition": "neq",
+              "keyValue": "=unbekannt"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1968,
+        -176
+      ],
+      "id": "4f9c92b7-f0e6-4c75-8692-bf68027bbed8",
+      "name": "Get All Companies with Email",
+      "credentials": {
+        "supabaseApi": {
+          "id": "7jkQKf9NKPyaMFV8",
+          "name": "Supabase ColdCalling"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Hole alle Companies vom Input\nconst companies = $input.all();\n\n// Hole die Webhook-Daten\nconst webhookData = $('Parse Webhook Input').first().json;\n\n// Extrahiere das Vorhaben aus verschiedenen Quellen\nlet vorhaben = '';\n\n// Quelle 1: Direkt als userGoal im Body\nif (webhookData.userGoal) {\n    vorhaben = webhookData.userGoal;\n}\n\n// Quelle 2: In trigger_data.userGoal\nelse if (webhookData.trigger_data?.userGoal) {\n    vorhaben = webhookData.trigger_data.userGoal;\n}\n\n// Quelle 3: In der Message mit \"Mein Vorhaben:\" Pattern\nelse {\n    const message = webhookData.message || webhookData.trigger_data?.message || '';\n    \n    // Suche nach \"Mein Vorhaben: <text>\"\n    const vorhabenMatch = message.match(/Mein Vorhaben:\\s*(.+?)(?:\\.\\s*|$)/i);\n    if (vorhabenMatch) {\n        vorhaben = vorhabenMatch[1].trim();\n    }\n    // Fallback: Verwende die gesamte Message nach \"System-Message:\" als Vorhaben\n    else if (message.includes('System-Message:')) {\n        const parts = message.split('System-Message:');\n        if (parts.length > 1) {\n            vorhaben = parts[1].trim()\n                .replace(/^Bitte generiere E-Mails.*?\\./i, '')\n                .replace(/welche eine E-Mail-Adresse hinterlegt haben\\.?/i, '')\n                .replace(/Mein Vorhaben:/i, '')\n                .trim();\n        }\n    }\n    // Letzter Fallback: Gesamte Message\n    else if (message) {\n        vorhaben = message;\n    }\n}\n\n// Extrahiere alle E-Mail-Adressen aus den Companies\nconst emails = companies\n    .map(item => ({\n        email: item.json.email,\n        company: item.json.company,\n        id: item.json.id\n    }))\n    .filter(item => item.email && item.email.trim() !== '');\n\n// Erstelle Output im erwarteten Format\nreturn {\n    workflow_id: webhookData.workflow_id,\n    project_id: webhookData.project_id,\n    user_id: webhookData.user_id,\n    output: {\n        userMessage: \"Automatischer Durchlauf - E-Mails für alle Firmen\",\n        pitchPaulAnswer: `E-Mail-Generierung für ${emails.length} Firmen wird gestartet. Vorhaben: ${vorhaben}`,\n        emails: emails.map(item => item.email),\n        vorhaben: vorhaben,\n        userGoal: vorhaben,  // Alias für Kompatibilität\n        startPitch: true\n    }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1280,
+        -176
+      ],
+      "id": "ad5b3415-340e-48cd-a36d-a011bfd06b4b",
+      "name": "Parse Auto Input"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://fttdfvnhghbgtawkslau.supabase.co/functions/v1/advance-pipeline",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "workflow_id",
+              "value": "={{ $('Parse Webhook Input').first().json.workflow_id }}"
+            },
+            {
+              "name": "workflow_name",
+              "value": "pitch_paul_auto"
+            },
+            {
+              "name": "status",
+              "value": "completed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -384,
+        32
+      ],
+      "id": "add575b5-2d22-4984-a414-96be081df9ec",
+      "name": "update Pipeline",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CE0Gh6v865OGseDN",
+          "name": "Lovable Header auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare Email Template - Mit Fallback\n// Dieser Node kommt NACH \"Get Email Template\" (Supabase)\n// Er stellt sicher, dass immer ein Template vorhanden ist\n\nconst webhookData = $('Parse Webhook Input').first().json;\nconst templateEnumName = webhookData.templateEnumName;\n\n// Versuche Template aus DB zu holen\nlet templateText = null;\nlet templateSource = 'database';\n\ntry {\n    const dbResult = $input.first().json;\n    if (dbResult && dbResult.template_text) {\n        templateText = dbResult.template_text;\n        console.log('✅ Email Template aus DB geladen:', templateEnumName);\n    } else {\n        console.log('⚠️ Kein Template in DB gefunden für:', templateEnumName);\n    }\n} catch (e) {\n    console.log('⚠️ Fehler beim Template-Laden:', e.message);\n}\n\n// FALLBACK: Default Template wenn DB leer\nif (!templateText) {\n    templateSource = 'fallback';\n    templateText = `Die E-Mail wird im HTML-Format erstellt und soll folgende Eigenschaften haben:\n\n1. **Anrede:**  \n   - Falls ein Ansprechpartner existiert, wird der Name des Ansprechpartners verwendet (\"Sehr geehrter Herr Mustermann\").  \n   - Falls kein Ansprechpartner existiert, wird \"Sehr geehrte Damen und Herren\" verwendet.\n\n2. **Pitch:**  \n   - Die E-Mail sollte ein überzeugendes Verkaufsargument enthalten, das sich auf die Anfrage und die spezifischen Anforderungen des Unternehmens bezieht.\n   - Die Lösung muss klar und einfach erklärt werden, dabei aber auch deren einzigartige Stärken und Vorteile hervorheben.\n   - Es soll verdeutlicht werden, dass diese Lösung der ideale Partner für das Unternehmen ist.\n\n3. **Call-to-Action (CTA):**  \n   - Ein klarer Call-to-Action, z.B. ein Vorschlag für einen Gesprächstermin oder eine Demo, um die Lösung weiter zu erläutern und die Zusammenarbeit zu fördern.\n\n4. **Abschluss:**  \n   - Freundliche und professionelle Verabschiedung\n   - Kontaktinformationen (Name, Position, Telefonnummer, E-Mail)\n   - Hinweis auf Website und gegebenenfalls ein Angebot für einen ersten Termin`;\n    \n    console.log('📝 Verwende Fallback-Template');\n}\n\nreturn {\n    template_enum_name: templateEnumName,\n    template_text: templateText,\n    template_source: templateSource,\n    seller_contact: webhookData.sellerContact\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2832,
+        304
+      ],
+      "id": "68ef94d3-ab92-42ba-8914-eb14bbe9b8c4",
+      "name": "Prepare Email Template"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filter Companies: With Email AND Analysis\n// Dieser Code Node kommt NACH \"Get All Companies with Email\"\n\nconst items = $input.all();\n\nconsole.log('========================================');\nconsole.log('Filter: Companies with Analysis');\nconsole.log('Input items:', items.length);\nconsole.log('========================================');\n\nconst filtered = items.filter(item => {\n    const company = item.json;\n    \n    // Analysis muss existieren und nicht leer/null sein\n    const hasAnalysis = company.analysis && \n                        company.analysis !== null && \n                        company.analysis !== '' &&\n                        company.analysis !== 'null' &&\n                        company.analysis !== 'unbekannt' &&\n                        // Falls JSON-String\n                        (typeof company.analysis === 'object' || company.analysis.length > 0);\n    \n    if (!hasAnalysis) {\n        console.log(`→ FILTERED OUT: ${company.company || 'N/A'} (no analysis)`);\n        return false;\n    }\n    \n    console.log(`→ VALID: ${company.company || 'N/A'}`);\n    return true;\n});\n\nconsole.log('\\n========================================');\nconsole.log('FILTER RESULTS:');\nconsole.log('Total input:', items.length);\nconsole.log('Valid companies:', filtered.length);\nconsole.log('Filtered out:', items.length - filtered.length);\nconsole.log('========================================');\n\nreturn filtered;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1760,
+        -176
+      ],
+      "id": "25f4028d-dd00-474e-ad2f-7cdcb301a1f4",
+      "name": "Filter Analysis"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Webhook Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Webhook Input": {
+      "main": [
+        [
+          {
+            "node": "ENV",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ENV": {
+      "main": [
+        [
+          {
+            "node": "Prepare Email Template",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Emails": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Update Workflow State",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get General Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get General Info": {
+      "main": [
+        [
+          {
+            "node": "Write Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Email": {
+      "main": [
+        [
+          {
+            "node": "Save Email to DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Email to DB": {
+      "main": [
+        [
+          {
+            "node": "Update Workflow State Alive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Pitch?": {
+      "main": [
+        [
+          {
+            "node": "Split Out Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Workflow State Alive": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Companies with Email": {
+      "main": [
+        [
+          {
+            "node": "Filter Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Auto Input": {
+      "main": [
+        [
+          {
+            "node": "Start Pitch?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Workflow State": {
+      "main": [
+        [
+          {
+            "node": "update Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Email Template": {
+      "main": [
+        [
+          {
+            "node": "Get All Companies with Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse Auto Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "baaf5668-f565-415b-bb36-64d12a3e7a22",
+  "meta": {
+    "instanceId": "9c29460e1125d39fb0b1abcb82f9993009f5cd2dd2a01dad7c3f71868ee40658"
+  },
+  "id": "oEBxZzEE0IehsJFT",
+  "tags": []
+}
