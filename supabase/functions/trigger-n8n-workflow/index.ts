@@ -44,7 +44,7 @@ serve(async (req) => {
       branding_britta: '/branding-britta',
       branding_britta_auto: '/branding-britta-auto',
       email_sender: '/sende-susan',
-      sende_susan: '/sende-susan',
+      sende_susan: '/sende-susan-auto',
     };
 
     const webhookPath = webhookPaths[workflow_name];
