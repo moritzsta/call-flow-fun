@@ -645,7 +645,7 @@ export type Database = {
         | "contacted"
         | "qualified"
         | "rejected"
-      email_status: "draft" | "ready_to_send" | "sent" | "failed"
+      email_status: "draft" | "ready_to_send" | "sending" | "sent" | "failed"
       workflow_status: "pending" | "running" | "completed" | "failed" | "alive"
     }
     CompositeTypes: {
@@ -782,7 +782,7 @@ export const Constants = {
         "qualified",
         "rejected",
       ],
-      email_status: ["draft", "ready_to_send", "sent", "failed"],
+      email_status: ["draft", "ready_to_send", "sending", "sent", "failed"],
       workflow_status: ["pending", "running", "completed", "failed", "alive"],
     },
   },

@@ -19,9 +19,10 @@ import { EmailEditor } from '@/components/emails/EmailEditor';
 import { useAuth } from '@/contexts/AuthContext';
 import { notifyError } from '@/lib/notifications';
 
-const statusMap = {
+const statusMap: Record<ProjectEmail['status'], { label: string; className: string }> = {
   draft: { label: 'Entwurf', className: 'bg-gray-500/10 text-gray-700 dark:text-gray-400' },
   ready_to_send: { label: 'Bereit', className: 'bg-blue-500/10 text-blue-700 dark:text-blue-400' },
+  sending: { label: 'Wird versendet...', className: 'bg-orange-500/10 text-orange-700 dark:text-orange-400' },
   sent: { label: 'Versendet', className: 'bg-green-500/10 text-green-700 dark:text-green-400' },
   failed: { label: 'Fehlgeschlagen', className: 'bg-red-500/10 text-red-700 dark:text-red-400' },
 };

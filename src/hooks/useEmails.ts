@@ -15,7 +15,7 @@ export interface ProjectEmail {
   body: string;
   body_improved?: string | null;
   recipient_email: string;
-  status: 'draft' | 'ready_to_send' | 'sent' | 'failed';
+  status: 'draft' | 'ready_to_send' | 'sending' | 'sent' | 'failed';
   sent_at: string | null;
   created_at: string;
   updated_at: string;
@@ -118,6 +118,13 @@ export const useEmails = (
       projectId: string;
       userId: string;
     }) => {
+      // 1. Status sofort auf 'sending' setzen für visuelles Feedback
+      await supabase
+        .from('project_emails')
+        .update({ status: 'sending' as any, updated_at: new Date().toISOString() })
+        .eq('id', emailId);
+
+      // 2. n8n Workflow triggern
       const { data, error } = await supabase.functions.invoke(
         'trigger-n8n-workflow',
         {
@@ -137,7 +144,6 @@ export const useEmails = (
       return data;
     },
     onSuccess: () => {
-      notifyEmailSent();
       queryClient.invalidateQueries({ queryKey: ['project_emails', projectId] });
     },
     onError: (error: Error) => {

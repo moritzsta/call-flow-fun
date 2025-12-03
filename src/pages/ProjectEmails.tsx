@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { notifyEmailSent, notifyEmailSendError } from '@/lib/notifications';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,37 @@ export default function ProjectEmails() {
   const readyToSendCount = emails.filter(
     e => e.status === 'draft' || e.status === 'ready_to_send'
   ).length;
+
+  // Realtime subscription for email status changes
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel('email-status-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'project_emails',
+          filter: `project_id=eq.${id}`
+        },
+        (payload) => {
+          const newStatus = payload.new?.status;
+          if (newStatus === 'sent') {
+            notifyEmailSent();
+          } else if (newStatus === 'failed') {
+            notifyEmailSendError('E-Mail konnte nicht versendet werden');
+          }
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, refetch]);
 
   const handleRemoveDuplicates = async () => {
     if (!id) return;
