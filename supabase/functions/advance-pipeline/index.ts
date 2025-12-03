@@ -41,6 +41,44 @@ const WORKFLOW_ID_MAPPING = {
   'branding_britta_auto': 'britta_workflow_id',
 };
 
+// Proactive check for stuck workflows (runs on every advance-pipeline call)
+async function checkAndRecoverStuckWorkflows(supabase: any, pipeline: Pipeline): Promise<boolean> {
+  const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+  
+  const workflowIds = [
+    pipeline.felix_workflow_id,
+    pipeline.anna_workflow_id,
+    pipeline.paul_workflow_id,
+    pipeline.britta_workflow_id,
+  ].filter(Boolean);
+
+  if (workflowIds.length === 0) return false;
+
+  const { data: activeWorkflows } = await supabase
+    .from('n8n_workflow_states')
+    .select('id, workflow_name, status, updated_at')
+    .in('id', workflowIds)
+    .in('status', ['running', 'alive']);
+
+  if (!activeWorkflows || activeWorkflows.length === 0) return false;
+
+  for (const workflow of activeWorkflows) {
+    const timeSinceUpdate = Date.now() - new Date(workflow.updated_at).getTime();
+    
+    if (timeSinceUpdate >= INACTIVITY_TIMEOUT) {
+      console.log(`[advance-pipeline] Auto-recovery: ${workflow.workflow_name} stuck for ${Math.floor(timeSinceUpdate / 1000)}s - marking as failed`);
+      
+      await supabase
+        .from('n8n_workflow_states')
+        .update({ status: 'failed' })
+        .eq('id', workflow.id);
+        
+      return true; // Signal that recovery is needed
+    }
+  }
+  return false;
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -80,6 +118,13 @@ Deno.serve(async (req) => {
     }
 
     console.log('Found pipeline:', pipeline.id, 'current_phase:', pipeline.current_phase);
+
+    // Proactive check: Auto-recover any stuck workflows in this pipeline
+    const recoveryNeeded = await checkAndRecoverStuckWorkflows(supabase, pipeline);
+    if (recoveryNeeded) {
+      console.log('[advance-pipeline] Stuck workflow detected and marked as failed, triggering recovery...');
+      return await handleRecovery(supabase, pipeline.id);
+    }
 
     // Normalize workflow name (convert dashes to underscores for consistency)
     // This handles cases where n8n sends 'finder-felix' instead of 'finder_felix'

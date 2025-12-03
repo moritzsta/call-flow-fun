@@ -662,7 +662,8 @@ export default function AutomationStatus() {
                       if (active) return map[active.workflow_name] || active.workflow_name;
                       if (pipeline.status === 'completed') return 'Abgeschlossen';
                       // fallback: last completed
-                      const lastDone = [...workflows].filter(w => w.status === 'completed').sort((a,b) => {
+                      const workflowList = workflows || [];
+                      const lastDone = [...workflowList].filter(w => w.status === 'completed').sort((a,b) => {
                         const ta = a.completed_at ? new Date(a.completed_at).getTime() : 0;
                         const tb = b.completed_at ? new Date(b.completed_at).getTime() : 0;
                         return tb - ta;
