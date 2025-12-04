@@ -7,44 +7,44 @@ import {
 
 const faqs = [
   {
-    question: 'Wie funktioniert die KI-Automatisierung?',
+    question: 'Was braucht ihr von mir?',
     answer:
-      'Unsere KI-Workflows analysieren automatisch Firmen-Websites, extrahieren relevante Informationen und generieren personalisierte E-Mails basierend auf den Erkenntnissen. Finder Felix sucht Firmen, Analyse Anna analysiert deren Websites, Pitch Paul erstellt personalisierte E-Mails und Branding Britta optimiert Ihre Nachrichten.',
+      'Nur drei Dinge: Ihre Zielbranche (z.B. Restaurants, Handwerker, Hotels), die Stadt oder Region, und eine kurze Beschreibung Ihres Angebots. Das reicht uns, um loszulegen.',
   },
   {
-    question: 'Ist Cold Calling DSGVO-konform?',
+    question: 'Wie schnell bekomme ich die E-Mails?',
     answer:
-      'Ja, alle Daten werden in Deutschland gespeichert und verarbeitet. Wir halten uns strikt an die DSGVO-Vorgaben und alle europäischen Datenschutzrichtlinien. Ihre Daten und die Ihrer Kontakte sind bei uns sicher.',
+      'Standard-Lieferzeit ist 72 Stunden. Mit dem Business-Paket bekommen Sie Priority-Bearbeitung und erhalten Ihre E-Mails innerhalb von 48 Stunden.',
   },
   {
-    question: 'Kann ich eigene E-Mail-Templates verwenden?',
+    question: 'In welchem Format erhalte ich die E-Mails?',
     answer:
-      'Absolut! Sie können eigene Templates erstellen oder unsere KI-generierten Templates als Ausgangspunkt nutzen. Die Templates sind vollständig anpassbar und können mit Platzhaltern für personalisierte Informationen versehen werden.',
+      'Sie erhalten alle E-Mails als übersichtliche CSV- oder Excel-Datei. Jede Zeile enthält Empfänger-E-Mail, Betreff und den personalisierten E-Mail-Text – versandbereit für Ihr E-Mail-Tool.',
   },
   {
-    question: 'Wie lange dauert die Einrichtung?',
+    question: 'Kann ich die E-Mails vorher prüfen?',
     answer:
-      'Die Einrichtung dauert ca. 10 Minuten. Danach können Sie sofort Ihren ersten Workflow starten. Wir bieten zudem eine ausführliche Dokumentation und Support, um Ihnen den Einstieg zu erleichtern.',
+      'Ja, im Business-Paket ist eine Revision inklusive. Sie können Feedback geben und wir passen die E-Mails entsprechend an.',
   },
   {
-    question: 'Gibt es eine kostenlose Testversion?',
+    question: 'Muss ich ein Abo abschließen?',
     answer:
-      'Ja, Sie können Cold Calling 14 Tage kostenlos testen. Keine Kreditkarte erforderlich. Sie erhalten vollen Zugriff auf alle Features und können die Plattform in Ruhe ausprobieren.',
+      'Nein, wir arbeiten mit Einzelaufträgen. Sie bestellen ein Paket, wir liefern. Keine monatlichen Gebühren, keine Kündigungsfristen.',
   },
   {
-    question: 'Welche E-Mail-Provider werden unterstützt?',
+    question: 'Wie personalisiert sind die E-Mails wirklich?',
     answer:
-      'Cold Calling funktioniert mit allen gängigen E-Mail-Providern. Sie benötigen lediglich SMTP-Zugangsdaten, um E-Mails über Ihren eigenen Server zu versenden.',
+      'Jede E-Mail wird individuell auf die Firma zugeschnitten. Unsere KI analysiert die Website der Firma und bezieht sich konkret auf deren Angebot, Branche und Besonderheiten – kein Copy-Paste.',
   },
   {
-    question: 'Kann ich mehrere Projekte parallel betreiben?',
+    question: 'Ist das DSGVO-konform?',
     answer:
-      'Ja, Sie können beliebig viele Projekte erstellen und parallel betreiben. Jedes Projekt kann unterschiedliche Branchen, Regionen und E-Mail-Templates verwenden.',
+      'Ja, alle Daten werden in Deutschland gespeichert und verarbeitet. Wir halten uns strikt an die DSGVO-Vorgaben.',
   },
   {
-    question: 'Wie schnell sind die KI-Workflows?',
+    question: 'Was kostet eine einzelne E-Mail?',
     answer:
-      'Die Geschwindigkeit hängt von der Anzahl der zu analysierenden Firmen ab. Im Durchschnitt analysiert Analyse Anna etwa 10-20 Websites pro Minute. Pitch Paul generiert E-Mails in Echtzeit.',
+      'Im Starter-Paket (25 E-Mails für 199€) kostet eine E-Mail ca. 8€. Im Business-Paket (100 E-Mails für 499€) nur noch ca. 5€ pro E-Mail – inklusive Recherche, Analyse und Personalisierung.',
   },
 ];
 
@@ -58,7 +58,7 @@ export const FAQ = () => {
             Häufig gestellte Fragen
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Alles, was Sie über Cold Calling wissen müssen
+            Alles, was Sie über unseren E-Mail-Service wissen müssen
           </p>
         </div>
 

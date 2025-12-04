@@ -11,24 +11,24 @@ import {
 
 const testimonials = [
   {
-    quote: 'Cold Calling hat unseren Sales-Prozess revolutioniert. Wir generieren jetzt 10x mehr qualifizierte Leads.',
-    author: 'Max Mustermann',
-    role: 'Sales Director',
-    company: 'TechCorp GmbH',
-    initials: 'MM',
+    quote: 'Als Webdesigner habe ich endlich eine Lösung gefunden, um Restaurants in Hamburg anzusprechen. 50 personalisierte E-Mails in 2 Tagen – und 8 Anfragen!',
+    author: 'Jan Petersen',
+    role: 'Webdesigner',
+    target: 'Restaurants in Hamburg',
+    initials: 'JP',
   },
   {
-    quote: 'Die KI-Workflows sind beeindruckend präzise. Unsere Conversion-Rate hat sich verdreifacht.',
-    author: 'Sarah Schmidt',
-    role: 'Marketing Manager',
-    company: 'SolarTech AG',
-    initials: 'SS',
+    quote: 'Ich wollte Handwerksbetriebe in München als Steuerberater gewinnen. Die E-Mails waren so gut, dass ich dachte, ich hätte sie selbst geschrieben.',
+    author: 'Dr. Maria Schneider',
+    role: 'Steuerberaterin',
+    target: 'Handwerksbetriebe in München',
+    initials: 'MS',
   },
   {
-    quote: 'Einfach einzurichten und sofort effektiv. Genau das, was wir gebraucht haben.',
+    quote: 'Hotels in Berlin für unseren Reinigungsservice zu finden war immer schwer. Mit Cold Calling hatten wir 25 Erstkontakte in einer Woche.',
     author: 'Thomas Weber',
-    role: 'Geschäftsführer',
-    company: 'Innovation GmbH',
+    role: 'Geschäftsführer Reinigungsservice',
+    target: 'Hotels in Berlin',
     initials: 'TW',
   },
 ];
@@ -69,9 +69,12 @@ export const Testimonials = () => {
                           <Star key={i} className="h-4 w-4 fill-primary text-primary" aria-hidden="true" />
                         ))}
                       </div>
-                      <blockquote className="text-sm text-muted-foreground italic mb-6">
+                      <blockquote className="text-sm text-muted-foreground italic mb-4">
                         "{testimonial.quote}"
                       </blockquote>
+                      <div className="text-xs text-primary font-medium mb-4">
+                        Zielgruppe: {testimonial.target}
+                      </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Avatar>
@@ -82,7 +85,7 @@ export const Testimonials = () => {
                       <div>
                         <div className="font-semibold text-sm">{testimonial.author}</div>
                         <div className="text-xs text-muted-foreground">
-                          {testimonial.role}, {testimonial.company}
+                          {testimonial.role}
                         </div>
                       </div>
                     </div>

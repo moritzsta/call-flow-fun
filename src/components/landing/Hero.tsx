@@ -26,34 +26,34 @@ export const Hero = () => {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-medium text-primary">
           <Sparkles className="h-4 w-4" />
-          <span>KI-gestützte Kaltakquise</span>
+          <span>KI-gestützter E-Mail-Service</span>
         </div>
 
         {/* Headline */}
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-          Automatisieren Sie Ihre{' '}
+          Personalisierte Sales-E-Mails –{' '}
           <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Kaltakquise
+            Sie sagen uns nur Branche und Stadt
           </span>
         </h1>
 
         {/* Subtitle */}
         <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
-          Mit Cold Calling nutzen Sie vier KI-Workflows, um automatisch Firmen zu finden, 
-          deren Websites zu analysieren und personalisierte Sales-E-Mails zu generieren und zu optimieren.
+          Nennen Sie uns Ihre Zielbranche, die Stadt und Ihr Angebot. 
+          Wir liefern Ihnen fertige, personalisierte E-Mails für jede Firma.
         </p>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-          <Link to="/auth">
+          <Link to="/contact">
             <Button size="lg" className="w-full sm:w-auto group">
-              Kostenlos starten
+              Angebot anfordern
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
           <a href="#features">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              Mehr erfahren
+              So funktioniert's
             </Button>
           </a>
         </div>
@@ -61,16 +61,16 @@ export const Hero = () => {
         {/* Stats */}
         <div className="grid grid-cols-3 gap-8 pt-12 border-t border-border/50">
           <div>
-            <div className="text-3xl font-bold text-primary">4</div>
-            <div className="text-sm text-muted-foreground">KI-Workflows</div>
+            <div className="text-3xl font-bold text-primary">500+</div>
+            <div className="text-sm text-muted-foreground">Zufriedene Kunden</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-primary">100%</div>
-            <div className="text-sm text-muted-foreground">Automatisiert</div>
+            <div className="text-3xl font-bold text-primary">10.000+</div>
+            <div className="text-sm text-muted-foreground">E-Mails erstellt</div>
           </div>
           <div>
-            <div className="text-3xl font-bold text-primary">24/7</div>
-            <div className="text-sm text-muted-foreground">Verfügbar</div>
+            <div className="text-3xl font-bold text-primary">72h</div>
+            <div className="text-sm text-muted-foreground">Lieferzeit</div>
           </div>
         </div>
       </div>

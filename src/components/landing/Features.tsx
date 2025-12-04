@@ -1,36 +1,36 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Search, Brain, Mail, Sparkles } from 'lucide-react';
+import { ClipboardList, Search, PenTool, FileSpreadsheet } from 'lucide-react';
 
-const features = [
+const steps = [
   {
-    icon: Search,
-    title: 'Finder Felix',
-    description: 'Webscraping der Gelben Seiten',
-    details: 'Felix durchsucht automatisch die Gelben Seiten nach Firmen in bestimmten Branchen, Städten oder Bundesländern. Alle relevanten Kontaktdaten werden direkt in Ihr Projekt importiert.',
+    icon: ClipboardList,
+    title: 'Auftrag erteilen',
+    description: 'Branche, Stadt, Anzahl E-Mails',
+    details: 'Sie nennen uns einfach Ihre Zielbranche (z.B. Restaurants, Handwerker, Hotels) und die Stadt oder Region. Dazu Ihr Angebot in wenigen Sätzen.',
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
   },
   {
-    icon: Brain,
-    title: 'Analyse Anna',
-    description: 'KI-basierte Website-Analyse',
-    details: 'Anna analysiert die Websites der gefundenen Firmen mit Firecrawl und GPT-4. Sie erkennt Geschäftsmodelle, Zielgruppen, Pain Points und erstellt detaillierte Analysen für personalisierte Ansprache.',
+    icon: Search,
+    title: 'Wir recherchieren',
+    description: 'Firmen in Ihrer Zielregion finden',
+    details: 'Unser Team findet alle relevanten Firmen in Ihrer Zielbranche und Region. Kontaktdaten, Websites und Ansprechpartner werden sorgfältig erfasst.',
     color: 'text-purple-500',
     bgColor: 'bg-purple-500/10',
   },
   {
-    icon: Mail,
-    title: 'Pitch Paul',
-    description: 'Personalisierte E-Mail-Generierung',
-    details: 'Paul erstellt auf Basis der Analysen vollständig personalisierte Sales-E-Mails. Jede E-Mail ist individuell auf die Firma zugeschnitten und kann mit einem Klick versendet werden.',
+    icon: PenTool,
+    title: 'Wir schreiben',
+    description: 'Personalisierte E-Mail für jede Firma',
+    details: 'Unsere KI analysiert jede Firma und erstellt eine individuell zugeschnittene Sales-E-Mail. Kein Copy-Paste – jede E-Mail ist ein Unikat.',
     color: 'text-green-500',
     bgColor: 'bg-green-500/10',
   },
   {
-    icon: Sparkles,
-    title: 'Branding Britta',
-    description: 'E-Mail-Optimierung durch KI',
-    details: 'Britta verbessert Ihre E-Mails mit KI-gestütztem Copywriting. Sie optimiert Betreffzeilen, Ansprache und Call-to-Actions für maximale Öffnungs- und Klickraten.',
+    icon: FileSpreadsheet,
+    title: 'Sie erhalten',
+    description: 'Fertige E-Mails als CSV/Excel',
+    details: 'Sie bekommen alle E-Mails übersichtlich als CSV oder Excel-Datei. Versandbereit mit Empfänger, Betreff und personalisiertem Text.',
     color: 'text-orange-500',
     bgColor: 'bg-orange-500/10',
   },
@@ -43,29 +43,33 @@ export const Features = () => {
         {/* Section Header */}
         <div className="text-center space-y-4 mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Ihre KI-Assistenten für Sales
+            So funktioniert's
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Vier spezialisierte KI-Workflows arbeiten Hand in Hand, um Ihre Kaltakquise zu automatisieren
+            In 4 einfachen Schritten zu Ihren personalisierten Sales-E-Mails
           </p>
         </div>
 
-        {/* Features Grid */}
+        {/* Steps Grid */}
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => {
-            const Icon = feature.icon;
+          {steps.map((step, index) => {
+            const Icon = step.icon;
             return (
-              <Card key={feature.title} className="border-border/50 hover:border-primary/20 transition-colors">
+              <Card key={step.title} className="border-border/50 hover:border-primary/20 transition-colors relative">
+                {/* Step Number */}
+                <div className="absolute -top-3 -left-3 h-8 w-8 rounded-full bg-primary text-primary-foreground font-bold flex items-center justify-center text-sm">
+                  {index + 1}
+                </div>
                 <CardHeader>
-                  <div className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${feature.bgColor} mb-4`}>
-                    <Icon className={`h-6 w-6 ${feature.color}`} />
+                  <div className={`inline-flex h-12 w-12 items-center justify-center rounded-lg ${step.bgColor} mb-4`}>
+                    <Icon className={`h-6 w-6 ${step.color}`} />
                   </div>
-                  <CardTitle className="text-xl">{feature.title}</CardTitle>
-                  <CardDescription>{feature.description}</CardDescription>
+                  <CardTitle className="text-xl">{step.title}</CardTitle>
+                  <CardDescription>{step.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    {feature.details}
+                    {step.details}
                   </p>
                 </CardContent>
               </Card>
@@ -73,44 +77,26 @@ export const Features = () => {
           })}
         </div>
 
-        {/* How it works */}
+        {/* Example Use Cases */}
         <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold mb-8">So funktioniert's</h3>
-          <div className="grid gap-6 md:grid-cols-4 max-w-5xl mx-auto">
-            <div className="space-y-2">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold mb-3">
-                1
-              </div>
-              <h4 className="font-semibold">Projekt erstellen</h4>
+          <h3 className="text-2xl font-bold mb-8">Beispiele aus der Praxis</h3>
+          <div className="grid gap-6 md:grid-cols-3 max-w-4xl mx-auto">
+            <div className="p-6 rounded-lg bg-card border border-border/50">
+              <div className="text-primary font-semibold mb-2">Webdesigner</div>
               <p className="text-sm text-muted-foreground">
-                Legen Sie ein neues Projekt für Ihre Kampagne an
+                sucht <strong>Restaurants</strong> in <strong>Hamburg</strong>
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold mb-3">
-                2
-              </div>
-              <h4 className="font-semibold">Felix starten</h4>
+            <div className="p-6 rounded-lg bg-card border border-border/50">
+              <div className="text-primary font-semibold mb-2">Steuerberater</div>
               <p className="text-sm text-muted-foreground">
-                Definieren Sie Branche und Region für die Firmensuche
+                sucht <strong>Handwerksbetriebe</strong> in <strong>München</strong>
               </p>
             </div>
-            <div className="space-y-2">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold mb-3">
-                3
-              </div>
-              <h4 className="font-semibold">Anna analysieren</h4>
+            <div className="p-6 rounded-lg bg-card border border-border/50">
+              <div className="text-primary font-semibold mb-2">Reinigungsservice</div>
               <p className="text-sm text-muted-foreground">
-                Lassen Sie Websites automatisch analysieren
-              </p>
-            </div>
-            <div className="space-y-2">
-              <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold mb-3">
-                4
-              </div>
-              <h4 className="font-semibold">Paul versenden</h4>
-              <p className="text-sm text-muted-foreground">
-                Personalisierte E-Mails generieren und versenden
+                sucht <strong>Hotels</strong> in <strong>Berlin</strong>
               </p>
             </div>
           </div>

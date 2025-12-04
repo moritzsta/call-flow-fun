@@ -4,27 +4,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 const benefits = [
   {
     icon: Clock,
-    title: 'Zeit sparen',
-    description: 'Bis zu 80% weniger Zeitaufwand für Kaltakquise',
-    metric: '80%',
-  },
-  {
-    icon: Target,
-    title: 'Höhere Conversion',
-    description: 'Personalisierte E-Mails erhöhen die Antwortquote um 300%',
-    metric: '3x',
+    title: 'Kein Aufwand',
+    description: 'Sie geben nur Branche und Stadt an – wir machen den Rest',
+    metric: '0',
   },
   {
     icon: Zap,
-    title: 'Vollautomatisch',
-    description: 'Einmal einrichten, dann läuft alles automatisch',
-    metric: '24/7',
+    title: '72h Lieferzeit',
+    description: 'Schnelle Bearbeitung garantiert – Standard innerhalb von 3 Tagen',
+    metric: '72h',
+  },
+  {
+    icon: Target,
+    title: '100% personalisiert',
+    description: 'Jede E-Mail ist individuell auf die Firma zugeschnitten',
+    metric: '100%',
   },
   {
     icon: Shield,
     title: 'DSGVO-konform',
     description: 'Alle Daten werden sicher in Deutschland gespeichert',
-    metric: '100%',
+    metric: 'DE',
   },
 ];
 
@@ -35,10 +35,10 @@ export const Benefits = () => {
         {/* Section Header */}
         <div className="text-center space-y-4 mb-16">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
-            Warum Cold Calling?
+            Ihre Vorteile
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Messbare Vorteile für Ihr Unternehmen
+            Warum Kunden unseren E-Mail-Service lieben
           </p>
         </div>
 
