@@ -7,46 +7,47 @@ import { Check } from 'lucide-react';
 const plans = [
   {
     name: 'Starter',
-    price: '49',
-    period: 'Monat',
-    description: 'Perfekt für kleine Teams',
+    price: '199',
+    period: 'einmalig',
+    description: 'Perfekt zum Ausprobieren',
+    emails: '25 E-Mails',
     features: [
-      'Bis zu 100 Firmen/Monat',
-      'Alle 4 KI-Workflows',
-      'E-Mail-Support',
-      'DSGVO-konform',
+      'Firmenrecherche inklusive',
+      'Website-Analyse inklusive',
+      'Vollständig personalisiert',
+      'CSV/Excel Export',
     ],
-    cta: 'Kostenlos testen',
+    cta: 'Jetzt bestellen',
     highlighted: false,
   },
   {
-    name: 'Professional',
-    price: '149',
-    period: 'Monat',
-    description: 'Für wachsende Unternehmen',
+    name: 'Business',
+    price: '499',
+    period: 'einmalig',
+    description: 'Unser beliebtestes Paket',
+    emails: '100 E-Mails',
     features: [
-      'Bis zu 1.000 Firmen/Monat',
-      'Alle 4 KI-Workflows',
-      'Priority Support',
-      'Custom Templates',
-      'Team-Funktionen',
+      'Alles aus Starter',
+      '1 Revision inklusive',
+      'Priority-Bearbeitung (48h)',
+      'Persönliche Beratung',
     ],
-    cta: 'Jetzt starten',
+    cta: 'Jetzt bestellen',
     highlighted: true,
   },
   {
     name: 'Enterprise',
-    price: 'Individuell',
+    price: 'Auf Anfrage',
     period: '',
-    description: 'Für große Organisationen',
+    description: 'Individuelle Anforderungen',
+    emails: '250+ E-Mails',
     features: [
-      'Unbegrenzte Firmen',
-      'Dedicated Support',
-      'Custom Integrationen',
-      'SLA-Garantie',
-      'White-Label',
+      'Alles aus Business',
+      'Unbegrenzte Revisionen',
+      'Dedizierter Ansprechpartner',
+      'Custom Templates',
     ],
-    cta: 'Kontakt',
+    cta: 'Kontakt aufnehmen',
     highlighted: false,
   },
 ];
@@ -61,7 +62,7 @@ export const PricingPreview = () => {
             Transparente Preise
           </h2>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
-            Wählen Sie den Plan, der zu Ihrem Unternehmen passt
+            Einzelaufträge ohne Abo – zahlen Sie nur, was Sie brauchen
           </p>
         </div>
 
@@ -85,15 +86,16 @@ export const PricingPreview = () => {
                 <CardTitle className="text-2xl mb-2">{plan.name}</CardTitle>
                 <CardDescription className="mb-4">{plan.description}</CardDescription>
                 <div className="flex items-baseline justify-center gap-2">
-                  {plan.price === 'Individuell' ? (
-                    <span className="text-4xl font-bold">{plan.price}</span>
+                  {plan.price === 'Auf Anfrage' ? (
+                    <span className="text-3xl font-bold">{plan.price}</span>
                   ) : (
                     <>
                       <span className="text-4xl font-bold">{plan.price}€</span>
-                      <span className="text-muted-foreground">/ {plan.period}</span>
+                      {plan.period && <span className="text-muted-foreground">/ {plan.period}</span>}
                     </>
                   )}
                 </div>
+                <div className="mt-2 text-primary font-semibold">{plan.emails}</div>
               </CardHeader>
               <CardContent className="flex flex-col flex-grow">
                 <ul className="space-y-3 mb-8 flex-grow">
@@ -110,7 +112,7 @@ export const PricingPreview = () => {
                   size="lg"
                   className="w-full"
                 >
-                  <Link to={plan.name === 'Enterprise' ? '/contact' : '/auth'}>
+                  <Link to={plan.name === 'Enterprise' ? '/contact' : '/contact'}>
                     {plan.cta}
                   </Link>
                 </Button>
@@ -122,10 +124,10 @@ export const PricingPreview = () => {
         {/* Additional Info */}
         <div className="mt-12 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            Alle Pläne beinhalten eine 14-tägige kostenlose Testphase. Keine Kreditkarte erforderlich.
+            Kein Abo notwendig. Sie bestellen, wir liefern. Bei Fragen beraten wir Sie gerne.
           </p>
           <Button variant="link" asChild>
-            <Link to="/pricing">Alle Preise und Features ansehen →</Link>
+            <Link to="/pricing">Alle Details ansehen →</Link>
           </Button>
         </div>
       </div>

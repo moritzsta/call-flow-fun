@@ -21,10 +21,10 @@ export const FinalCTA = () => {
       {/* Content */}
       <div className="relative z-10 max-w-3xl mx-auto text-center">
         <h2 className="text-4xl font-bold mb-4 text-white">
-          Bereit, Ihre Kaltakquise zu automatisieren?
+          Bereit für Ihre personalisierten Sales-E-Mails?
         </h2>
         <p className="text-xl mb-8 text-white/90">
-          Starten Sie jetzt kostenlos und überzeugen Sie sich selbst von der Kraft unserer KI-Workflows.
+          Sagen Sie uns Branche und Stadt – wir liefern die E-Mails.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button 
@@ -33,8 +33,8 @@ export const FinalCTA = () => {
             className="bg-white text-primary hover:bg-white/90"
             asChild
           >
-            <Link to="/auth">
-              Kostenlos testen
+            <Link to="/contact">
+              Angebot anfordern
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
@@ -44,20 +44,20 @@ export const FinalCTA = () => {
             className="border-white text-white hover:bg-white/10 hover:text-white"
             asChild
           >
-            <Link to="/contact">Demo ansehen</Link>
+            <Link to="/contact">Fragen? Kontakt aufnehmen</Link>
           </Button>
         </div>
 
         {/* Trust Elements */}
         <div className="mt-8 flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center text-sm text-white/80">
           <span className="flex items-center justify-center gap-1">
-            <span className="text-white">✓</span> Keine Kreditkarte nötig
+            <span className="text-white">✓</span> Kein Abo notwendig
           </span>
           <span className="flex items-center justify-center gap-1">
-            <span className="text-white">✓</span> 14 Tage kostenlos
+            <span className="text-white">✓</span> 72h Lieferzeit
           </span>
           <span className="flex items-center justify-center gap-1">
-            <span className="text-white">✓</span> Jederzeit kündbar
+            <span className="text-white">✓</span> DSGVO-konform
           </span>
         </div>
       </div>
