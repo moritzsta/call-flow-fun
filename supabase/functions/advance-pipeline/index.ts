@@ -154,15 +154,52 @@ Deno.serve(async (req) => {
     // Find the pipeline associated with this workflow
     const pipeline = await findPipelineByWorkflowId(supabase, body.workflow_id);
     
+    // EXPLIZIT: Kein Pipeline-Kontext = Standalone-Modul (Einzel-Batch)
+    // In diesem Fall: Workflow als completed markieren, aber KEINE Pipeline-Fortsetzung
     if (!pipeline) {
-      console.log('No pipeline found for workflow_id:', body.workflow_id);
+      console.log(`[advance-pipeline] Mode: STANDALONE (no pipeline found for workflow_id: ${body.workflow_id})`);
+      
+      // Wenn n8n "completed" meldet, markiere den Workflow als abgeschlossen
+      if (body.status === 'completed') {
+        const { error: updateError } = await supabase
+          .from('n8n_workflow_states')
+          .update({ 
+            status: 'completed',
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', body.workflow_id);
+        
+        if (updateError) {
+          console.error('[advance-pipeline] Error updating standalone workflow:', updateError);
+        } else {
+          console.log('[advance-pipeline] Standalone workflow marked as completed');
+        }
+      } else if (body.status === 'failed') {
+        // Bei Fehler auch den Status aktualisieren
+        await supabase
+          .from('n8n_workflow_states')
+          .update({ 
+            status: 'failed',
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', body.workflow_id);
+        
+        console.log('[advance-pipeline] Standalone workflow marked as failed');
+      }
+      
       return new Response(
-        JSON.stringify({ message: 'No pipeline found for this workflow' }),
+        JSON.stringify({ 
+          message: 'Standalone workflow - no pipeline context, no continuation',
+          workflow_id: body.workflow_id,
+          workflow_name: body.workflow_name,
+          status: body.status,
+          standalone: true
+        }),
         { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Found pipeline:', pipeline.id, 'current_phase:', pipeline.current_phase);
+    console.log(`[advance-pipeline] Mode: PIPELINE (pipeline_id: ${pipeline.id}, current_phase: ${pipeline.current_phase})`);
 
     // Proactive check: Auto-recover any stuck workflows in this pipeline
     const recoveryNeeded = await checkAndRecoverStuckWorkflows(supabase, pipeline);
@@ -290,6 +327,7 @@ Deno.serve(async (req) => {
     const filteredTriggerData = getTriggerDataForWorkflow(nextWorkflow, pipeline.config);
     console.log(`[advance-pipeline] Filtered trigger_data for ${nextWorkflow}:`, JSON.stringify(filteredTriggerData, null, 2));
     
+    // Create new workflow state with pipeline_id for explicit context tracking
     const { data: newWorkflowState, error: workflowStateError } = await supabase
       .from('n8n_workflow_states')
       .insert({
@@ -297,7 +335,8 @@ Deno.serve(async (req) => {
         project_id: pipeline.project_id,
         user_id: pipeline.user_id,
         status: 'pending',
-        trigger_data: filteredTriggerData
+        trigger_data: filteredTriggerData,
+        pipeline_id: pipeline.id  // WICHTIG: Explizite Pipeline-Zuordnung
       })
       .select()
       .single();

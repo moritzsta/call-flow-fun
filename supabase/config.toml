@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.remove-duplicate-emails]
 verify_jwt = false
+
+[functions.workflow-watchdog]
+verify_jwt = false
