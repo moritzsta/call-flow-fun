@@ -53,21 +53,23 @@ const ProjectRow = ({ project, canManage }: ProjectRowProps) => {
 
   return (
     <TableRow 
-      className="cursor-pointer hover:bg-muted/50 transition-colors"
+      className="group cursor-pointer transition-all duration-200 
+                 hover:bg-gradient-to-r hover:from-highlight/10 hover:via-highlight/5 hover:to-transparent
+                 border-l-4 border-l-transparent hover:border-l-highlight"
       onClick={() => navigate(`/projects/${project.id}`)}
     >
-      <TableCell className="font-medium max-w-[200px] truncate">
+      <TableCell className="font-medium max-w-[200px] truncate group-hover:text-highlight transition-colors">
         {project.title}
       </TableCell>
       <TableCell>
-        <Badge variant="secondary" className="font-mono">
-          {statsLoading ? '...' : stats?.companiesCount ?? 0}
-        </Badge>
+        <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
+          <span className="text-xs font-semibold">{statsLoading ? '...' : stats?.companiesCount ?? 0}</span>
+        </div>
       </TableCell>
       <TableCell>
-        <Badge variant="secondary" className="font-mono">
-          {statsLoading ? '...' : stats?.emailsCount ?? 0}
-        </Badge>
+        <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-success/10 text-success border border-success/20">
+          <span className="text-xs font-semibold">{statsLoading ? '...' : stats?.emailsCount ?? 0}</span>
+        </div>
       </TableCell>
       <TableCell className="text-muted-foreground text-sm">
         {new Date(project.created_at).toLocaleDateString('de-DE')}
@@ -77,7 +79,7 @@ const ProjectRow = ({ project, canManage }: ProjectRowProps) => {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={() => navigate(`/projects/${project.id}`)}
           >
             <ExternalLink className="h-4 w-4" />
@@ -89,7 +91,7 @@ const ProjectRow = ({ project, canManage }: ProjectRowProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                   disabled={isArchiving || isDeleting}
                 >
                   <MoreVertical className="h-4 w-4" />
@@ -149,19 +151,19 @@ interface ProjectsTableProps {
 
 export const ProjectsTable = ({ projects, canManage }: ProjectsTableProps) => {
   return (
-    <div className="rounded-lg border bg-card">
+    <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Projekt</TableHead>
-            <TableHead className="w-24">Firmen</TableHead>
-            <TableHead className="w-24">E-Mails</TableHead>
-            <TableHead className="w-32">Erstellt</TableHead>
-            <TableHead className="w-24">Aktionen</TableHead>
+          <TableRow className="bg-gradient-to-r from-muted/80 via-muted/50 to-transparent border-b border-border/50">
+            <TableHead className="font-semibold">Projekt</TableHead>
+            <TableHead className="w-24 font-semibold">Firmen</TableHead>
+            <TableHead className="w-24 font-semibold">E-Mails</TableHead>
+            <TableHead className="w-32 font-semibold">Erstellt</TableHead>
+            <TableHead className="w-24 font-semibold">Aktionen</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {projects.map((project) => (
+          {projects.map((project, index) => (
             <ProjectRow key={project.id} project={project} canManage={canManage} />
           ))}
         </TableBody>
