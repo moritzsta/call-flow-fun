@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ProjectEmail, EmailSortConfig } from '@/hooks/useEmails';
-import { MoreHorizontal, ArrowUpDown, Trash2, Eye, Send, Mail, Building, Loader2 } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, Trash2, Eye, Send, Mail, Building, Loader2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -178,7 +178,15 @@ export const EmailsTable = ({
             </div>
 
             <div className="flex items-center justify-between">
-              {getStatusBadge(email.status)}
+              <div className="flex items-center gap-2">
+                {getStatusBadge(email.status)}
+                {email.body_improved && (
+                  <Badge className="bg-highlight/10 text-highlight border-highlight/20">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Verbessert
+                  </Badge>
+                )}
+              </div>
               <div className="text-xs text-muted-foreground">
                 {format(new Date(email.created_at), 'dd.MM.yy HH:mm', { locale: de })}
               </div>
@@ -263,7 +271,17 @@ export const EmailsTable = ({
                 </TableCell>
                 <TableCell>{email.recipient_email}</TableCell>
                 <TableCell>{email.company_name || '-'}</TableCell>
-                <TableCell>{getStatusBadge(email.status)}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(email.status)}
+                    {email.body_improved && (
+                      <Badge className="bg-highlight/10 text-highlight border-highlight/20">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Verbessert
+                      </Badge>
+                    )}
+                  </div>
+                </TableCell>
                 <TableCell className="text-muted-foreground text-sm">
                   {format(new Date(email.created_at), 'dd.MM.yyyy HH:mm', { locale: de })}
                 </TableCell>
