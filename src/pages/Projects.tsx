@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog';
 import { ProjectCard } from '@/components/projects/ProjectCard';
+import { ProjectsTable } from '@/components/projects/ProjectsTable';
+import { ProjectsToolbar, ViewMode, SortOption } from '@/components/projects/ProjectsToolbar';
 import { useProjects } from '@/hooks/useProjects';
 import { useOrganizations } from '@/hooks/useOrganizations';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
@@ -22,6 +24,9 @@ export default function Projects() {
   const { user } = useAuth();
   const { organizations, isLoading: orgsLoading } = useOrganizations();
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
 
   // Auto-select first organization
   if (!selectedOrgId && organizations.length > 0) {
@@ -35,6 +40,28 @@ export default function Projects() {
   const canManage =
     currentMember?.role === 'owner' || currentMember?.role === 'manager';
 
+  // Filter and sort projects
+  const filteredProjects = useMemo(() => {
+    let result = projects.filter((p) =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    switch (sortBy) {
+      case 'newest':
+        result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        break;
+      case 'oldest':
+        result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        break;
+      case 'name':
+        result.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      // 'companies' sorting would need stats data - keeping original order
+    }
+
+    return result;
+  }, [projects, searchQuery, sortBy]);
+
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-background">
@@ -44,7 +71,7 @@ export default function Projects() {
           <Header />
 
           <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-7xl mx-auto space-y-6">
+            <div className="max-w-7xl mx-auto space-y-5">
               {/* Page Header */}
               <div className="flex items-center justify-between">
                 <div>
@@ -72,33 +99,47 @@ export default function Projects() {
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center gap-4">
-                    <label className="text-sm font-medium text-foreground">
-                      Organisation:
-                    </label>
-                    <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
-                      <SelectTrigger className="w-64">
-                        <SelectValue placeholder="Organisation auswählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {organizations.map((org) => (
-                          <SelectItem key={org.id} value={org.id}>
-                            {org.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Organisation:
+                      </label>
+                      <Select value={selectedOrgId} onValueChange={setSelectedOrgId}>
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Organisation auswählen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {organizations.map((org) => (
+                            <SelectItem key={org.id} value={org.id}>
+                              {org.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
                     {canManage && selectedOrgId && (
                       <CreateProjectDialog organizationId={selectedOrgId} />
                     )}
                   </div>
 
-                  {/* Projects Grid */}
+                  {/* Toolbar */}
+                  {projects.length > 0 && (
+                    <ProjectsToolbar
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      sortBy={sortBy}
+                      onSortChange={setSortBy}
+                      viewMode={viewMode}
+                      onViewModeChange={setViewMode}
+                    />
+                  )}
+
+                  {/* Projects List */}
                   {projectsLoading || membersLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {[1, 2, 3].map((i) => (
-                        <Skeleton key={i} className="h-64 w-full" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {[1, 2, 3, 4].map((i) => (
+                        <Skeleton key={i} className="h-32 w-full" />
                       ))}
                     </div>
                   ) : projects.length === 0 ? (
@@ -118,9 +159,17 @@ export default function Projects() {
                         <CreateProjectDialog organizationId={selectedOrgId} />
                       )}
                     </div>
+                  ) : filteredProjects.length === 0 ? (
+                    <div className="text-center py-12">
+                      <p className="text-muted-foreground">
+                        Keine Projekte gefunden für "{searchQuery}"
+                      </p>
+                    </div>
+                  ) : viewMode === 'table' ? (
+                    <ProjectsTable projects={filteredProjects} canManage={canManage} />
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {projects.map((project) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                      {filteredProjects.map((project) => (
                         <ProjectCard
                           key={project.id}
                           project={project}
