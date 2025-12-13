@@ -9,6 +9,7 @@ import { ProjectsToolbar, ViewMode, SortOption } from '@/components/projects/Pro
 import { useProjects } from '@/hooks/useProjects';
 import { useOrganizations } from '@/hooks/useOrganizations';
 import { useOrganizationMembers } from '@/hooks/useOrganizationMembers';
+import { useAllProjectStats } from '@/hooks/useAllProjectStats';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -36,6 +37,10 @@ export default function Projects() {
   const { projects, isLoading: projectsLoading } = useProjects(selectedOrgId);
   const { members, isLoading: membersLoading } = useOrganizationMembers(selectedOrgId);
 
+  // Fetch all project stats for sorting
+  const projectIds = useMemo(() => projects.map((p) => p.id), [projects]);
+  const { data: statsMap } = useAllProjectStats(projectIds);
+
   const currentMember = members.find((m) => m.user_id === user?.id);
   const canManage =
     currentMember?.role === 'owner' || currentMember?.role === 'manager';
@@ -56,11 +61,31 @@ export default function Projects() {
       case 'name':
         result.sort((a, b) => a.title.localeCompare(b.title));
         break;
-      // 'companies' sorting would need stats data - keeping original order
+      case 'companies':
+        result.sort((a, b) => {
+          const aCount = statsMap?.[a.id]?.companiesCount ?? 0;
+          const bCount = statsMap?.[b.id]?.companiesCount ?? 0;
+          return bCount - aCount;
+        });
+        break;
+      case 'emails':
+        result.sort((a, b) => {
+          const aCount = statsMap?.[a.id]?.emailsCount ?? 0;
+          const bCount = statsMap?.[b.id]?.emailsCount ?? 0;
+          return bCount - aCount;
+        });
+        break;
+      case 'score':
+        result.sort((a, b) => {
+          const aScore = statsMap?.[a.id]?.score ?? 0;
+          const bScore = statsMap?.[b.id]?.score ?? 0;
+          return bScore - aScore;
+        });
+        break;
     }
 
     return result;
-  }, [projects, searchQuery, sortBy]);
+  }, [projects, searchQuery, sortBy, statsMap]);
 
   return (
     <SidebarProvider>
