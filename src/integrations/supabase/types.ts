@@ -297,6 +297,7 @@ export type Database = {
           id: string
           last_message_at: string | null
           loop_count: number
+          pipeline_id: string | null
           project_id: string
           result_summary: Json | null
           started_at: string
@@ -313,6 +314,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           loop_count?: number
+          pipeline_id?: string | null
           project_id: string
           result_summary?: Json | null
           started_at?: string
@@ -329,6 +331,7 @@ export type Database = {
           id?: string
           last_message_at?: string | null
           loop_count?: number
+          pipeline_id?: string | null
           project_id?: string
           result_summary?: Json | null
           started_at?: string
@@ -339,6 +342,13 @@ export type Database = {
           workflow_name?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "n8n_workflow_states_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "automation_pipelines"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "n8n_workflow_states_project_id_fkey"
             columns: ["project_id"]

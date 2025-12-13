@@ -132,7 +132,7 @@ export function useAutomatedPipeline(projectId: string) {
 
       console.log('Starting Finder Felix with message:', felixMessage);
 
-      // Start Finder Felix via chat
+      // Start Finder Felix via chat - this creates a workflow_state internally
       const felixWorkflowId = await felixChat.sendMessage(felixMessage);
       
       if (!felixWorkflowId) {
@@ -141,11 +141,18 @@ export function useAutomatedPipeline(projectId: string) {
 
       console.log('Finder Felix started with workflow_id:', felixWorkflowId);
 
-      // Update pipeline with Felix workflow_id
+      // Update pipeline with Felix workflow_id AND set pipeline_id on the workflow_state
+      // This creates the explicit link between workflow and pipeline
       await supabase
         .from('automation_pipelines')
         .update({ felix_workflow_id: felixWorkflowId })
         .eq('id', pipeline.id);
+
+      // WICHTIG: Set pipeline_id on the workflow_state for explicit context tracking
+      await supabase
+        .from('n8n_workflow_states')
+        .update({ pipeline_id: pipeline.id })
+        .eq('id', felixWorkflowId);
 
       toast.success('Pipeline gestartet - Finder Felix läuft');
 
