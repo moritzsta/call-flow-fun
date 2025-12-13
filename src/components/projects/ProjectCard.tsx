@@ -50,13 +50,20 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
 
   return (
     <Card 
-      className="group hover:shadow-md hover:border-primary/20 transition-all cursor-pointer"
+      className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 cursor-pointer
+                 border-l-4 border-l-highlight/70
+                 hover:shadow-xl hover:shadow-highlight/10 
+                 hover:border-highlight/40
+                 hover:-translate-y-1"
       onClick={() => navigate(`/projects/${project.id}`)}
     >
-      <CardContent className="p-4">
+      {/* Hover gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-highlight/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
+      <CardContent className="relative p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+            <h3 className="font-semibold text-foreground truncate group-hover:text-highlight transition-colors">
               {project.title}
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -125,18 +132,18 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
           </p>
         )}
 
-        <div className="flex items-center justify-between mt-3 pt-3 border-t">
-          <div className="flex items-center gap-3 text-xs">
-            <div className="flex items-center gap-1 text-muted-foreground">
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
               <Building2 className="h-3.5 w-3.5" />
-              <span className="font-medium">{statsLoading ? '...' : stats?.companiesCount ?? 0}</span>
+              <span className="text-xs font-semibold">{statsLoading ? '...' : stats?.companiesCount ?? 0}</span>
             </div>
-            <div className="flex items-center gap-1 text-muted-foreground">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-success/10 text-success border border-success/20">
               <Mail className="h-3.5 w-3.5" />
-              <span className="font-medium">{statsLoading ? '...' : stats?.emailsCount ?? 0}</span>
+              <span className="text-xs font-semibold">{statsLoading ? '...' : stats?.emailsCount ?? 0}</span>
             </div>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-highlight group-hover:translate-x-1 transition-all duration-300" />
         </div>
       </CardContent>
     </Card>

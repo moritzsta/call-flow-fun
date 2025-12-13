@@ -70,8 +70,15 @@ export default function Projects() {
         <div className="flex flex-col flex-1 overflow-hidden">
           <Header />
 
-          <main className="flex-1 overflow-y-auto p-6">
-            <div className="max-w-7xl mx-auto space-y-5">
+          <main className="flex-1 overflow-y-auto p-6 relative">
+            {/* Decorative background blobs */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float" />
+              <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-highlight/5 rounded-full blur-3xl" />
+              <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
+            </div>
+            
+            <div className="relative max-w-7xl mx-auto space-y-5">
               {/* Page Header */}
               <div className="flex items-center justify-between">
                 <div>
@@ -144,8 +151,9 @@ export default function Projects() {
                     </div>
                   ) : projects.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center mb-4">
-                        <FolderOpen className="h-12 w-12 text-muted-foreground" />
+                      <div className="relative h-24 w-24 rounded-full bg-gradient-to-br from-highlight/20 via-primary/10 to-accent/20 flex items-center justify-center mb-4">
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-highlight/10 to-transparent animate-pulse" />
+                        <FolderOpen className="h-12 w-12 text-highlight" />
                       </div>
                       <h2 className="text-xl font-semibold text-foreground mb-2">
                         Noch keine Projekte
