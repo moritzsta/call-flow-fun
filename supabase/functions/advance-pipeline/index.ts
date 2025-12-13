@@ -535,6 +535,11 @@ async function handleRecovery(supabase: any, pipelineId: string) {
     .update({ current_phase: nextWorkflowName })
     .eq('id', pipelineId);
 
+  // Wait 30 seconds before triggering next workflow (same as normal flow)
+  // This ensures the timer animation shows in the frontend
+  console.log('[handleRecovery] Waiting 30 seconds before triggering next workflow...');
+  await new Promise(resolve => setTimeout(resolve, 30000));
+
   // Create new workflow state with filtered trigger_data
   const recoveryTriggerData = getTriggerDataForWorkflow(nextWorkflowName, pipeline.config);
   console.log(`[advance-pipeline] Recovery trigger_data for ${nextWorkflowName}:`, JSON.stringify(recoveryTriggerData, null, 2));
