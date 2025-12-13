@@ -19,6 +19,7 @@ import ProjectSettings from "./pages/ProjectSettings";
 import ProjectCompanies from "./pages/ProjectCompanies";
 import ProjectEmails from "./pages/ProjectEmails";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import CompanyDetail from "./pages/CompanyDetail";
 import EmailDetail from "./pages/EmailDetail";
 import EmailTemplates from "./pages/EmailTemplates";
@@ -211,12 +212,20 @@ const App = () => (
                 } 
               />
               <Route 
+                path="/settings" 
+                element={
+                  <ProtectedRoute>
+                    <Settings />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
                 path="/profile" 
                 element={
                   <ProtectedRoute>
                     <Profile />
                   </ProtectedRoute>
-                } 
+                }
               />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
