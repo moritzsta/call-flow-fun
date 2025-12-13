@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Settings, Archive, Trash2, ArrowRight, Building2, Mail } from 'lucide-react';
 import { Project } from '@/hooks/useProjects';
 import { useProjectStats } from '@/hooks/useProjectStats';
@@ -30,6 +29,15 @@ interface ProjectCardProps {
   canManage: boolean;
 }
 
+// Calculate dynamic color based on companies and emails
+const getProgressColor = (companiesCount: number, emailsCount: number): string => {
+  // Score: 0.5 per company, 2 per email, max 100
+  const score = Math.min(100, (companiesCount * 0.5) + (emailsCount * 2));
+  // Interpolate hue from 0 (red) to 120 (green)
+  const hue = Math.round((score / 100) * 120);
+  return `hsl(${hue}, 70%, 45%)`;
+};
+
 export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
   const navigate = useNavigate();
   const { archiveProject, deleteProject, isArchiving, isDeleting } = useProjects(project.organization_id);
@@ -48,25 +56,29 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
     });
   };
 
+  const companiesCount = stats?.companiesCount ?? 0;
+  const emailsCount = stats?.emailsCount ?? 0;
+  const borderColor = getProgressColor(companiesCount, emailsCount);
+
   return (
     <Card 
       className="group relative overflow-hidden bg-card border border-border/50 transition-all duration-300 cursor-pointer
-                 border-l-4 border-l-highlight/70
-                 hover:shadow-xl hover:shadow-highlight/10 
-                 hover:border-highlight/40
+                 hover:shadow-xl hover:shadow-primary/10 
+                 hover:border-primary/40
                  hover:-translate-y-1"
+      style={{ borderLeftWidth: '5px', borderLeftColor: borderColor }}
       onClick={() => navigate(`/projects/${project.id}`)}
     >
       {/* Hover gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-highlight/5 via-transparent to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-highlight/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       
-      <CardContent className="relative p-4">
-        <div className="flex items-start justify-between gap-2">
+      <CardContent className="relative p-5">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate group-hover:text-highlight transition-colors">
+            <h3 className="font-semibold text-lg text-foreground truncate group-hover:text-primary transition-colors">
               {project.title}
             </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-sm text-muted-foreground mt-1">
               {new Date(project.created_at).toLocaleDateString('de-DE')}
             </p>
           </div>
@@ -77,7 +89,7 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                   disabled={isArchiving || isDeleting}
                 >
                   <MoreVertical className="h-4 w-4" />
@@ -127,23 +139,23 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
         </div>
 
         {project.description && (
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-1">
+          <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
             {project.description}
           </p>
         )}
 
-        <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 text-primary border border-primary/20">
-              <Building2 className="h-3.5 w-3.5" />
-              <span className="text-xs font-semibold">{statsLoading ? '...' : stats?.companiesCount ?? 0}</span>
+        <div className="flex items-center justify-between mt-4 pt-4 border-t border-border/50">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20">
+              <Building2 className="h-4 w-4" />
+              <span className="text-sm font-semibold">{statsLoading ? '...' : companiesCount}</span>
             </div>
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-success/10 text-success border border-success/20">
-              <Mail className="h-3.5 w-3.5" />
-              <span className="text-xs font-semibold">{statsLoading ? '...' : stats?.emailsCount ?? 0}</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-success/10 text-success border border-success/20">
+              <Mail className="h-4 w-4" />
+              <span className="text-sm font-semibold">{statsLoading ? '...' : emailsCount}</span>
             </div>
           </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-highlight group-hover:translate-x-1 transition-all duration-300" />
+          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all duration-300" />
         </div>
       </CardContent>
     </Card>

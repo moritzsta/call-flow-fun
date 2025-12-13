@@ -10,7 +10,7 @@ import {
 import { Search, LayoutGrid, List } from 'lucide-react';
 
 export type ViewMode = 'cards' | 'table';
-export type SortOption = 'newest' | 'oldest' | 'name' | 'companies';
+export type SortOption = 'newest' | 'oldest' | 'name' | 'companies' | 'emails';
 
 interface ProjectsToolbarProps {
   searchQuery: string;
@@ -53,6 +53,7 @@ export const ProjectsToolbar = ({
             <SelectItem value="oldest">Älteste</SelectItem>
             <SelectItem value="name">Name A-Z</SelectItem>
             <SelectItem value="companies">Firmenanzahl</SelectItem>
+            <SelectItem value="emails">E-Mail-Anzahl</SelectItem>
           </SelectContent>
         </Select>
 
