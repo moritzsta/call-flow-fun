@@ -31,7 +31,7 @@ export const EmailPreview = ({ subject, body, recipientEmail }: EmailPreviewProp
         </div>
 
         {/* Email Body Preview */}
-        <div className="border rounded-lg p-4 bg-background">
+        <div className="border rounded-lg p-4 bg-white dark:bg-slate-800">
           <iframe
             srcDoc={`
               <!DOCTYPE html>
@@ -43,7 +43,8 @@ export const EmailPreview = ({ subject, body, recipientEmail }: EmailPreviewProp
                     body {
                       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
                       line-height: 1.6;
-                      color: #333;
+                      color: #1f2937;
+                      background-color: #ffffff;
                       max-width: 600px;
                       margin: 0;
                       padding: 20px;
@@ -59,7 +60,7 @@ export const EmailPreview = ({ subject, body, recipientEmail }: EmailPreviewProp
               </html>
             `}
             title="Email Preview"
-            className="w-full min-h-[400px] border-0"
+            className="w-full min-h-[400px] border-0 rounded"
             sandbox="allow-same-origin"
           />
         </div>
