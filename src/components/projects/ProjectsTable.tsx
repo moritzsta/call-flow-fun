@@ -1,10 +1,20 @@
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, Archive, Trash2, ArrowRight, Building2, Mail } from 'lucide-react';
-import { Project } from '@/hooks/useProjects';
-import { useProjectStats } from '@/hooks/useProjectStats';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,32 +26,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useProjects } from '@/hooks/useProjects';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, Settings, Archive, Trash2, ExternalLink } from 'lucide-react';
+import { Project, useProjects } from '@/hooks/useProjects';
+import { useProjectStats } from '@/hooks/useProjectStats';
 
-interface ProjectCardProps {
+interface ProjectRowProps {
   project: Project;
   canManage: boolean;
 }
 
-export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
+const ProjectRow = ({ project, canManage }: ProjectRowProps) => {
   const navigate = useNavigate();
   const { archiveProject, deleteProject, isArchiving, isDeleting } = useProjects(project.organization_id);
   const { data: stats, isLoading: statsLoading } = useProjectStats(project.id);
 
-  const handleArchive = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleArchive = () => {
     archiveProject(project.id);
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDelete = () => {
     deleteProject({
       id: project.id,
       organizationId: project.organization_id,
@@ -49,35 +52,51 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
   };
 
   return (
-    <Card 
-      className="group hover:shadow-md hover:border-primary/20 transition-all cursor-pointer"
+    <TableRow 
+      className="cursor-pointer hover:bg-muted/50 transition-colors"
       onClick={() => navigate(`/projects/${project.id}`)}
     >
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-              {project.title}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {new Date(project.created_at).toLocaleDateString('de-DE')}
-            </p>
-          </div>
+      <TableCell className="font-medium max-w-[200px] truncate">
+        {project.title}
+      </TableCell>
+      <TableCell>
+        <Badge variant="secondary" className="font-mono">
+          {statsLoading ? '...' : stats?.companiesCount ?? 0}
+        </Badge>
+      </TableCell>
+      <TableCell>
+        <Badge variant="secondary" className="font-mono">
+          {statsLoading ? '...' : stats?.emailsCount ?? 0}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-muted-foreground text-sm">
+        {new Date(project.created_at).toLocaleDateString('de-DE')}
+      </TableCell>
+      <TableCell onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => navigate(`/projects/${project.id}`)}
+          >
+            <ExternalLink className="h-4 w-4" />
+          </Button>
 
           {canManage && (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="h-8 w-8"
                   disabled={isArchiving || isDeleting}
                 >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigate(`/projects/${project.id}/settings`); }}>
+                <DropdownMenuItem onClick={() => navigate(`/projects/${project.id}/settings`)}>
                   <Settings className="mr-2 h-4 w-4" />
                   Einstellungen
                 </DropdownMenuItem>
@@ -95,7 +114,7 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
                       Löschen
                     </DropdownMenuItem>
                   </AlertDialogTrigger>
-                  <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                  <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Projekt löschen?</AlertDialogTitle>
                       <AlertDialogDescription>
@@ -118,27 +137,35 @@ export const ProjectCard = ({ project, canManage }: ProjectCardProps) => {
             </DropdownMenu>
           )}
         </div>
+      </TableCell>
+    </TableRow>
+  );
+};
 
-        {project.description && (
-          <p className="text-sm text-muted-foreground mt-2 line-clamp-1">
-            {project.description}
-          </p>
-        )}
+interface ProjectsTableProps {
+  projects: Project[];
+  canManage: boolean;
+}
 
-        <div className="flex items-center justify-between mt-3 pt-3 border-t">
-          <div className="flex items-center gap-3 text-xs">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Building2 className="h-3.5 w-3.5" />
-              <span className="font-medium">{statsLoading ? '...' : stats?.companiesCount ?? 0}</span>
-            </div>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Mail className="h-3.5 w-3.5" />
-              <span className="font-medium">{statsLoading ? '...' : stats?.emailsCount ?? 0}</span>
-            </div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-        </div>
-      </CardContent>
-    </Card>
+export const ProjectsTable = ({ projects, canManage }: ProjectsTableProps) => {
+  return (
+    <div className="rounded-lg border bg-card">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Projekt</TableHead>
+            <TableHead className="w-24">Firmen</TableHead>
+            <TableHead className="w-24">E-Mails</TableHead>
+            <TableHead className="w-32">Erstellt</TableHead>
+            <TableHead className="w-24">Aktionen</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {projects.map((project) => (
+            <ProjectRow key={project.id} project={project} canManage={canManage} />
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 };
