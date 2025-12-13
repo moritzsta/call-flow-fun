@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { MoreVertical, Settings, Archive, Trash2, ExternalLink, Building2, Mail, Calendar, FolderOpen } from 'lucide-react';
+import { MoreVertical, Settings, Archive, Trash2, ExternalLink, Building2, Mail, Calendar, Rocket } from 'lucide-react';
 import { Project, useProjects } from '@/hooks/useProjects';
 import { useProjectStats } from '@/hooks/useProjectStats';
 
@@ -80,7 +80,7 @@ const ProjectRow = ({ project, canManage, index }: ProjectRowProps) => {
       <TableCell className="font-medium pl-4">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary/20 to-highlight/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-            <FolderOpen className="h-4 w-4 text-primary" />
+            <Rocket className="h-4 w-4 text-primary" />
           </div>
           <div>
             <p className="font-semibold text-foreground group-hover:text-primary transition-colors truncate max-w-[200px]">
@@ -200,7 +200,7 @@ export const ProjectsTable = ({ projects, canManage }: ProjectsTableProps) => {
             <TableHead className="w-2"></TableHead>
             <TableHead className="font-bold text-foreground">
               <div className="flex items-center gap-2">
-                <FolderOpen className="h-4 w-4 text-primary" />
+                <Rocket className="h-4 w-4 text-primary" />
                 Projekt
               </div>
             </TableHead>
