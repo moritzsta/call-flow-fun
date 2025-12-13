@@ -99,9 +99,23 @@ serve(async (req) => {
       requestBody.project_id = project_id;
     }
 
-    // Special handling for auto workflows - extract userGoal
-    if (workflow_name === 'analyse_anna_auto' && trigger_data?.userGoal) {
-      requestBody.userGoal = trigger_data.userGoal;
+    // CRITICAL: analyse_anna_auto darf KEINE Absenderdaten erhalten!
+    // Defense-in-depth: Entferne Absenderdaten, falls versehentlich mitgesendet
+    if (workflow_name === 'analyse_anna_auto') {
+      if (requestBody.trigger_data) {
+        delete requestBody.trigger_data.sellerContact;
+        delete requestBody.trigger_data.sellerName;
+        delete requestBody.trigger_data.sellerCompany;
+        delete requestBody.trigger_data.sellerPhone;
+        delete requestBody.trigger_data.sellerAddress;
+        delete requestBody.trigger_data.sellerWebsite;
+        delete requestBody.trigger_data.templateEnumName;
+        delete requestBody.trigger_data.templateId;
+      }
+      if (trigger_data?.userGoal) {
+        requestBody.userGoal = trigger_data.userGoal;
+      }
+      console.log('[trigger-n8n-workflow] analyse_anna_auto: Absenderdaten gefiltert');
     }
     
     if (workflow_name === 'pitch_paul_auto' && trigger_data?.userGoal) {

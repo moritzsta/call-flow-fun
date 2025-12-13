@@ -41,6 +41,51 @@ const WORKFLOW_ID_MAPPING = {
   'branding_britta_auto': 'britta_workflow_id',
 };
 
+// Helper: Workflow-spezifische Trigger-Daten filtern
+// WICHTIG: analyse_anna_auto darf KEINE Absenderdaten erhalten!
+function getTriggerDataForWorkflow(workflowName: string, config: any): Record<string, any> {
+  // Basis-Daten für ALLE Workflows (Ort/Branche)
+  const baseData = {
+    city: config?.city,
+    state: config?.state,
+    category: config?.category,
+    maxCompanies: config?.maxCompanies,
+  };
+
+  switch (workflowName) {
+    case 'finder_felix':
+      // Nur Ort/Branche - keine Absenderdaten
+      return baseData;
+      
+    case 'analyse_anna_auto':
+      // Nur Basis + userGoal, KEINE Absenderdaten!
+      return {
+        ...baseData,
+        userGoal: config?.vorhaben,
+      };
+      
+    case 'pitch_paul_auto':
+    case 'branding_britta_auto':
+      // Alle Daten inkl. Absender
+      return {
+        ...baseData,
+        userGoal: config?.vorhaben,
+        vorhaben: config?.vorhaben,
+        templateEnumName: config?.templateEnumName,
+        templateId: config?.templateId,
+        sellerContact: config?.sellerContact,
+        sellerName: config?.sellerContact?.name,
+        sellerCompany: config?.sellerContact?.company,
+        sellerPhone: config?.sellerContact?.phone,
+        sellerAddress: config?.sellerContact?.address,
+        sellerWebsite: config?.sellerContact?.website,
+      };
+      
+    default:
+      return baseData;
+  }
+}
+
 // Proactive check for stuck workflows (runs on every advance-pipeline call)
 async function checkAndRecoverStuckWorkflows(supabase: any, pipeline: Pipeline): Promise<boolean> {
   const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minutes
@@ -241,7 +286,10 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create new workflow state for next workflow
+    // Create new workflow state for next workflow with filtered trigger_data
+    const filteredTriggerData = getTriggerDataForWorkflow(nextWorkflow, pipeline.config);
+    console.log(`[advance-pipeline] Filtered trigger_data for ${nextWorkflow}:`, JSON.stringify(filteredTriggerData, null, 2));
+    
     const { data: newWorkflowState, error: workflowStateError } = await supabase
       .from('n8n_workflow_states')
       .insert({
@@ -249,7 +297,7 @@ Deno.serve(async (req) => {
         project_id: pipeline.project_id,
         user_id: pipeline.user_id,
         status: 'pending',
-        trigger_data: pipeline.config
+        trigger_data: filteredTriggerData
       })
       .select()
       .single();
@@ -281,7 +329,7 @@ Deno.serve(async (req) => {
           workflow_id: newWorkflowState.id,
           project_id: pipeline.project_id,
           user_id: pipeline.user_id,
-          trigger_data: pipeline.config
+          trigger_data: filteredTriggerData
         }
       }
     );
@@ -448,7 +496,10 @@ async function handleRecovery(supabase: any, pipelineId: string) {
     .update({ current_phase: nextWorkflowName })
     .eq('id', pipelineId);
 
-  // Create new workflow state
+  // Create new workflow state with filtered trigger_data
+  const recoveryTriggerData = getTriggerDataForWorkflow(nextWorkflowName, pipeline.config);
+  console.log(`[advance-pipeline] Recovery trigger_data for ${nextWorkflowName}:`, JSON.stringify(recoveryTriggerData, null, 2));
+  
   const { data: newWorkflowState, error: workflowStateError } = await supabase
     .from('n8n_workflow_states')
     .insert({
@@ -456,7 +507,7 @@ async function handleRecovery(supabase: any, pipelineId: string) {
       project_id: pipeline.project_id,
       user_id: pipeline.user_id,
       status: 'pending',
-      trigger_data: pipeline.config
+      trigger_data: recoveryTriggerData
     })
     .select()
     .single();
@@ -481,7 +532,7 @@ async function handleRecovery(supabase: any, pipelineId: string) {
       workflow_id: newWorkflowState.id,
       project_id: pipeline.project_id,
       user_id: pipeline.user_id,
-      trigger_data: pipeline.config
+      trigger_data: recoveryTriggerData
     }
   });
 
