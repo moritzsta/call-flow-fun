@@ -58,8 +58,8 @@ serve(async (req) => {
     // Remove any existing /webhook or /webhook-test suffix from base URL
     baseUrl = baseUrl.replace(/\/webhook(-test)?$/, '');
     
-    // TEMPORARY: Use webhook-test for workflows in test mode
-    const testModeWorkflows = ['finder_felix', 'sende_susan', 'sende_susan_single'];
+    // TEMPORARY: Use webhook-test for workflows in test mode (only Sende Susan remains in test mode)
+    const testModeWorkflows = ['sende_susan', 'sende_susan_single'];
     const webhookPrefix = testModeWorkflows.includes(workflow_name) ? '/webhook-test' : '/webhook';
     const n8nUrl = `${baseUrl}${webhookPrefix}${webhookPath}`;
     
