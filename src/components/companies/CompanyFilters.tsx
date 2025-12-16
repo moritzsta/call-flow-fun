@@ -3,15 +3,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Search, X, Globe, Mail, CheckCircle2 } from 'lucide-react';
+import { SearchInput } from '@/components/ui/search-input';
+import { X, Globe, Mail, CheckCircle2 } from 'lucide-react';
 import { CompanyFilters as Filters } from '@/hooks/useCompanies';
 
 interface CompanyFiltersProps {
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
+  isSearching?: boolean;
 }
 
-export const CompanyFilters = ({ filters, onFiltersChange }: CompanyFiltersProps) => {
+export const CompanyFilters = ({ filters, onFiltersChange, isSearching }: CompanyFiltersProps) => {
   const handleReset = () => {
     onFiltersChange({});
   };
@@ -30,17 +32,15 @@ export const CompanyFilters = ({ filters, onFiltersChange }: CompanyFiltersProps
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Firma, E-Mail, Telefon..."
-            value={filters.search || ''}
-            onChange={(e) =>
-              onFiltersChange({ ...filters, search: e.target.value || undefined })
-            }
-            className="pl-10"
-          />
-        </div>
+        <SearchInput
+          value={filters.search || ''}
+          onChange={(value) =>
+            onFiltersChange({ ...filters, search: value || undefined })
+          }
+          placeholder="Firma, E-Mail, Telefon..."
+          debounceMs={300}
+          isSearching={isSearching}
+        />
 
         {/* Status Filter */}
         <Select

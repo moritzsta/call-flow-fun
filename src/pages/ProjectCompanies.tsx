@@ -65,6 +65,7 @@ export default function ProjectCompanies() {
     companies,
     totalCount,
     isLoading,
+    isFetching,
     refetch,
     deleteCompany,
     updateCompanyStatus,
@@ -278,7 +279,7 @@ export default function ProjectCompanies() {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Filters */}
-            <CompanyFilters filters={filters} onFiltersChange={setFilters} />
+            <CompanyFilters filters={filters} onFiltersChange={setFilters} isSearching={isFetching} />
 
             {/* Bulk Actions */}
             <BulkActions
