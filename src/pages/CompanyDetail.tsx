@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -9,9 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeft, Sparkles, Mail } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Sparkles, Mail, Eye, Edit } from 'lucide-react';
 import { useCompany } from '@/hooks/useCompany';
 import { CompanyInfo } from '@/components/companies/CompanyInfo';
+import { CompanyEditor } from '@/components/companies/CompanyEditor';
 import { AnalysisDisplay } from '@/components/companies/AnalysisDisplay';
 import { useWorkflowTrigger } from '@/hooks/useWorkflowTrigger';
 import { useAuth } from '@/contexts/AuthContext';
@@ -22,8 +25,9 @@ export default function CompanyDetail() {
   const { companyId } = useParams<{ companyId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { company, isLoading, updateCompanyStatus } = useCompany(companyId);
+  const { company, isLoading, updateCompanyStatus, updateCompany, isUpdating } = useCompany(companyId);
   const { triggerWorkflow, isTriggering } = useWorkflowTrigger();
+  const [activeTab, setActiveTab] = useState('overview');
 
   const handleStatusChange = (newStatus: Company['status']) => {
     if (company) {
@@ -155,10 +159,37 @@ export default function CompanyDetail() {
           </div>
         </div>
 
-        <div className="grid gap-6">
-          <CompanyInfo company={company} />
-          <AnalysisDisplay analysis={company.analysis} />
-        </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList>
+            <TabsTrigger value="overview">
+              <Eye className="h-4 w-4 mr-2" />
+              Übersicht
+            </TabsTrigger>
+            <TabsTrigger value="edit">
+              <Edit className="h-4 w-4 mr-2" />
+              Bearbeiten
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-6">
+            <div className="grid gap-6">
+              <CompanyInfo company={company} />
+              <AnalysisDisplay analysis={company.analysis} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="edit" className="mt-6">
+            <CompanyEditor
+              company={company}
+              onSave={(data) => {
+                updateCompany(data);
+                setActiveTab('overview');
+              }}
+              onCancel={() => setActiveTab('overview')}
+              isUpdating={isUpdating}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
