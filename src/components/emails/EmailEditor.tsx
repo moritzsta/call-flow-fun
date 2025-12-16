@@ -18,6 +18,10 @@ import { Edit, Save, Send } from 'lucide-react';
 import { ProjectEmail } from '@/hooks/useEmails';
 
 const emailFormSchema = z.object({
+  recipient_email: z
+    .string()
+    .email('Ungültige E-Mail-Adresse')
+    .min(1, 'Empfänger darf nicht leer sein'),
   subject: z
     .string()
     .min(1, 'Betreff darf nicht leer sein')
@@ -32,7 +36,7 @@ type EmailFormValues = z.infer<typeof emailFormSchema>;
 
 interface EmailEditorProps {
   email: ProjectEmail;
-  onSave: (subject: string, body: string, status?: ProjectEmail['status']) => void;
+  onSave: (subject: string, body: string, recipientEmail?: string, status?: ProjectEmail['status']) => void;
   onSend: (userId: string) => void;
   isUpdating: boolean;
   userId: string;
@@ -42,21 +46,22 @@ export const EmailEditor = ({ email, onSave, onSend, isUpdating, userId }: Email
   const form = useForm<EmailFormValues>({
     resolver: zodResolver(emailFormSchema),
     defaultValues: {
+      recipient_email: email.recipient_email,
       subject: email.subject,
       body: email.body,
     },
   });
 
   const handleSaveDraft = (values: EmailFormValues) => {
-    onSave(values.subject, values.body, 'draft');
+    onSave(values.subject, values.body, values.recipient_email, 'draft');
   };
 
   const handleSaveReady = (values: EmailFormValues) => {
-    onSave(values.subject, values.body, 'ready_to_send');
+    onSave(values.subject, values.body, values.recipient_email, 'ready_to_send');
   };
 
   const handleSendNow = (values: EmailFormValues) => {
-    onSave(values.subject, values.body, 'ready_to_send');
+    onSave(values.subject, values.body, values.recipient_email, 'ready_to_send');
     // Wait a moment for the save to complete, then trigger send
     setTimeout(() => {
       onSend(userId);
@@ -77,16 +82,25 @@ export const EmailEditor = ({ email, onSave, onSend, isUpdating, userId }: Email
       <CardContent>
         <Form {...form}>
           <form className="space-y-6">
-            {/* Recipient (read-only) */}
-            <FormItem>
-              <FormLabel>Empfänger</FormLabel>
-              <FormControl>
-                <Input value={email.recipient_email} disabled />
-              </FormControl>
-              <FormDescription>
-                Der Empfänger kann nicht geändert werden
-              </FormDescription>
-            </FormItem>
+            {/* Recipient */}
+            <FormField
+              control={form.control}
+              name="recipient_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Empfänger</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="empfaenger@firma.de"
+                      {...field}
+                      disabled={isUpdating || email.status === 'sent'}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Subject */}
             <FormField

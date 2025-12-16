@@ -40,16 +40,21 @@ export const useEmail = (emailId?: string) => {
       emailId,
       subject,
       body,
+      recipientEmail,
       status,
     }: {
       emailId: string;
       subject: string;
       body: string;
+      recipientEmail?: string;
       status?: ProjectEmail['status'];
     }) => {
       const updateData: any = { subject, body, updated_at: new Date().toISOString() };
       if (status) {
         updateData.status = status;
+      }
+      if (recipientEmail) {
+        updateData.recipient_email = recipientEmail;
       }
 
       const { error } = await supabase
@@ -99,8 +104,8 @@ export const useEmail = (emailId?: string) => {
     isLoading,
     error,
     refetch,
-    updateEmail: (subject: string, body: string, status?: ProjectEmail['status']) =>
-      updateEmailMutation.mutate({ emailId: emailId!, subject, body, status }),
+    updateEmail: (subject: string, body: string, recipientEmail?: string, status?: ProjectEmail['status']) =>
+      updateEmailMutation.mutate({ emailId: emailId!, subject, body, recipientEmail, status }),
     updateStatus: (status: ProjectEmail['status']) =>
       updateStatusMutation.mutate({ emailId: emailId!, status }),
     isUpdating: updateEmailMutation.isPending || updateStatusMutation.isPending,
