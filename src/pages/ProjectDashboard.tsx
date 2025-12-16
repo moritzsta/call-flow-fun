@@ -87,12 +87,7 @@ export default function ProjectDashboard() {
   } | null>(null);
 
   const { organizations, isLoading: orgsLoading } = useOrganizations();
-  
-  // Find project across all organizations
-  const allProjects = organizations.flatMap(org => {
-    const { projects } = useProjects(org.id);
-    return projects || [];
-  });
+  const { projects: allProjects, isLoading: projectsLoading } = useProjects();
   
   const project = allProjects.find(p => p.id === id);
   const { members, isLoading: membersLoading } = useOrganizationMembers(
@@ -429,7 +424,7 @@ export default function ProjectDashboard() {
     }
   };
 
-  if (orgsLoading || membersLoading) {
+  if (orgsLoading || projectsLoading || membersLoading) {
     return (
       <SidebarProvider>
         <div className="flex min-h-screen w-full bg-background">
