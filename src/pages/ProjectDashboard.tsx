@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
@@ -28,6 +29,8 @@ import { SingleUpdateUweDialog } from '@/components/workflows/SingleUpdateUweDia
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PaulWorkflowConfig, UweWorkflowConfig } from '@/types/workflow';
+import { formatDistanceToNow } from 'date-fns';
+import { de } from 'date-fns/locale';
 import { 
   ArrowLeft, 
   Building2, 
@@ -139,6 +142,37 @@ export default function ProjectDashboard() {
   
   // Cancel workflow hook
   const { cancelWorkflow, isCancelling } = useWorkflowCancel();
+  
+  // Recent workflows query
+  const { data: recentWorkflows } = useQuery({
+    queryKey: ['recent-workflows', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('n8n_workflow_states')
+        .select('id, workflow_name, status, created_at, completed_at, loop_count')
+        .eq('project_id', id!)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!id,
+  });
+  
+  // Workflow name mapping
+  const getWorkflowDisplayName = (name: string) => {
+    const nameMap: Record<string, string> = {
+      'finder_felix': 'Finder Felix',
+      'analyse_anna_auto': 'Analyse Anna',
+      'pitch_paul_auto': 'Pitch Paul',
+      'branding_britta_auto': 'Branding Britta',
+      'sende_susan': 'Sende Susan',
+      'sende_susan_single': 'Sende Susan (Einzel)',
+      'update_uwe': 'Update Uwe',
+    };
+    return nameMap[name] || name;
+  };
   
   // Counts for dialogs
   const companiesWithWebsite = companies.filter((c) => c.website && c.website.length > 0).length;
@@ -1031,18 +1065,66 @@ export default function ProjectDashboard() {
                 </Card>
               </div>
 
-              {/* Recent Activity Placeholder */}
+              {/* Recent Activity */}
               <Card>
                 <CardHeader>
                   <CardTitle>Letzte Aktivitäten</CardTitle>
                   <CardDescription>
-                    Übersicht über die neuesten Änderungen in diesem Projekt
+                    Übersicht über die neuesten Workflow-Ausführungen in diesem Projekt
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-center text-muted-foreground py-8">
-                    Noch keine Aktivitäten vorhanden.
-                  </p>
+                  {recentWorkflows && recentWorkflows.length > 0 ? (
+                    <div className="space-y-3">
+                      {recentWorkflows.map((workflow) => (
+                        <div 
+                          key={workflow.id}
+                          className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors cursor-pointer"
+                          onClick={() => {
+                            // Navigate to appropriate detail page based on workflow type
+                            if (workflow.workflow_name === 'sende_susan') {
+                              navigate(`/projects/${id}/sende-susan/${workflow.id}`);
+                            } else if (workflow.workflow_name === 'update_uwe') {
+                              navigate(`/projects/${id}/update-uwe/${workflow.id}`);
+                            } else {
+                              navigate(`/projects/${id}/workflow-status/${workflow.id}`);
+                            }
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
+                              workflow.workflow_name === 'finder_felix' ? 'bg-primary/10' :
+                              workflow.workflow_name === 'analyse_anna_auto' ? 'bg-accent/10' :
+                              workflow.workflow_name === 'pitch_paul_auto' ? 'bg-secondary/50' :
+                              workflow.workflow_name === 'branding_britta_auto' ? 'bg-purple-500/10' :
+                              workflow.workflow_name === 'sende_susan' || workflow.workflow_name === 'sende_susan_single' ? 'bg-green-500/10' :
+                              workflow.workflow_name === 'update_uwe' ? 'bg-teal-500/10' :
+                              'bg-muted'
+                            }`}>
+                              {workflow.workflow_name === 'finder_felix' && <Search className="h-4 w-4 text-primary" />}
+                              {workflow.workflow_name === 'analyse_anna_auto' && <BarChart3 className="h-4 w-4 text-accent" />}
+                              {workflow.workflow_name === 'pitch_paul_auto' && <Mail className="h-4 w-4 text-foreground" />}
+                              {workflow.workflow_name === 'branding_britta_auto' && <Sparkles className="h-4 w-4 text-purple-600 dark:text-purple-400" />}
+                              {(workflow.workflow_name === 'sende_susan' || workflow.workflow_name === 'sende_susan_single') && <Send className="h-4 w-4 text-green-600" />}
+                              {workflow.workflow_name === 'update_uwe' && <RefreshCw className="h-4 w-4 text-teal-600 dark:text-teal-400" />}
+                            </div>
+                            <div>
+                              <p className="font-medium text-sm">{getWorkflowDisplayName(workflow.workflow_name)}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDistanceToNow(new Date(workflow.created_at), { addSuffix: true, locale: de })}
+                                {workflow.loop_count > 0 && ` • ${workflow.loop_count} Loops`}
+                              </p>
+                            </div>
+                          </div>
+                          <WorkflowStatusBadge status={workflow.status} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center text-muted-foreground py-8">
+                      Noch keine Aktivitäten vorhanden.
+                    </p>
+                  )}
                 </CardContent>
               </Card>
             </div>
