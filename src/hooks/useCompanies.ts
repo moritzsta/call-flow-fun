@@ -70,7 +70,7 @@ export const useCompanies = (
   const queryClient = useQueryClient();
   const defaultPagination = { page: 0, pageSize: 50 };
 
-  const { data: result, isLoading, error, refetch } = useQuery({
+  const { data: result, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ['companies', projectId, filters, sortConfig, pagination],
     queryFn: async () => {
       if (!projectId) return { data: [], count: 0 };
@@ -218,6 +218,7 @@ export const useCompanies = (
     companies,
     totalCount,
     isLoading,
+    isFetching,
     error,
     refetch,
     deleteCompany: deleteCompany.mutate,
