@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/Sidebar';
@@ -10,10 +10,10 @@ import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge'
 import { WorkflowLoadingAnimation } from '@/components/workflows/WorkflowLoadingAnimation';
 import { useWorkflowMaxLoops } from '@/hooks/useWorkflowMaxLoops';
 import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
-import { ArrowLeft, MessageSquare, XCircle } from 'lucide-react';
+import { ArrowLeft, MessageSquare, XCircle, Building2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 
 interface WorkflowState {
   id: string;
@@ -59,10 +59,31 @@ export default function WorkflowStatus() {
   });
 
   const isActive = workflow?.status === 'running' || workflow?.status === 'alive';
+  const isFinderFelix = workflow?.workflow_name === 'finder_felix';
+  
   const { annaMaxLoops, paulMaxLoops, brittaMaxLoops } = useWorkflowMaxLoops(
     workflow?.project_id,
     isActive
   );
+
+  // Live companies count for Finder Felix
+  const { data: companiesCount, refetch: refetchCompanies } = useQuery({
+    queryKey: ['companies-count-felix', workflow?.project_id],
+    queryFn: async () => {
+      const { count, error } = await supabase
+        .from('companies')
+        .select('*', { count: 'exact', head: true })
+        .eq('project_id', workflow?.project_id);
+      if (error) throw error;
+      return count || 0;
+    },
+    enabled: !!workflow?.project_id && isFinderFelix,
+    refetchInterval: isActive && isFinderFelix ? 3000 : false,
+  });
+
+  const stableRefetchCompanies = useCallback(() => {
+    refetchCompanies();
+  }, [refetchCompanies]);
 
   // Determine max loops based on workflow name
   const getMaxLoops = (workflowName: string): number => {
@@ -74,7 +95,7 @@ export default function WorkflowStatus() {
 
   const maxLoopsValue = workflow ? getMaxLoops(workflow.workflow_name) : 0;
 
-  // Realtime subscription
+  // Realtime subscription for workflow state updates
   useEffect(() => {
     if (!workflowId) return;
 
@@ -98,6 +119,31 @@ export default function WorkflowStatus() {
       supabase.removeChannel(channel);
     };
   }, [workflowId, refetch]);
+
+  // Realtime subscription for companies (Finder Felix only)
+  useEffect(() => {
+    if (!workflow?.project_id || !isFinderFelix || !isActive) return;
+
+    const channel = supabase
+      .channel(`companies-felix-${workflow.project_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'companies',
+          filter: `project_id=eq.${workflow.project_id}`,
+        },
+        () => {
+          stableRefetchCompanies();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [workflow?.project_id, isFinderFelix, isActive, stableRefetchCompanies]);
 
   if (isLoading) {
     return (
@@ -192,25 +238,61 @@ export default function WorkflowStatus() {
                   <CardTitle>Status Details</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fortschritt</p>
-                    <div className="mt-2">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium">
-                          {workflow.loop_count} / {maxLoopsValue > 0 ? maxLoopsValue : '∞'} Durchläufe
-                        </span>
-                        <span className="text-sm text-muted-foreground">
-                          {progress.toFixed(0)}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-secondary rounded-full h-2">
-                        <div
-                          className="bg-primary h-2 rounded-full transition-all"
-                          style={{ width: `${progress}%` }}
-                        />
+                  {isFinderFelix ? (
+                    // Finder Felix: Show live company count
+                    <div>
+                      <p className="text-sm text-muted-foreground">Gefundene Firmen</p>
+                      <div className="mt-2">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Building2 className="h-5 w-5 text-primary" />
+                            <span className="text-2xl font-bold">{companiesCount ?? 0}</span>
+                            {workflow.trigger_data?.maxCompanies && (
+                              <span className="text-muted-foreground">
+                                / {workflow.trigger_data.maxCompanies} max
+                              </span>
+                            )}
+                          </div>
+                          {isActive && (
+                            <span className="text-sm text-muted-foreground animate-pulse">
+                              Live aktualisiert...
+                            </span>
+                          )}
+                        </div>
+                        {workflow.trigger_data?.maxCompanies && (
+                          <div className="w-full bg-secondary rounded-full h-2 mt-3">
+                            <div
+                              className="bg-primary h-2 rounded-full transition-all"
+                              style={{ 
+                                width: `${Math.min((companiesCount || 0) / workflow.trigger_data.maxCompanies * 100, 100)}%` 
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    // Other workflows: Show loop count progress
+                    <div>
+                      <p className="text-sm text-muted-foreground">Fortschritt</p>
+                      <div className="mt-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium">
+                            {workflow.loop_count} / {maxLoopsValue > 0 ? maxLoopsValue : '∞'} Durchläufe
+                          </span>
+                          <span className="text-sm text-muted-foreground">
+                            {progress.toFixed(0)}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-secondary rounded-full h-2">
+                          <div
+                            className="bg-primary h-2 rounded-full transition-all"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {workflow.trigger_data && (
                     <div>
