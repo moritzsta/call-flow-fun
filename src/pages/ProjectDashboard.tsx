@@ -151,6 +151,21 @@ export default function ProjectDashboard() {
     setIsTriggeringFelix(true);
     
     try {
+      // Message zusammenbauen (identisch wie Pipeline-Trigger)
+      const searchTerms = [];
+      if (config.state) searchTerms.push(`Bundesland: ${config.state}`);
+      if (config.city) searchTerms.push(`Stadt: ${config.city}`);
+      if (config.category) searchTerms.push(`Branche: ${config.category}`);
+      
+      const felixMessage = searchTerms.length > 0
+        ? `Bitte finde Unternehmen mit folgenden Kriterien: ${searchTerms.join(', ')}`
+        : 'Bitte finde Unternehmen';
+      
+      const triggerData = {
+        message: felixMessage,
+        maxCompanies: config.maxCompanies,
+      };
+      
       const { data: workflowState, error: dbError } = await supabase
         .from('n8n_workflow_states')
         .insert({
@@ -158,7 +173,7 @@ export default function ProjectDashboard() {
           user_id: user.id,
           workflow_name: 'finder_felix',
           status: 'running',
-          trigger_data: config,
+          trigger_data: triggerData,
         })
         .select()
         .single();
@@ -171,7 +186,7 @@ export default function ProjectDashboard() {
           workflow_id: workflowState.id,
           project_id: id,
           user_id: user.id,
-          trigger_data: config,
+          trigger_data: triggerData,
         },
       });
       
