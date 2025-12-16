@@ -857,6 +857,60 @@ export default function ProjectDashboard() {
                   </CardContent>
                 </Card>
 
+                {/* Update Uwe Card */}
+                <Card className="border-2 border-teal-500/20 hover:border-teal-500/40 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                          <RefreshCw className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base">Update Uwe</CardTitle>
+                          <CardDescription className="text-xs">
+                            E-Mails überarbeiten
+                          </CardDescription>
+                        </div>
+                      </div>
+                      {uweRunning && <WorkflowStatusBadge status="running" />}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2">
+                    {uweRunning ? (
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          onClick={() => navigate(`/projects/${id}/update-uwe/${uweWorkflow?.id}`)}
+                        >
+                          Details anzeigen
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isCancelling}
+                          onClick={() => uweWorkflow && cancelWorkflow(uweWorkflow.id, 'Update Uwe')}
+                        >
+                          <XCircle className="mr-2 h-3 w-3" />
+                          Abbrechen
+                        </Button>
+                      </>
+                    ) : (
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        className="w-full" 
+                        disabled={!canManage || totalEmails === 0}
+                        onClick={() => setUweDialogOpen(true)}
+                      >
+                        <RefreshCw className="mr-2 h-3 w-3" />
+                        Batch starten ({totalEmails})
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {/* Branding Britta Card */}
                 <Card className="border-2 border-purple-500/20 hover:border-purple-500/40 transition-colors">
                   <CardHeader className="pb-3">
@@ -971,60 +1025,6 @@ export default function ProjectDashboard() {
                       >
                         <Send className="mr-2 h-3 w-3" />
                         Batch starten ({emailsToSend})
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Update Uwe Card */}
-                <Card className="border-2 border-teal-500/20 hover:border-teal-500/40 transition-colors">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
-                          <RefreshCw className="h-4 w-4 text-teal-600 dark:text-teal-400" />
-                        </div>
-                        <div className="min-w-0">
-                          <CardTitle className="text-base">Update Uwe</CardTitle>
-                          <CardDescription className="text-xs">
-                            E-Mails überarbeiten
-                          </CardDescription>
-                        </div>
-                      </div>
-                      {uweRunning && <WorkflowStatusBadge status="running" />}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 space-y-2">
-                    {uweRunning ? (
-                      <>
-                        <Button 
-                          size="sm"
-                          className="w-full" 
-                          onClick={() => navigate(`/projects/${id}/update-uwe/${uweWorkflow?.id}`)}
-                        >
-                          Details anzeigen
-                        </Button>
-                        <Button 
-                          size="sm"
-                          variant="destructive"
-                          className="w-full"
-                          disabled={isCancelling}
-                          onClick={() => uweWorkflow && cancelWorkflow(uweWorkflow.id, 'Update Uwe')}
-                        >
-                          <XCircle className="mr-2 h-3 w-3" />
-                          Abbrechen
-                        </Button>
-                      </>
-                    ) : (
-                      <Button 
-                        size="sm"
-                        variant="outline"
-                        className="w-full" 
-                        disabled={!canManage || totalEmails === 0}
-                        onClick={() => setUweDialogOpen(true)}
-                      >
-                        <RefreshCw className="mr-2 h-3 w-3" />
-                        Batch starten ({totalEmails})
                       </Button>
                     )}
                   </CardContent>
