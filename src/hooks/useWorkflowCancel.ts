@@ -21,9 +21,19 @@ export const useWorkflowCancel = () => {
 
       if (error) throw error;
 
-      // Invalidate all related queries to ensure UI updates
-      await queryClient.invalidateQueries({ queryKey: ['workflow-state', workflowId] });
-      await queryClient.invalidateQueries({ queryKey: ['single-workflow-status'] });
+      // Force refetch all workflow-related queries to ensure UI updates immediately
+      await queryClient.refetchQueries({ 
+        queryKey: ['single-workflow-status'],
+        type: 'active'
+      });
+      await queryClient.refetchQueries({ 
+        queryKey: ['workflow-state'],
+        type: 'active'
+      });
+      await queryClient.refetchQueries({ 
+        queryKey: ['all-workflows'],
+        type: 'active'
+      });
 
       toast.success(`Workflow "${workflowName}" wurde abgebrochen`, {
         description: 'Der Workflow wurde als fehlgeschlagen markiert.',
