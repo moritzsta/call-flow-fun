@@ -1,10 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import { 
   notifyCompanyDeleted, 
   notifyCompanyStatusUpdated,
   notifyCrudError 
 } from '@/lib/notifications';
+
+export interface CreateCompanyData {
+  company: string;
+  industry?: string;
+  ceo_name?: string;
+  email?: string;
+  phone?: string;
+  website?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  district?: string;
+  status?: 'found' | 'analyzed' | 'contacted' | 'qualified' | 'rejected';
+}
 
 export interface Company {
   id: string;
@@ -163,6 +178,42 @@ export const useCompanies = (
     },
   });
 
+  // Create company mutation
+  const createCompany = useMutation({
+    mutationFn: async (data: CreateCompanyData) => {
+      if (!projectId) throw new Error('Project ID ist erforderlich');
+      
+      const { data: newCompany, error } = await supabase
+        .from('companies')
+        .insert({
+          project_id: projectId,
+          company: data.company,
+          industry: data.industry || null,
+          ceo_name: data.ceo_name || null,
+          email: data.email || null,
+          phone: data.phone || null,
+          website: data.website || null,
+          address: data.address || null,
+          city: data.city || null,
+          state: data.state || null,
+          district: data.district || null,
+          status: data.status || 'found',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return newCompany;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['companies', projectId] });
+      toast.success('Firma erfolgreich hinzugefügt');
+    },
+    onError: (error: Error) => {
+      notifyCrudError('Erstellen', error.message);
+    },
+  });
+
   return {
     companies,
     totalCount,
@@ -172,5 +223,7 @@ export const useCompanies = (
     deleteCompany: deleteCompany.mutate,
     updateCompanyStatus: (companyId: string, status: Company['status']) =>
       updateCompanyStatus.mutate({ companyId, status }),
+    createCompany: createCompany.mutateAsync,
+    isCreating: createCompany.isPending,
   };
 };

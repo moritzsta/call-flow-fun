@@ -4,12 +4,13 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Building2, RefreshCw, Search, Trash2, Loader2 } from 'lucide-react';
-import { useCompanies, CompanyFilters as Filters, CompanySortConfig, Company } from '@/hooks/useCompanies';
+import { ArrowLeft, Building2, RefreshCw, Search, Trash2, Loader2, Plus } from 'lucide-react';
+import { useCompanies, CompanyFilters as Filters, CompanySortConfig, Company, CreateCompanyData } from '@/hooks/useCompanies';
 import { CompanyFilters } from '@/components/companies/CompanyFilters';
 import { CompaniesTable } from '@/components/companies/CompaniesTable';
 import { ImportCompaniesButton } from '@/components/companies/ImportCompaniesButton';
 import { ExportCompaniesButton } from '@/components/companies/ExportCompaniesButton';
+import { AddCompanyDialog } from '@/components/companies/AddCompanyDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompanyStats } from '@/components/companies/CompanyStats';
 import { BulkActions } from '@/components/companies/BulkActions';
@@ -58,6 +59,7 @@ export default function ProjectCompanies() {
     created: true,
   });
   const [isRemovingDuplicates, setIsRemovingDuplicates] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
 
   const {
     companies,
@@ -66,7 +68,14 @@ export default function ProjectCompanies() {
     refetch,
     deleteCompany,
     updateCompanyStatus,
+    createCompany,
+    isCreating,
   } = useCompanies(id, filters, sortConfig, { page: 0, pageSize: 10000 });
+
+  const handleAddCompany = async (data: CreateCompanyData) => {
+    await createCompany(data);
+    setAddDialogOpen(false);
+  };
 
   const handleRemoveDuplicates = async () => {
     if (!id) return;
@@ -280,8 +289,12 @@ export default function ProjectCompanies() {
               onExport={handleBulkExport}
             />
 
-            {/* Import/Export Buttons */}
-            <div className="flex gap-2 justify-end">
+            {/* Add / Import / Export Buttons */}
+            <div className="flex gap-2 justify-end flex-wrap">
+              <Button onClick={() => setAddDialogOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Firma hinzufügen
+              </Button>
               <ImportCompaniesButton projectId={id!} />
               <ExportCompaniesButton projectId={id!} />
             </div>
@@ -327,6 +340,14 @@ export default function ProjectCompanies() {
             )}
           </CardContent>
         </Card>
+
+        {/* Add Company Dialog */}
+        <AddCompanyDialog
+          open={addDialogOpen}
+          onOpenChange={setAddDialogOpen}
+          onSubmit={handleAddCompany}
+          isLoading={isCreating}
+        />
       </div>
     </Layout>
   );
