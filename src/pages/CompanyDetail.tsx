@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -20,6 +22,7 @@ import { useWorkflowTrigger } from '@/hooks/useWorkflowTrigger';
 import { useAuth } from '@/contexts/AuthContext';
 import { Company } from '@/hooks/useCompanies';
 import { notifyError } from '@/lib/notifications';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function CompanyDetail() {
   const { companyId } = useParams<{ companyId: string }>();
@@ -28,6 +31,22 @@ export default function CompanyDetail() {
   const { company, isLoading, updateCompanyStatus, updateCompany, isUpdating } = useCompany(companyId);
   const { triggerWorkflow, isTriggering } = useWorkflowTrigger();
   const [activeTab, setActiveTab] = useState('overview');
+
+  // E-Mails für diese Firma abrufen
+  const { data: companyEmails } = useQuery({
+    queryKey: ['company-emails', companyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('project_emails')
+        .select('id, subject, status, created_at')
+        .eq('company_id', companyId!)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!companyId,
+  });
 
   const handleStatusChange = (newStatus: Company['status']) => {
     if (company) {
@@ -157,6 +176,62 @@ export default function CompanyDetail() {
               E-Mail generieren (Paul)
             </Button>
           </div>
+
+          {/* E-Mail Status Indikator */}
+          {companyEmails && companyEmails.length > 0 ? (
+            <Card className="mt-6 border-green-500/30 bg-green-500/5">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-green-500/10 flex items-center justify-center">
+                      <Mail className="h-5 w-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-green-700 dark:text-green-400">
+                        E-Mail vorhanden
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {companyEmails.length === 1 
+                          ? `"${companyEmails[0].subject}"` 
+                          : `${companyEmails.length} E-Mails erstellt`}
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => navigate(`/emails/${companyEmails[0].id}`)}
+                    variant="outline"
+                    className="border-green-500/30 hover:bg-green-500/10"
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    {companyEmails.length === 1 ? 'E-Mail anzeigen' : 'Neueste E-Mail'}
+                  </Button>
+                </div>
+                {companyEmails.length > 1 && (
+                  <p className="text-xs text-muted-foreground mt-2 ml-13">
+                    + {companyEmails.length - 1} weitere E-Mail(s)
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="mt-6 border-dashed">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-muted-foreground">
+                      Noch keine E-Mail erstellt
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Nutze "E-Mail generieren (Paul)" um eine E-Mail zu erstellen
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
