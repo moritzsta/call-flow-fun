@@ -24,9 +24,10 @@ import { SingleAnalyseAnnaDialog } from '@/components/workflows/SingleAnalyseAnn
 import { SinglePitchPaulDialog } from '@/components/workflows/SinglePitchPaulDialog';
 import { SingleBrandingBrittaDialog } from '@/components/workflows/SingleBrandingBrittaDialog';
 import { SingleSendeSusanDialog } from '@/components/workflows/SingleSendeSusanDialog';
+import { SingleUpdateUweDialog } from '@/components/workflows/SingleUpdateUweDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PaulWorkflowConfig } from '@/types/workflow';
+import { PaulWorkflowConfig, UweWorkflowConfig } from '@/types/workflow';
 import { 
   ArrowLeft, 
   Building2, 
@@ -38,7 +39,8 @@ import {
   Settings,
   Sparkles,
   XCircle,
-  Activity
+  Activity,
+  RefreshCw
 } from 'lucide-react';
 import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
 
@@ -53,6 +55,7 @@ export default function ProjectDashboard() {
   const [paulDialogOpen, setPaulDialogOpen] = useState(false);
   const [brittaDialogOpen, setBrittaDialogOpen] = useState(false);
   const [susanDialogOpen, setSusanDialogOpen] = useState(false);
+  const [uweDialogOpen, setUweDialogOpen] = useState(false);
   
   // Trigger states
   const [isTriggeringFelix, setIsTriggeringFelix] = useState(false);
@@ -60,6 +63,7 @@ export default function ProjectDashboard() {
   const [isTriggeringPaul, setIsTriggeringPaul] = useState(false);
   const [isTriggeringBritta, setIsTriggeringBritta] = useState(false);
   const [isTriggeringSusan, setIsTriggeringSusan] = useState(false);
+  const [isTriggeringUwe, setIsTriggeringUwe] = useState(false);
   
   // Rate Limits states
   const [rateLimitsOpen, setRateLimitsOpen] = useState(false);
@@ -136,6 +140,7 @@ export default function ProjectDashboard() {
   const { workflow: paulWorkflow, isRunning: paulRunning } = useSingleWorkflowStatus(id || '', 'pitch_paul_auto');
   const { workflow: brittaWorkflow, isRunning: brittaRunning } = useSingleWorkflowStatus(id || '', 'branding_britta_auto');
   const { workflow: susanWorkflow, isRunning: susanRunning } = useSingleWorkflowStatus(id || '', 'sende_susan');
+  const { workflow: uweWorkflow, isRunning: uweRunning } = useSingleWorkflowStatus(id || '', 'update_uwe');
   
   // Cancel workflow hook
   const { cancelWorkflow, isCancelling } = useWorkflowCancel();
@@ -361,6 +366,48 @@ export default function ProjectDashboard() {
       toast.error(`Fehler: ${error.message}`);
     } finally {
       setIsTriggeringSusan(false);
+    }
+  };
+
+  const triggerUwe = async (config: UweWorkflowConfig) => {
+    if (!id || !user?.id) return;
+    setIsTriggeringUwe(true);
+    
+    try {
+      const { data: workflowState, error: dbError } = await supabase
+        .from('n8n_workflow_states')
+        .insert({
+          project_id: id,
+          user_id: user.id,
+          workflow_name: 'update_uwe',
+          status: 'running',
+          trigger_data: { userGoal: config.userGoal },
+        })
+        .select()
+        .single();
+      
+      if (dbError) throw dbError;
+      
+      const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+        body: {
+          workflow_name: 'update_uwe',
+          workflow_id: workflowState.id,
+          project_id: id,
+          user_id: user.id,
+          trigger_data: { userGoal: config.userGoal },
+        },
+      });
+      
+      if (functionError) throw functionError;
+      
+      toast.success('Update Uwe wurde gestartet');
+      setUweDialogOpen(false);
+      navigate(`/projects/${id}/update-uwe/${workflowState.id}`);
+    } catch (error: any) {
+      console.error('Error triggering Uwe:', error);
+      toast.error(`Fehler: ${error.message}`);
+    } finally {
+      setIsTriggeringUwe(false);
     }
   };
   
@@ -918,6 +965,60 @@ export default function ProjectDashboard() {
                     )}
                   </CardContent>
                 </Card>
+
+                {/* Update Uwe Card */}
+                <Card className="border-2 border-teal-500/20 hover:border-teal-500/40 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                          <RefreshCw className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                        </div>
+                        <div className="min-w-0">
+                          <CardTitle className="text-base">Update Uwe</CardTitle>
+                          <CardDescription className="text-xs">
+                            E-Mails überarbeiten
+                          </CardDescription>
+                        </div>
+                      </div>
+                      {uweRunning && <WorkflowStatusBadge status="running" />}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-0 space-y-2">
+                    {uweRunning ? (
+                      <>
+                        <Button 
+                          size="sm"
+                          className="w-full" 
+                          onClick={() => navigate(`/projects/${id}/update-uwe/${uweWorkflow?.id}`)}
+                        >
+                          Details anzeigen
+                        </Button>
+                        <Button 
+                          size="sm"
+                          variant="destructive"
+                          className="w-full"
+                          disabled={isCancelling}
+                          onClick={() => uweWorkflow && cancelWorkflow(uweWorkflow.id, 'Update Uwe')}
+                        >
+                          <XCircle className="mr-2 h-3 w-3" />
+                          Abbrechen
+                        </Button>
+                      </>
+                    ) : (
+                      <Button 
+                        size="sm"
+                        variant="outline"
+                        className="w-full" 
+                        disabled={!canManage || totalEmails === 0}
+                        onClick={() => setUweDialogOpen(true)}
+                      >
+                        <RefreshCw className="mr-2 h-3 w-3" />
+                        Batch starten ({totalEmails})
+                      </Button>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Recent Activity Placeholder */}
@@ -977,6 +1078,14 @@ export default function ProjectDashboard() {
         onConfirm={triggerSusan}
         emailCount={emailsToSend}
         isLoading={isTriggeringSusan}
+      />
+      
+      <SingleUpdateUweDialog
+        open={uweDialogOpen}
+        onOpenChange={setUweDialogOpen}
+        onStart={triggerUwe}
+        isStarting={isTriggeringUwe}
+        emailsCount={totalEmails}
       />
       
       {/* OpenAI Rate Limits Dialog */}

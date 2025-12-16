@@ -14,6 +14,7 @@ const videoMap: Record<string, string> = {
   branding_britta: '/videos/britta-ladeanimation.mp4',
   branding_britta_auto: '/videos/britta-ladeanimation.mp4',
   sende_susan: '/videos/timer-ladeanimation.mp4',
+  update_uwe: '/videos/timer-ladeanimation.mp4',
   timer: '/videos/timer-ladeanimation.mp4',
 };
 

@@ -11,3 +11,7 @@ export interface PaulWorkflowConfig {
   templateEnumName?: string;
   sellerContact?: SellerContactData;
 }
+
+export interface UweWorkflowConfig {
+  userGoal: string;
+}

@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface WorkflowRequest {
-  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'pitch_paul_auto' | 'branding_britta' | 'branding_britta_auto' | 'sende_susan' | 'sende_susan_single';
+  workflow_name: 'finder_felix' | 'analyse_anna' | 'analyse_anna_auto' | 'pitch_paul' | 'pitch_paul_auto' | 'branding_britta' | 'branding_britta_auto' | 'sende_susan' | 'sende_susan_single' | 'update_uwe';
   workflow_id: string;
   project_id: string;
   user_id: string;
@@ -45,6 +45,7 @@ serve(async (req) => {
       branding_britta_auto: '/branding-britta-auto',
       sende_susan: '/sende-susan-auto',        // Batch E-Mail versand
       sende_susan_single: '/sende-susan',      // Einzelne E-Mail versenden
+      update_uwe: '/update-uwe',               // Batch E-Mail Update
     };
 
     const webhookPath = webhookPaths[workflow_name];
@@ -58,8 +59,8 @@ serve(async (req) => {
     // Remove any existing /webhook or /webhook-test suffix from base URL
     baseUrl = baseUrl.replace(/\/webhook(-test)?$/, '');
     
-    // TEMPORARY: Use webhook-test for workflows in test mode (only Sende Susan remains in test mode)
-    const testModeWorkflows = ['sende_susan', 'sende_susan_single'];
+    // TEMPORARY: Use webhook-test for workflows in test mode (Sende Susan and Update Uwe remain in test mode)
+    const testModeWorkflows = ['sende_susan', 'sende_susan_single', 'update_uwe'];
     const webhookPrefix = testModeWorkflows.includes(workflow_name) ? '/webhook-test' : '/webhook';
     const n8nUrl = `${baseUrl}${webhookPrefix}${webhookPath}`;
     
@@ -129,6 +130,12 @@ serve(async (req) => {
     // Special handling for finder_felix workflow - check for duplicates
     if (workflow_name === 'finder_felix' && trigger_data) {
       requestBody.check_duplicates = true;
+    }
+
+    // Special handling for update_uwe workflow
+    if (workflow_name === 'update_uwe' && trigger_data) {
+      requestBody.updateUwe_usergoal = trigger_data.userGoal;
+      console.log('[trigger-n8n-workflow] update_uwe: userGoal set to', trigger_data.userGoal);
     }
 
     // Log final URL and payload structure for debugging
