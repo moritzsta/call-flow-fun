@@ -740,6 +740,7 @@ export default function ProjectDashboard() {
                       <>
                         <Button 
                           size="sm"
+                          variant="outline"
                           className="w-full" 
                           disabled={!canManage}
                           onClick={() => navigate(`/projects/${id}/finder-felix`)}
