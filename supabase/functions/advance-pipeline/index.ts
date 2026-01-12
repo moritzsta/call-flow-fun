@@ -551,7 +551,8 @@ async function handleRecovery(supabase: any, pipelineId: string) {
       project_id: pipeline.project_id,
       user_id: pipeline.user_id,
       status: 'pending',
-      trigger_data: recoveryTriggerData
+      trigger_data: recoveryTriggerData,
+      pipeline_id: pipelineId  // FIX: Pipeline-Zuordnung hinzufügen
     })
     .select()
     .single();
