@@ -58,10 +58,13 @@ function getTriggerDataForWorkflow(workflowName: string, config: any): Record<st
       return baseData;
       
     case 'analyse_anna_auto':
-      // Nur Basis + userGoal, KEINE Absenderdaten!
+      // Basis + userGoal + analyseInstruction, KEINE Absenderdaten!
       return {
         ...baseData,
         userGoal: config?.vorhaben,
+        analyseInstruction: config?.analyseInstruction,
+        analyseInstructionId: config?.analyseInstructionId,
+        analyseInstructionName: config?.analyseInstructionName,
       };
       
     case 'pitch_paul_auto':

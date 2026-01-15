@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { AdaptiveDialog } from '@/components/ui/adaptive-dialog';
 import { useCitySearch } from '@/hooks/useCitySearch';
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
+import { useAnalyseInstructions } from '@/hooks/useAnalyseInstructions';
 import { PaulWorkflowConfig } from '@/types/workflow';
 import { Loader2, X } from 'lucide-react';
 import {
@@ -26,6 +27,7 @@ const automationSchema = z.object({
   category: z.string().min(1, 'Kategorie ist erforderlich').max(200),
   vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(1000),
   maxCompanies: z.number().positive('Bitte geben Sie eine positive Zahl ein').optional().or(z.literal(undefined)),
+  analyseInstructionId: z.string().min(1, 'Bitte wählen Sie eine Analyse-Anweisung'),
   templateId: z.string().optional(),
   sellerName: z.string().min(2, 'Name erforderlich'),
   sellerCompany: z.string().min(2, 'Firma erforderlich'),
@@ -54,6 +56,7 @@ export const AutomationDialog = ({
   const [isSearching, setIsSearching] = useState(false);
 
   const { templates, isLoading: templatesLoading } = useEmailTemplates();
+  const { instructions: analyseInstructions, isLoading: instructionsLoading } = useAnalyseInstructions();
 
   const {
     register,
@@ -70,6 +73,7 @@ export const AutomationDialog = ({
       category: '',
       vorhaben: '',
       maxCompanies: undefined,
+      analyseInstructionId: '',
       templateId: '',
       sellerName: '',
       sellerCompany: '',
@@ -82,6 +86,7 @@ export const AutomationDialog = ({
   const selectedCity = watch('city');
   const selectedState = watch('state');
   const selectedTemplateId = watch('templateId');
+  const selectedAnalyseInstructionId = watch('analyseInstructionId');
 
   // Debounce Effect (500ms)
   useEffect(() => {
@@ -101,11 +106,15 @@ export const AutomationDialog = ({
 
   const onSubmit = (data: AutomationFormData) => {
     const selectedTemplate = templates.find(t => t.id === data.templateId);
+    const selectedInstruction = analyseInstructions.find(i => i.id === data.analyseInstructionId);
     
     // Build extended config (only pass enum_name, not id or content)
     const extendedData = {
       ...data,
       templateEnumName: selectedTemplate?.enum_name,
+      analyseInstruction: selectedInstruction?.instruction,
+      analyseInstructionId: data.analyseInstructionId,
+      analyseInstructionName: selectedInstruction?.name,
       sellerContact: {
         name: data.sellerName,
         company: data.sellerCompany,
@@ -146,6 +155,11 @@ export const AutomationDialog = ({
     const salesTemplate = templates.find(t => t.enum_name === 'sales');
     if (salesTemplate) {
       setValue('templateId', salesTemplate.id, { shouldValidate: true });
+    }
+    
+    // Erste Analyse-Anweisung wählen
+    if (analyseInstructions.length > 0) {
+      setValue('analyseInstructionId', analyseInstructions[0].id, { shouldValidate: true });
     }
     
     // Verkäufer-Daten
@@ -287,6 +301,33 @@ export const AutomationDialog = ({
           )}
           <p className="text-xs text-muted-foreground">
             Leer lassen für unbegrenzte Suche
+          </p>
+        </div>
+
+        {/* Analyse Instruction */}
+        <div className="space-y-2">
+          <Label htmlFor="analyseInstructionId">Analyse-Anweisung *</Label>
+          <Select
+            value={selectedAnalyseInstructionId}
+            onValueChange={(value) => setValue('analyseInstructionId', value, { shouldValidate: true })}
+            disabled={isStarting || instructionsLoading}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Analyse-Anweisung auswählen..." />
+            </SelectTrigger>
+            <SelectContent>
+              {analyseInstructions.map((instruction) => (
+                <SelectItem key={instruction.id} value={instruction.id}>
+                  {instruction.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.analyseInstructionId && (
+            <p className="text-sm text-destructive">{errors.analyseInstructionId.message}</p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Bestimmt, nach welchen Kriterien Firmenwebseiten analysiert werden
           </p>
         </div>
 

@@ -1,12 +1,16 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AdaptiveDialog } from '@/components/ui/adaptive-dialog';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAnalyseInstructions } from '@/hooks/useAnalyseInstructions';
 
 interface SingleAnalyseAnnaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onStart: () => void;
+  onStart: (analyseInstructionId?: string, analyseInstruction?: string) => void;
   isStarting: boolean;
   companiesCount: number;
 }
@@ -18,6 +22,14 @@ export const SingleAnalyseAnnaDialog = ({
   isStarting,
   companiesCount,
 }: SingleAnalyseAnnaDialogProps) => {
+  const { instructions, isLoading } = useAnalyseInstructions();
+  const [selectedInstructionId, setSelectedInstructionId] = useState<string>('');
+
+  const handleStart = () => {
+    const selectedInstruction = instructions.find(i => i.id === selectedInstructionId);
+    onStart(selectedInstructionId, selectedInstruction?.instruction);
+  };
+
   return (
     <AdaptiveDialog
       open={open}
@@ -42,6 +54,30 @@ export const SingleAnalyseAnnaDialog = ({
           </Alert>
         )}
 
+        {/* Analyse Instruction Selection */}
+        <div className="space-y-2">
+          <Label htmlFor="analyseInstruction">Analyse-Anweisung</Label>
+          <Select
+            value={selectedInstructionId}
+            onValueChange={setSelectedInstructionId}
+            disabled={isStarting || isLoading}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Analyse-Anweisung auswählen (optional)..." />
+            </SelectTrigger>
+            <SelectContent>
+              {instructions.map((instruction) => (
+                <SelectItem key={instruction.id} value={instruction.id}>
+                  {instruction.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Bestimmt, nach welchen Kriterien Firmenwebseiten analysiert werden
+          </p>
+        </div>
+
         <div className="flex gap-3 justify-end">
           <Button
             type="button"
@@ -52,7 +88,7 @@ export const SingleAnalyseAnnaDialog = ({
             Abbrechen
           </Button>
           <Button 
-            onClick={onStart} 
+            onClick={handleStart} 
             disabled={isStarting || companiesCount === 0}
           >
             {isStarting ? (

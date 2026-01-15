@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      analyse_instructions: {
+        Row: {
+          created_at: string
+          id: string
+          instruction: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instruction: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instruction?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       automation_pipelines: {
         Row: {
           anna_workflow_id: string | null
