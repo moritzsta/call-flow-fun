@@ -102,7 +102,7 @@ serve(async (req) => {
 
     // CRITICAL: analyse_anna_auto darf KEINE Absenderdaten erhalten!
     // Defense-in-depth: Entferne Absenderdaten, falls versehentlich mitgesendet
-    if (workflow_name === 'analyse_anna_auto') {
+    if (workflow_name === 'analyse_anna_auto' || workflow_name === 'analyse_anna') {
       if (requestBody.trigger_data) {
         delete requestBody.trigger_data.sellerContact;
         delete requestBody.trigger_data.sellerName;
@@ -116,7 +116,14 @@ serve(async (req) => {
       if (trigger_data?.userGoal) {
         requestBody.userGoal = trigger_data.userGoal;
       }
-      console.log('[trigger-n8n-workflow] analyse_anna_auto: Absenderdaten gefiltert');
+      // Analyse Instruction weitergeben
+      if (trigger_data?.analyseInstruction) {
+        requestBody.analyseInstruction = trigger_data.analyseInstruction;
+        requestBody.analyseInstructionId = trigger_data.analyseInstructionId;
+        requestBody.analyseInstructionName = trigger_data.analyseInstructionName;
+        console.log('[trigger-n8n-workflow] analyseInstruction set:', trigger_data.analyseInstructionName);
+      }
+      console.log('[trigger-n8n-workflow] analyse_anna: Absenderdaten gefiltert');
     }
     
     if (workflow_name === 'pitch_paul_auto' && trigger_data?.userGoal) {

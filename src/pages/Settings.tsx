@@ -10,12 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { User, Mail, Save } from 'lucide-react';
+import { User, Mail, Save, BarChart3 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { notifyProfileUpdated, notifyProfileError } from '@/lib/notifications';
 import { EmailTemplateManager } from '@/components/settings/EmailTemplateManager';
-
+import { AnalyseInstructionManager } from '@/components/settings/AnalyseInstructionManager';
 const profileSchema = z.object({
   full_name: z.string().trim().min(2, 'Name muss mindestens 2 Zeichen lang sein').max(100),
   preferred_language: z.enum(['de', 'en']),
@@ -98,7 +98,7 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Profil
@@ -106,6 +106,10 @@ export default function Settings() {
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
               E-Mail-Templates
+            </TabsTrigger>
+            <TabsTrigger value="analyse" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analyse-Anweisungen
             </TabsTrigger>
           </TabsList>
 
@@ -198,6 +202,11 @@ export default function Settings() {
           {/* Templates Tab */}
           <TabsContent value="templates">
             <EmailTemplateManager />
+          </TabsContent>
+
+          {/* Analyse Instructions Tab */}
+          <TabsContent value="analyse">
+            <AnalyseInstructionManager />
           </TabsContent>
         </Tabs>
       </div>
