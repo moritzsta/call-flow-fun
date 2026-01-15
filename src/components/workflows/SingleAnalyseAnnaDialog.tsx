@@ -10,7 +10,7 @@ import { useAnalyseInstructions } from '@/hooks/useAnalyseInstructions';
 interface SingleAnalyseAnnaDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onStart: (analyseInstructionId?: string, analyseInstruction?: string) => void;
+  onStart: (analyseInstructionId?: string, analyseInstruction?: string, analyseInstructionName?: string) => void;
   isStarting: boolean;
   companiesCount: number;
 }
@@ -27,7 +27,7 @@ export const SingleAnalyseAnnaDialog = ({
 
   const handleStart = () => {
     const selectedInstruction = instructions.find(i => i.id === selectedInstructionId);
-    onStart(selectedInstructionId, selectedInstruction?.instruction);
+    onStart(selectedInstructionId, selectedInstruction?.instruction, selectedInstruction?.name);
   };
 
   return (
