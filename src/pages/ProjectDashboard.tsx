@@ -237,11 +237,20 @@ export default function ProjectDashboard() {
     }
   };
   
-  const triggerAnna = async () => {
+  const triggerAnna = async (analyseInstructionId?: string, analyseInstruction?: string, analyseInstructionName?: string) => {
     if (!id || !user?.id) return;
     setIsTriggeringAnna(true);
     
     try {
+      const triggerData: Record<string, any> = {};
+      
+      // Add analyse instruction if provided
+      if (analyseInstructionId && analyseInstruction && analyseInstructionName) {
+        triggerData.analyseInstructionId = analyseInstructionId;
+        triggerData.analyseInstruction = analyseInstruction;
+        triggerData.analyseInstructionName = analyseInstructionName;
+      }
+      
       const { data: workflowState, error: dbError } = await supabase
         .from('n8n_workflow_states')
         .insert({
@@ -249,7 +258,7 @@ export default function ProjectDashboard() {
           user_id: user.id,
           workflow_name: 'analyse_anna_auto',
           status: 'running',
-          trigger_data: {},
+          trigger_data: triggerData,
         })
         .select()
         .single();
@@ -262,7 +271,7 @@ export default function ProjectDashboard() {
           workflow_id: workflowState.id,
           project_id: id,
           user_id: user.id,
-          trigger_data: {},
+          trigger_data: triggerData,
         },
       });
       
