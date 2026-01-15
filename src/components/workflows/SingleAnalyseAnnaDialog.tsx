@@ -56,14 +56,14 @@ export const SingleAnalyseAnnaDialog = ({
 
         {/* Analyse Instruction Selection */}
         <div className="space-y-2">
-          <Label htmlFor="analyseInstruction">Analyse-Anweisung</Label>
+          <Label htmlFor="analyseInstruction">Analyse-Anweisung *</Label>
           <Select
             value={selectedInstructionId}
             onValueChange={setSelectedInstructionId}
             disabled={isStarting || isLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Analyse-Anweisung auswählen (optional)..." />
+              <SelectValue placeholder="Analyse-Anweisung auswählen..." />
             </SelectTrigger>
             <SelectContent>
               {instructions.map((instruction) => (
@@ -89,7 +89,7 @@ export const SingleAnalyseAnnaDialog = ({
           </Button>
           <Button 
             onClick={handleStart} 
-            disabled={isStarting || companiesCount === 0}
+            disabled={isStarting || companiesCount === 0 || !selectedInstructionId}
           >
             {isStarting ? (
               <>
