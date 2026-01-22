@@ -131,7 +131,8 @@ export function AnalyseInstructionManager() {
                 value={instruction}
                 onChange={(e) => setInstruction(e.target.value)}
                 placeholder="Beschreiben Sie, welche Informationen auf der Firmenwebseite analysiert werden sollen..."
-                rows={6}
+                rows={16}
+                className="min-h-[400px]"
               />
               <p className="text-sm text-muted-foreground">
                 Diese Anweisung wird an den Analyse-Workflow übergeben und bestimmt, nach welchen Kriterien Firmenwebseiten analysiert werden.

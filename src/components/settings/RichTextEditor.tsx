@@ -118,7 +118,7 @@ export function RichTextEditor({ content, onChange, placeholder, disabled }: Ric
       {/* Editor Content */}
       <EditorContent 
         editor={editor} 
-        className="prose prose-sm max-w-none p-4 min-h-[200px] focus-within:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[180px] bg-background"
+        className="prose prose-sm max-w-none p-4 min-h-[400px] focus-within:outline-none [&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[380px] bg-background"
       />
     </div>
   );
