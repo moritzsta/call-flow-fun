@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select';
 
 const paulSchema = z.object({
-  vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(1000),
+  vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(5000),
   templateId: z.string().optional(),
   sellerName: z.string().min(2, 'Name erforderlich'),
   sellerCompany: z.string().min(2, 'Firma erforderlich'),
