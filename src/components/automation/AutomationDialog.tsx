@@ -25,7 +25,7 @@ const automationSchema = z.object({
   city: z.string().min(1, 'Bitte wählen Sie eine Stadt'),
   state: z.string().min(1, 'Bundesland erforderlich'),
   category: z.string().min(1, 'Kategorie ist erforderlich').max(200),
-  vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(1000),
+  vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(5000),
   maxCompanies: z.number().positive('Bitte geben Sie eine positive Zahl ein').optional().or(z.literal(undefined)),
   analyseInstructionId: z.string().min(1, 'Bitte wählen Sie eine Analyse-Anweisung'),
   templateId: z.string().optional(),
