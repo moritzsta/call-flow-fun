@@ -60,7 +60,7 @@ export const EmailPreview = ({ subject, body, recipientEmail }: EmailPreviewProp
               </html>
             `}
             title="Email Preview"
-            className="w-full min-h-[400px] border-0 rounded"
+            className="w-full min-h-[600px] border-0 rounded"
             sandbox="allow-same-origin"
           />
         </div>
