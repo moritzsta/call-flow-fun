@@ -4,13 +4,14 @@ import { Layout } from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Building2, RefreshCw, Search, Trash2, Loader2, Plus } from 'lucide-react';
+import { ArrowLeft, Building2, RefreshCw, Search, Trash2, Loader2, Plus, Sparkles } from 'lucide-react';
 import { useCompanies, CompanyFilters as Filters, CompanySortConfig, Company, CreateCompanyData } from '@/hooks/useCompanies';
 import { CompanyFilters } from '@/components/companies/CompanyFilters';
 import { CompaniesTable } from '@/components/companies/CompaniesTable';
 import { ImportCompaniesButton } from '@/components/companies/ImportCompaniesButton';
 import { ExportCompaniesButton } from '@/components/companies/ExportCompaniesButton';
 import { AddCompanyDialog } from '@/components/companies/AddCompanyDialog';
+import { CleanupCompaniesDialog } from '@/components/companies/CleanupCompaniesDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompanyStats } from '@/components/companies/CompanyStats';
 import { BulkActions } from '@/components/companies/BulkActions';
@@ -60,6 +61,7 @@ export default function ProjectCompanies() {
   });
   const [isRemovingDuplicates, setIsRemovingDuplicates] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [cleanupDialogOpen, setCleanupDialogOpen] = useState(false);
 
   const {
     companies,
@@ -247,6 +249,14 @@ export default function ProjectCompanies() {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+              <Button 
+                variant="outline" 
+                onClick={() => setCleanupDialogOpen(true)}
+                className={isMobile ? 'w-full' : ''}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Bereinigen
+              </Button>
               <Button variant="outline" onClick={() => refetch()} className={isMobile ? 'w-full' : ''}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Aktualisieren
@@ -348,6 +358,14 @@ export default function ProjectCompanies() {
           onOpenChange={setAddDialogOpen}
           onSubmit={handleAddCompany}
           isLoading={isCreating}
+        />
+
+        {/* Cleanup Companies Dialog */}
+        <CleanupCompaniesDialog
+          open={cleanupDialogOpen}
+          onOpenChange={setCleanupDialogOpen}
+          projectId={id!}
+          onSuccess={refetch}
         />
       </div>
     </Layout>
