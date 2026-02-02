@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.workflow-watchdog]
 verify_jwt = false
+
+[functions.cleanup-companies]
+verify_jwt = false
