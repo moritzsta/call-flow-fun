@@ -11,7 +11,7 @@ interface CleanupOptions {
   no_analysis: boolean;
   no_phone: boolean;
   chains: boolean;
-  by_status: string | null; // e.g., 'rejected'
+  by_status: string | null;
 }
 
 interface Company {
@@ -30,71 +30,179 @@ interface ChainGroup {
   baseName: string;
   count: number;
   idsToDelete: string[];
+  companies: string[]; // For debugging
 }
 
 // Suffixes to remove when extracting base name
 const LEGAL_SUFFIXES = [
-  'gmbh', 'ag', 'e.k.', 'e.k', 'ek', 'kg', 'ohg', 'gbr', 'ug', 
-  'mbh', 'co.', 'co', 'inc', 'ltd', 'limited', 'corp', 'corporation',
-  '& co', '& co.', 'gesellschaft', 'holding', 'gruppe', 'group'
+  'gmbh & co. kg', 'gmbh & co kg', 'gmbh &co. kg', 'gmbh', 'ag', 'e.k.', 'e.k', 'ek', 
+  'kg', 'ohg', 'gbr', 'ug', 'mbh', 'co.', 'co', 'inc', 'ltd', 'limited', 
+  'corp', 'corporation', '& co', '& co.', 'gesellschaft', 'holding', 
+  'gruppe', 'group'
+];
+
+// Common descriptive words to remove
+const DESCRIPTIVE_WORDS = [
+  'fitness', 'fitnessstudio', 'fitnesscenter', 'studio', 'center', 'zentrum',
+  'sport', 'sports', 'training', 'gym', 'club', 'wellness', 'health',
+  'frauen', 'damen', 'herren', 'premium', 'personal', 'für', 'f.',
 ];
 
 /**
- * Extract the base name of a company by removing city and legal suffixes
+ * Normalize a string for comparison
  */
-function extractBaseName(companyName: string, city: string | null): string {
-  let name = companyName.toLowerCase().trim();
+function normalize(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^\w\säöüß]/g, ' ') // Replace special chars with space
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Extract the brand/chain name from a company name
+ * This extracts the first 1-3 significant words that likely represent the brand
+ */
+function extractBrandName(companyName: string, city: string | null): string {
+  let name = normalize(companyName);
   
-  // Remove city name if present
+  // Remove city name and common city prefixes/suffixes
   if (city) {
-    const cityLower = city.toLowerCase();
-    // Try to remove city with various patterns
-    name = name.replace(new RegExp(`\\s+${cityLower}\\s*$`, 'i'), '');
-    name = name.replace(new RegExp(`\\s+in\\s+${cityLower}\\s*$`, 'i'), '');
-    name = name.replace(new RegExp(`\\s+-\\s+${cityLower}\\s*$`, 'i'), '');
-    name = name.replace(new RegExp(`\\s+${cityLower}\\s+`, 'i'), ' ');
+    const cityNorm = normalize(city);
+    // Also extract just the city name without postal code
+    const cityMatch = city.match(/\d*\s*([A-Za-zäöüß\-]+)/);
+    const cityOnly = cityMatch ? normalize(cityMatch[1]) : cityNorm;
+    
+    name = name.replace(new RegExp(`\\b${cityNorm}\\b`, 'gi'), ' ');
+    name = name.replace(new RegExp(`\\b${cityOnly}\\b`, 'gi'), ' ');
   }
   
   // Remove legal suffixes
   for (const suffix of LEGAL_SUFFIXES) {
-    const regex = new RegExp(`\\s+${suffix.replace('.', '\\.')}\\s*$`, 'i');
-    name = name.replace(regex, '');
+    name = name.replace(new RegExp(`\\s*${suffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`, 'i'), '');
+    name = name.replace(new RegExp(`\\s*${suffix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+`, 'i'), ' ');
   }
   
-  // Normalize whitespace and trim
+  // Remove descriptive words
+  for (const word of DESCRIPTIVE_WORDS) {
+    name = name.replace(new RegExp(`\\b${word}\\b`, 'gi'), ' ');
+  }
+  
+  // Normalize whitespace
   name = name.replace(/\s+/g, ' ').trim();
+  
+  // Take the first 1-3 words as the brand name
+  const words = name.split(' ').filter(w => w.length > 1);
+  
+  // If we have words, take up to 2 significant words
+  if (words.length >= 1) {
+    // For short names (1-2 words), keep all
+    if (words.length <= 2) {
+      return words.join(' ');
+    }
+    // For longer names, take first 2 words as brand
+    return words.slice(0, 2).join(' ');
+  }
   
   return name;
 }
 
 /**
- * Detect chain companies and return groups with IDs to delete
+ * Calculate similarity between two brand names
+ * Returns true if they likely represent the same chain
  */
-function detectChains(companies: Company[]): { groups: ChainGroup[]; totalToDelete: number } {
-  const baseNameMap = new Map<string, Company[]>();
-  
-  // Group companies by base name
-  for (const company of companies) {
-    const baseName = extractBaseName(company.company, company.city);
-    if (baseName.length < 2) continue; // Skip very short names
-    
-    if (!baseNameMap.has(baseName)) {
-      baseNameMap.set(baseName, []);
-    }
-    baseNameMap.get(baseName)!.push(company);
+function areSameChain(brand1: string, brand2: string): boolean {
+  if (!brand1 || !brand2 || brand1.length < 3 || brand2.length < 3) {
+    return false;
   }
   
-  const groups: ChainGroup[] = [];
-  let totalToDelete = 0;
+  // Exact match
+  if (brand1 === brand2) {
+    return true;
+  }
   
-  // Find groups with more than one company
-  for (const [baseName, groupCompanies] of baseNameMap) {
-    if (groupCompanies.length > 1) {
-      // Sort by created_at (oldest first) and then by data completeness
-      const sorted = groupCompanies.sort((a, b) => {
+  // One contains the other (prefix matching)
+  if (brand1.startsWith(brand2) || brand2.startsWith(brand1)) {
+    return true;
+  }
+  
+  // Handle variations like "clever fit" vs "cleverfit"
+  const compact1 = brand1.replace(/\s+/g, '');
+  const compact2 = brand2.replace(/\s+/g, '');
+  
+  if (compact1 === compact2) {
+    return true;
+  }
+  
+  if (compact1.startsWith(compact2) || compact2.startsWith(compact1)) {
+    // Only match if the shorter one is at least 5 chars (to avoid false positives)
+    const shorter = compact1.length < compact2.length ? compact1 : compact2;
+    if (shorter.length >= 5) {
+      return true;
+    }
+  }
+  
+  // Handle "mrs sporty" vs "mrs. sporty" etc.
+  const clean1 = brand1.replace(/[.\s]/g, '');
+  const clean2 = brand2.replace(/[.\s]/g, '');
+  
+  if (clean1 === clean2 || clean1.startsWith(clean2) || clean2.startsWith(clean1)) {
+    const shorter = clean1.length < clean2.length ? clean1 : clean2;
+    if (shorter.length >= 5) {
+      return true;
+    }
+  }
+  
+  return false;
+}
+
+/**
+ * Detect chain companies using improved brand name extraction
+ */
+function detectChains(companies: Company[]): { groups: ChainGroup[]; totalToDelete: number } {
+  // First, extract brand names for all companies
+  const companiesWithBrands = companies.map(c => ({
+    ...c,
+    brandName: extractBrandName(c.company, c.city),
+  }));
+  
+  console.log('[cleanup-companies] Sample brand extractions:');
+  companiesWithBrands.slice(0, 10).forEach(c => {
+    console.log(`  "${c.company}" -> "${c.brandName}"`);
+  });
+  
+  // Group companies by similar brand names
+  const groups: ChainGroup[] = [];
+  const processed = new Set<string>();
+  
+  for (let i = 0; i < companiesWithBrands.length; i++) {
+    const company = companiesWithBrands[i];
+    
+    if (processed.has(company.id)) continue;
+    if (company.brandName.length < 3) continue;
+    
+    // Find all companies with similar brand names
+    const chainMembers = [company];
+    
+    for (let j = i + 1; j < companiesWithBrands.length; j++) {
+      const other = companiesWithBrands[j];
+      if (processed.has(other.id)) continue;
+      
+      if (areSameChain(company.brandName, other.brandName)) {
+        chainMembers.push(other);
+      }
+    }
+    
+    // If we found a chain (more than one company)
+    if (chainMembers.length > 1) {
+      // Mark all as processed
+      chainMembers.forEach(m => processed.add(m.id));
+      
+      // Sort by data completeness and then by creation date
+      const sorted = chainMembers.sort((a, b) => {
         // Prioritize companies with more data
-        const scoreA = (a.website ? 1 : 0) + (a.email ? 1 : 0) + (a.phone ? 1 : 0) + (a.analysis ? 1 : 0);
-        const scoreB = (b.website ? 1 : 0) + (b.email ? 1 : 0) + (b.phone ? 1 : 0) + (b.analysis ? 1 : 0);
+        const scoreA = (a.website ? 2 : 0) + (a.email ? 2 : 0) + (a.phone ? 1 : 0) + (a.analysis ? 3 : 0);
+        const scoreB = (b.website ? 2 : 0) + (b.email ? 2 : 0) + (b.phone ? 1 : 0) + (b.analysis ? 3 : 0);
         
         if (scoreB !== scoreA) {
           return scoreB - scoreA; // Higher score first
@@ -104,21 +212,31 @@ function detectChains(companies: Company[]): { groups: ChainGroup[]; totalToDele
         return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       });
       
-      // Keep the first one, delete the rest
+      // Keep the first one (best data), delete the rest
       const idsToDelete = sorted.slice(1).map(c => c.id);
+      const displayName = company.brandName.split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
       
       groups.push({
-        baseName: baseName.charAt(0).toUpperCase() + baseName.slice(1), // Capitalize
-        count: groupCompanies.length,
+        baseName: displayName,
+        count: chainMembers.length,
         idsToDelete,
+        companies: chainMembers.map(c => c.company),
       });
-      
-      totalToDelete += idsToDelete.length;
     }
   }
   
   // Sort groups by count (largest first)
   groups.sort((a, b) => b.count - a.count);
+  
+  const totalToDelete = groups.reduce((sum, g) => sum + g.idsToDelete.length, 0);
+  
+  console.log('[cleanup-companies] Detected chains:');
+  groups.forEach(g => {
+    console.log(`  "${g.baseName}": ${g.count} companies, deleting ${g.idsToDelete.length}`);
+    console.log(`    Companies: ${g.companies.join(', ')}`);
+  });
   
   return { groups, totalToDelete };
 }
