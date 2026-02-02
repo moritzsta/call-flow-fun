@@ -42,6 +42,8 @@ import {
   AlertTriangle,
   Loader2,
   Sparkles,
+  Type,
+  CheckCircle2,
 } from 'lucide-react';
 
 interface CleanupOptions {
@@ -51,6 +53,13 @@ interface CleanupOptions {
   no_phone: boolean;
   chains: boolean;
   by_status: string | null;
+  fix_names: boolean;
+}
+
+interface FixedName {
+  id: string;
+  before: string;
+  after: string;
 }
 
 interface ChainGroup {
@@ -68,6 +77,7 @@ interface CleanupResult {
     no_phone: { count: number };
     chains: { count: number; groups: ChainGroup[] };
     by_status: { status: string; count: number }[];
+    fix_names: { count: number; fixed: FixedName[] };
   };
   total_affected: number;
 }
@@ -100,11 +110,13 @@ export function CleanupCompaniesDialog({
     no_phone: false,
     chains: false,
     by_status: null,
+    fix_names: false,
   });
   
   const [previewResult, setPreviewResult] = useState<CleanupResult | null>(null);
   const [isLoadingPreview, setIsLoadingPreview] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isFixingNames, setIsFixingNames] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Auto-fetch preview when options change
@@ -117,7 +129,8 @@ export function CleanupCompaniesDialog({
       options.no_analysis || 
       options.no_phone || 
       options.chains || 
-      options.by_status !== null;
+      options.by_status !== null ||
+      options.fix_names;
     
     if (!hasAnyOption) {
       setPreviewResult(null);
@@ -163,15 +176,46 @@ export function CleanupCompaniesDialog({
       if (error) throw error;
       
       const result = data as CleanupResult;
-      toast.success(`${result.total_affected} Firmen erfolgreich gelöscht`);
+      const messages: string[] = [];
+      if (result.total_affected > 0) {
+        messages.push(`${result.total_affected} Firmen gelöscht`);
+      }
+      if (result.results.fix_names?.count > 0) {
+        messages.push(`${result.results.fix_names.count} Namen korrigiert`);
+      }
+      toast.success(messages.join(', ') || 'Bereinigung abgeschlossen');
       setShowConfirmDialog(false);
       onOpenChange(false);
       onSuccess();
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error('Fehler beim Löschen der Firmen');
+      toast.error('Fehler beim Bereinigen der Firmen');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleFixNamesOnly = async () => {
+    setIsFixingNames(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cleanup-companies', {
+        body: {
+          project_id: projectId,
+          options: { ...options, fix_names: true },
+          mode: 'delete',
+        },
+      });
+
+      if (error) throw error;
+      
+      const result = data as CleanupResult;
+      toast.success(`${result.results.fix_names?.count || 0} Firmennamen korrigiert`);
+      onSuccess();
+    } catch (error) {
+      console.error('Fix names error:', error);
+      toast.error('Fehler beim Korrigieren der Namen');
+    } finally {
+      setIsFixingNames(false);
     }
   };
 
@@ -183,6 +227,7 @@ export function CleanupCompaniesDialog({
       no_phone: false,
       chains: false,
       by_status: null,
+      fix_names: false,
     });
     setPreviewResult(null);
     onOpenChange(false);
@@ -192,13 +237,15 @@ export function CleanupCompaniesDialog({
     setOptions(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const hasAnySelection = 
+  const hasAnyDeleteSelection = 
     options.no_website || 
     options.no_email || 
     options.no_analysis || 
     options.no_phone || 
     options.chains || 
     options.by_status !== null;
+
+  const hasAnySelection = hasAnyDeleteSelection || options.fix_names;
 
   return (
     <>
@@ -404,10 +451,65 @@ export function CleanupCompaniesDialog({
                 ) : null}
               </CardContent>
             </Card>
+
+            {/* Separator */}
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Korrektur (ohne Löschen)</span>
+              </div>
+            </div>
+
+            {/* Fix Names */}
+            <Card 
+              className={`cursor-pointer transition-all ${options.fix_names ? 'border-green-500 bg-green-500/5' : ''}`}
+              onClick={() => toggleOption('fix_names')}
+            >
+              <CardContent className="flex items-start gap-4 p-4">
+                <Checkbox
+                  checked={options.fix_names}
+                  onCheckedChange={() => toggleOption('fix_names')}
+                  onClick={(e) => e.stopPropagation()}
+                  className="mt-1"
+                />
+                <Type className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div className="flex-1">
+                  <Label className="font-medium cursor-pointer">Namen korrigieren</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Korrigiert Sonderzeichen in Firmennamen (z.B. &amp;amp; → &amp;)
+                  </p>
+                  {previewResult && options.fix_names && previewResult.results.fix_names?.fixed?.length > 0 && (
+                    <div className="mt-2 space-y-1 text-xs">
+                      {previewResult.results.fix_names.fixed.slice(0, 3).map((fix) => (
+                        <div key={fix.id} className="flex items-center gap-2 text-muted-foreground">
+                          <span className="line-through">{fix.before}</span>
+                          <span>→</span>
+                          <span className="text-foreground font-medium">{fix.after}</span>
+                        </div>
+                      ))}
+                      {previewResult.results.fix_names.fixed.length > 3 && (
+                        <div className="text-muted-foreground">
+                          +{previewResult.results.fix_names.fixed.length - 3} weitere...
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                {isLoadingPreview ? (
+                  <Skeleton className="h-6 w-12" />
+                ) : previewResult && options.fix_names ? (
+                  <Badge variant="outline" className="border-green-500 text-green-600">
+                    {previewResult.results.fix_names?.count || 0}
+                  </Badge>
+                ) : null}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Total Summary */}
-          {hasAnySelection && (
+          {hasAnyDeleteSelection && (
             <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4">
               <div className="flex items-center gap-2 text-destructive">
                 <AlertTriangle className="h-5 w-5" />
@@ -427,17 +529,58 @@ export function CleanupCompaniesDialog({
             </div>
           )}
 
-          <DialogFooter>
+          {/* Fix Names Summary */}
+          {options.fix_names && !hasAnyDeleteSelection && previewResult && (
+            <div className="rounded-lg border border-green-500/50 bg-green-500/10 p-4">
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 className="h-5 w-5" />
+                <span className="font-medium">
+                  {isLoadingPreview ? (
+                    <span className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Berechne...
+                    </span>
+                  ) : (
+                    `${previewResult.results.fix_names?.count || 0} Firmennamen werden korrigiert`
+                  )}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button variant="outline" onClick={handleClose}>
               Abbrechen
             </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setShowConfirmDialog(true)}
-              disabled={!hasAnySelection || isLoadingPreview || !previewResult || previewResult.total_affected === 0}
-            >
-              Bereinigen starten
-            </Button>
+            {options.fix_names && !hasAnyDeleteSelection && (
+              <Button
+                variant="default"
+                onClick={handleFixNamesOnly}
+                disabled={isLoadingPreview || !previewResult || (previewResult.results.fix_names?.count || 0) === 0 || isFixingNames}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                {isFixingNames ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Korrigiere...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                    Namen korrigieren
+                  </>
+                )}
+              </Button>
+            )}
+            {hasAnyDeleteSelection && (
+              <Button
+                variant="destructive"
+                onClick={() => setShowConfirmDialog(true)}
+                disabled={isLoadingPreview || !previewResult || previewResult.total_affected === 0}
+              >
+                Bereinigen starten
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

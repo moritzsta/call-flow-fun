@@ -12,6 +12,35 @@ interface CleanupOptions {
   no_phone: boolean;
   chains: boolean;
   by_status: string | null;
+  fix_names: boolean;
+}
+
+// HTML entities to fix in company names
+const HTML_ENTITIES: Record<string, string> = {
+  '&amp;': '&',
+  '&lt;': '<',
+  '&gt;': '>',
+  '&quot;': '"',
+  '&#39;': "'",
+  '&apos;': "'",
+  '&nbsp;': ' ',
+  '&#38;': '&',
+  '&#60;': '<',
+  '&#62;': '>',
+  '&#34;': '"',
+};
+
+/**
+ * Fix HTML entities in a string
+ */
+function fixHtmlEntities(str: string): string {
+  let result = str;
+  for (const [entity, char] of Object.entries(HTML_ENTITIES)) {
+    result = result.replace(new RegExp(entity, 'gi'), char);
+  }
+  // Also handle numeric entities like &#123;
+  result = result.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
+  return result;
 }
 
 interface Company {
@@ -295,6 +324,7 @@ Deno.serve(async (req) => {
       no_phone: { count: number; ids: string[] };
       chains: { count: number; groups: ChainGroup[] };
       by_status: { status: string; count: number; ids: string[] }[];
+      fix_names: { count: number; fixed: { id: string; before: string; after: string }[] };
     } = {
       no_website: { count: 0, ids: [] },
       no_email: { count: 0, ids: [] },
@@ -302,6 +332,7 @@ Deno.serve(async (req) => {
       no_phone: { count: 0, ids: [] },
       chains: { count: 0, groups: [] },
       by_status: [],
+      fix_names: { count: 0, fixed: [] },
     };
 
     // Process each option
@@ -345,8 +376,30 @@ Deno.serve(async (req) => {
       matching.forEach(c => idsToDelete.add(c.id));
     }
 
+    // Process fix_names option (find companies with HTML entities)
+    if (options.fix_names) {
+      const companiesWithEntities = allCompanies.filter(c => {
+        // Check if company name contains any HTML entities
+        for (const entity of Object.keys(HTML_ENTITIES)) {
+          if (c.company.includes(entity)) return true;
+        }
+        // Also check for numeric entities
+        if (/&#\d+;/.test(c.company)) return true;
+        return false;
+      });
+
+      const fixedList = companiesWithEntities.map(c => ({
+        id: c.id,
+        before: c.company,
+        after: fixHtmlEntities(c.company),
+      }));
+
+      results.fix_names = { count: fixedList.length, fixed: fixedList };
+      console.log(`[cleanup-companies] Found ${fixedList.length} companies with HTML entities to fix`);
+    }
+
     const totalAffected = idsToDelete.size;
-    console.log(`[cleanup-companies] Total affected: ${totalAffected}`);
+    console.log(`[cleanup-companies] Total affected (for deletion): ${totalAffected}`);
 
     // If delete mode, actually delete the companies
     if (mode === 'delete' && totalAffected > 0) {
@@ -380,6 +433,26 @@ Deno.serve(async (req) => {
       }
       
       console.log(`[cleanup-companies] Successfully deleted ${deletedCount} companies`);
+    }
+
+    // If delete mode and fix_names is enabled, update the company names
+    if (mode === 'delete' && options.fix_names && results.fix_names.fixed.length > 0) {
+      console.log(`[cleanup-companies] Fixing ${results.fix_names.fixed.length} company names...`);
+      
+      for (const fix of results.fix_names.fixed) {
+        const { error: updateError } = await supabase
+          .from('companies')
+          .update({ company: fix.after, updated_at: new Date().toISOString() })
+          .eq('id', fix.id);
+        
+        if (updateError) {
+          console.error(`[cleanup-companies] Error fixing company ${fix.id}:`, updateError);
+        } else {
+          console.log(`[cleanup-companies] Fixed: "${fix.before}" -> "${fix.after}"`);
+        }
+      }
+      
+      console.log(`[cleanup-companies] Successfully fixed ${results.fix_names.fixed.length} company names`);
     }
 
     return new Response(
