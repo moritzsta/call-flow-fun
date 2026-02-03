@@ -190,6 +190,30 @@ export type Database = {
           },
         ]
       }
+      email_instructions: {
+        Row: {
+          created_at: string
+          id: string
+          instruction: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          instruction: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          instruction?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       email_templates: {
         Row: {
           body_template: string
