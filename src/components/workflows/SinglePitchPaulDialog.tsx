@@ -101,6 +101,7 @@ export const SinglePitchPaulDialog = ({
       },
     };
     
+    onStart(config);
     reset();
     setSelectedInstructionId('custom');
   };
