@@ -28,7 +28,7 @@ import { SingleSendeSusanDialog } from '@/components/workflows/SingleSendeSusanD
 import { SingleUpdateUweDialog } from '@/components/workflows/SingleUpdateUweDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PaulWorkflowConfig, UweWorkflowConfig } from '@/types/workflow';
+import { PaulWorkflowConfig, UweWorkflowConfig, FelixWorkflowConfig } from '@/types/workflow';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { 
@@ -180,55 +180,184 @@ export default function ProjectDashboard() {
   const emailsToSend = emails.filter((e) => e.status === 'draft' || e.status === 'ready_to_send').length;
   
   // Trigger functions
-  const triggerFelix = async (config: { city: string; state: string; category: string; maxCompanies?: number }) => {
+  const triggerFelix = async (config: FelixWorkflowConfig) => {
     if (!id || !user?.id) return;
     setIsTriggeringFelix(true);
     
     try {
-      // Message zusammenbauen (identisch wie Pipeline-Trigger)
-      const searchTerms = [];
-      if (config.state) searchTerms.push(`Bundesland: ${config.state}`);
-      if (config.city) searchTerms.push(`Stadt: ${config.city}`);
-      if (config.category) searchTerms.push(`Branche: ${config.category}`);
-      
-      const felixMessage = searchTerms.length > 0
-        ? `Bitte finde Unternehmen mit folgenden Kriterien: ${searchTerms.join(', ')}`
-        : 'Bitte finde Unternehmen';
-      
-      const triggerData = {
-        message: felixMessage,
-        maxCompanies: config.maxCompanies,
-      };
-      
-      const { data: workflowState, error: dbError } = await supabase
-        .from('n8n_workflow_states')
-        .insert({
-          project_id: id,
-          user_id: user.id,
-          workflow_name: 'finder_felix',
-          status: 'running',
-          trigger_data: triggerData,
-        })
-        .select()
-        .single();
-      
-      if (dbError) throw dbError;
-      
-      const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
-        body: {
-          workflow_name: 'finder_felix',
-          workflow_id: workflowState.id,
-          project_id: id,
-          user_id: user.id,
-          trigger_data: triggerData,
-        },
-      });
-      
-      if (functionError) throw functionError;
-      
-      toast.success('Finder Felix wurde gestartet');
-      setFelixDialogOpen(false);
-      navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+      if (config.searchMode === 'state') {
+        // State-wide search - trigger single workflow
+        const searchTerms = [];
+        if (config.state) searchTerms.push(`Bundesland: ${config.state}`);
+        if (config.category) searchTerms.push(`Branche: ${config.category}`);
+        
+        const felixMessage = searchTerms.length > 0
+          ? `Bitte finde Unternehmen mit folgenden Kriterien: ${searchTerms.join(', ')}`
+          : 'Bitte finde Unternehmen';
+        
+        const triggerData = {
+          message: felixMessage,
+          maxCompanies: config.maxCompanies,
+        };
+        
+        const { data: workflowState, error: dbError } = await supabase
+          .from('n8n_workflow_states')
+          .insert({
+            project_id: id,
+            user_id: user.id,
+            workflow_name: 'finder_felix',
+            status: 'running',
+            trigger_data: triggerData,
+          })
+          .select()
+          .single();
+        
+        if (dbError) throw dbError;
+        
+        const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+          body: {
+            workflow_name: 'finder_felix',
+            workflow_id: workflowState.id,
+            project_id: id,
+            user_id: user.id,
+            trigger_data: triggerData,
+          },
+        });
+        
+        if (functionError) throw functionError;
+        
+        toast.success('Finder Felix wurde gestartet');
+        setFelixDialogOpen(false);
+        navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+        
+      } else if (config.searchMode === 'cities' && config.cities) {
+        // Multi-city search - schedule runs
+        const cities = config.cities;
+        
+        if (cities.length === 1) {
+          // Single city - trigger immediately like before
+          const cityData = cities[0];
+          const searchTerms = [];
+          if (cityData.state) searchTerms.push(`Bundesland: ${cityData.state}`);
+          if (cityData.city) searchTerms.push(`Stadt: ${cityData.city}`);
+          if (config.category) searchTerms.push(`Branche: ${config.category}`);
+          
+          const felixMessage = `Bitte finde Unternehmen mit folgenden Kriterien: ${searchTerms.join(', ')}`;
+          
+          const triggerData = {
+            message: felixMessage,
+            maxCompanies: config.maxCompanies,
+          };
+          
+          const { data: workflowState, error: dbError } = await supabase
+            .from('n8n_workflow_states')
+            .insert({
+              project_id: id,
+              user_id: user.id,
+              workflow_name: 'finder_felix',
+              status: 'running',
+              trigger_data: triggerData,
+            })
+            .select()
+            .single();
+          
+          if (dbError) throw dbError;
+          
+          const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+            body: {
+              workflow_name: 'finder_felix',
+              workflow_id: workflowState.id,
+              project_id: id,
+              user_id: user.id,
+              trigger_data: triggerData,
+            },
+          });
+          
+          if (functionError) throw functionError;
+          
+          toast.success('Finder Felix wurde gestartet');
+          setFelixDialogOpen(false);
+          navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+          
+        } else {
+          // Multiple cities - create scheduled runs
+          const now = new Date();
+          const scheduledRuns = cities.map((cityData, index) => ({
+            project_id: id,
+            user_id: user.id,
+            city: cityData.city,
+            state: cityData.state,
+            category: config.category,
+            max_companies: config.maxCompanies ?? null,
+            scheduled_at: new Date(now.getTime() + index * 5 * 60 * 1000).toISOString(),
+            status: 'pending',
+          }));
+          
+          const { error: insertError } = await supabase
+            .from('scheduled_felix_runs')
+            .insert(scheduledRuns);
+          
+          if (insertError) throw insertError;
+          
+          // Trigger the first one immediately
+          const firstCity = cities[0];
+          const searchTerms = [];
+          if (firstCity.state) searchTerms.push(`Bundesland: ${firstCity.state}`);
+          if (firstCity.city) searchTerms.push(`Stadt: ${firstCity.city}`);
+          if (config.category) searchTerms.push(`Branche: ${config.category}`);
+          
+          const felixMessage = `Bitte finde Unternehmen mit folgenden Kriterien: ${searchTerms.join(', ')}`;
+          
+          const triggerData = {
+            message: felixMessage,
+            maxCompanies: config.maxCompanies,
+          };
+          
+          const { data: workflowState, error: dbError } = await supabase
+            .from('n8n_workflow_states')
+            .insert({
+              project_id: id,
+              user_id: user.id,
+              workflow_name: 'finder_felix',
+              status: 'running',
+              trigger_data: triggerData,
+            })
+            .select()
+            .single();
+          
+          if (dbError) throw dbError;
+          
+          // Update the first scheduled run with the workflow state id
+          await supabase
+            .from('scheduled_felix_runs')
+            .update({ 
+              status: 'triggered', 
+              workflow_state_id: workflowState.id 
+            })
+            .eq('project_id', id)
+            .eq('city', firstCity.city)
+            .eq('state', firstCity.state)
+            .eq('status', 'pending')
+            .order('scheduled_at', { ascending: true })
+            .limit(1);
+          
+          const { error: functionError } = await supabase.functions.invoke('trigger-n8n-workflow', {
+            body: {
+              workflow_name: 'finder_felix',
+              workflow_id: workflowState.id,
+              project_id: id,
+              user_id: user.id,
+              trigger_data: triggerData,
+            },
+          });
+          
+          if (functionError) throw functionError;
+          
+          toast.success(`${cities.length} Städte werden durchsucht (5 Min Intervall)`);
+          setFelixDialogOpen(false);
+          navigate(`/projects/${id}/workflow-status/${workflowState.id}`);
+        }
+      }
     } catch (error: any) {
       console.error('Error triggering Felix:', error);
       toast.error(`Fehler: ${error.message}`);

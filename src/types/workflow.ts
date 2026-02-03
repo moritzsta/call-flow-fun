@@ -15,3 +15,13 @@ export interface PaulWorkflowConfig {
 export interface UweWorkflowConfig {
   userGoal: string;
 }
+
+// Extended Felix config for state-wide and multi-city search
+export interface FelixWorkflowConfig {
+  searchMode: 'state' | 'cities';
+  state?: string;
+  city?: string;
+  cities?: Array<{ city: string; state: string }>;
+  category: string;
+  maxCompanies?: number;
+}
