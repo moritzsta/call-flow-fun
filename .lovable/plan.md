@@ -1,121 +1,176 @@
 
 
-## E-Mail-Anweisungen - Vereinfachter Implementierungsplan
+## Finder Felix: Erweiterte Such-Optionen
 
 ### Zusammenfassung
-E-Mail-Anweisungen werden als vordefinierte Texte gespeichert, die der User beim Starten von Pitch Paul aus einem Dropdown auswählen kann. Bei Auswahl wird der Inhalt direkt in das **bestehende `vorhaben`-Feld** eingefügt. Es werden keine neuen Webhook-Parameter benötigt - die Anweisung läuft über die existierende `vorhaben`/`userGoal` Variable.
+Der SingleFinderFelixDialog wird erweitert um:
+1. **Bundesland-Suche**: User kann ein ganzes Bundesland auswählen (ohne Stadt-Pflichtfeld)
+2. **Multi-Stadt-Suche**: User kann mehrere Städte auswählen, die dann im 5-Minuten-Intervall nacheinander durchsucht werden
 
 ### Architektur-Übersicht
 
 ```text
-+------------------+     +------------------------+
-|  Settings.tsx    |     | SinglePitchPaulDialog  |
-|  (4. Tab)        |     |                        |
-+--------+---------+     +------------+-----------+
-         |                            |
-         v                            v
-+-------------------+     +------------------------+
-| EmailInstruction  |     | useEmailInstructions() |
-| Manager.tsx       |     |   → Dropdown           |
-+-------------------+     +------------------------+
-         |                            |
-         v                            v
-+------------------------------------------------+
-|           email_instructions (DB)              |
-+------------------------------------------------+
-                      |
-                      | (Anweisung wird in vorhaben geschrieben)
-                      v
-+-----------------------------------+
-| trigger-n8n-workflow              |
-|  → vorhaben (unverändert)         |
-+-----------------------------------+
++------------------------------------------+
+|     SingleFinderFelixDialog              |
++------------------------------------------+
+|  [x] Bundesland-Suche                    |
+|  [_] Multi-Stadt-Suche                   |
++------------------------------------------+
+|                                          |
+|  Bundesland: [Dropdown - Bayern]         |
+|                                          |
+|  Stadt: [Suche...] (deaktiviert bei      |
+|          Bundesland-Suche)               |
+|                                          |
+|  Bei Multi-Stadt:                        |
+|  [München] [x]  [Nürnberg] [x]  + ...    |
+|                                          |
+|  Kategorie: [________________]           |
+|  Max Firmen: [___]                       |
++------------------------------------------+
+```
+
+### Neue Logik für Multi-Stadt-Suche
+
+```text
+User wählt: München, Nürnberg, Augsburg
+Kategorie: "IT-Dienstleister"
+
+Klick auf "Starten"
+    ↓
+DB: scheduled_felix_runs eintragen
+    ├─ run_1: München, scheduled_at: NOW
+    ├─ run_2: Nürnberg, scheduled_at: NOW + 5min
+    └─ run_3: Augsburg, scheduled_at: NOW + 10min
+    ↓
+Edge Function: schedule-felix-runs (Cron)
+    ├─ Prüft alle 1 Minute
+    └─ Triggert Workflows wenn scheduled_at <= NOW
 ```
 
 ### Zu erstellende/ändernde Dateien
 
-#### 1. Neue Datenbanktabelle: `email_instructions`
-Struktur analog zu `analyse_instructions`:
-- `id` (UUID, Primary Key)
-- `name` (Text, NOT NULL) - z.B. "Formeller Geschäftsstil"
-- `instruction` (Text, NOT NULL) - Der vordefinierte Anweisungstext
-- `created_at`, `updated_at` (Timestamps)
+#### 1. Neue Datenbank-Tabelle: `scheduled_felix_runs`
 
-RLS-Policies für authentifizierte Benutzer (lesen, schreiben, aktualisieren, löschen).
+Für die zeitgesteuerte Multi-Stadt-Suche:
+- `id` (UUID, PK)
+- `project_id` (UUID, FK)
+- `user_id` (UUID, FK)
+- `city` (TEXT)
+- `state` (TEXT)
+- `category` (TEXT)
+- `max_companies` (INTEGER, optional)
+- `scheduled_at` (TIMESTAMPTZ) - Wann soll der Run starten
+- `status` (TEXT) - 'pending', 'triggered', 'completed', 'failed'
+- `workflow_state_id` (UUID, nullable) - Verknüpfung zum gestarteten Workflow
+- `created_at` (TIMESTAMPTZ)
 
-#### 2. Neuer Hook: `src/hooks/useEmailInstructions.ts`
-Kopie von `useAnalyseInstructions.ts`:
-- Query-Key: `email-instructions`
-- Tabelle: `email_instructions`
-- CRUD-Operationen
+RLS: Nur authentifizierte User mit Project-Zugriff
 
-#### 3. Neue Komponente: `src/components/settings/EmailInstructionManager.tsx`
-Kopie von `AnalyseInstructionManager.tsx`:
-- Icon: `MessageSquareText`
-- Titel: "E-Mail-Anweisungen verwalten"
-- Beschreibung: "Erstellen und bearbeiten Sie Anweisungen für die E-Mail-Generierung durch Pitch Paul."
+#### 2. Neue Edge Function: `schedule-felix-runs`
 
-#### 4. Änderung: `src/pages/Settings.tsx`
-- TabsList von 3 auf 4 Spalten erweitern
-- Neuen Tab "E-Mail-Anweisungen" hinzufügen
-- Import und Einbindung von `EmailInstructionManager`
+Cron-getriggerte Funktion (jede Minute):
+- Sucht nach `scheduled_felix_runs` mit `status = 'pending'` UND `scheduled_at <= NOW`
+- Triggert für jeden Eintrag den Felix-Workflow
+- Setzt Status auf `'triggered'`
 
-#### 5. Änderung: `src/components/workflows/SinglePitchPaulDialog.tsx`
-Neues Dropdown über der Textarea:
-- "Eigene Anweisung" (Default) - Textarea bleibt leer und editierbar
-- Liste aller gespeicherten E-Mail-Anweisungen
-- Bei Auswahl einer DB-Anweisung: `setValue('vorhaben', instruction.instruction)`
-- Textarea bleibt immer editierbar (User kann nach Auswahl noch anpassen)
+#### 3. Änderung: `src/components/workflows/SingleFinderFelixDialog.tsx`
 
----
+Komplett überarbeitetes UI:
 
-### Technische Details
+**Neue State-Variablen:**
+```typescript
+const [searchMode, setSearchMode] = useState<'state' | 'cities'>('state');
+const [selectedCities, setSelectedCities] = useState<Array<{city: string, state: string}>>([]);
+```
 
-#### Dialog-Logik in SinglePitchPaulDialog
+**UI-Änderungen:**
+1. Radio-Gruppe oben: "Bundesland-Suche" vs "Multi-Stadt-Suche"
+2. Bei Bundesland-Suche:
+   - Dropdown für Bundesland (Pflicht)
+   - Stadt-Feld wird ausgeblendet
+   - Message: "Bitte finde Unternehmen mit folgenden Kriterien: Bundesland: Bayern, Branche: IT"
+3. Bei Multi-Stadt-Suche:
+   - Städte-Suche wie bisher, aber mit Multi-Select
+   - Badges für ausgewählte Städte (mit X zum Entfernen)
+   - Hinweis: "X Städte ausgewählt - Workflows werden im 5-Min-Intervall gestartet"
+
+**Form-Schema erweitern:**
+```typescript
+const felixSchema = z.discriminatedUnion('searchMode', [
+  z.object({
+    searchMode: z.literal('state'),
+    state: z.string().min(1, 'Bundesland erforderlich'),
+    category: z.string().min(1).max(200),
+    maxCompanies: z.number().positive().optional(),
+  }),
+  z.object({
+    searchMode: z.literal('cities'),
+    cities: z.array(z.object({ city: z.string(), state: z.string() }))
+      .min(1, 'Mindestens eine Stadt erforderlich'),
+    category: z.string().min(1).max(200),
+    maxCompanies: z.number().positive().optional(),
+  }),
+]);
+```
+
+#### 4. Änderung: `src/pages/ProjectDashboard.tsx`
+
+`triggerFelix` Funktion erweitern:
+- Bei Bundesland-Suche: Direkt Felix-Workflow mit angepasster Message triggern
+- Bei Multi-Stadt-Suche: Scheduled Runs in DB eintragen
 
 ```typescript
-import { useEmailInstructions } from '@/hooks/useEmailInstructions';
-
-// Im Dialog:
-const { instructions: emailInstructions, isLoading: instructionsLoading } = useEmailInstructions();
-const [selectedInstructionId, setSelectedInstructionId] = useState<string>('custom');
-
-const handleInstructionChange = (instructionId: string) => {
-  setSelectedInstructionId(instructionId);
-  
-  if (instructionId === 'custom') {
-    // Leeren für eigene Eingabe
-    setValue('vorhaben', '');
+const triggerFelix = async (config: FelixConfig) => {
+  if (config.searchMode === 'state') {
+    // Direkt triggern (wie bisher, aber ohne Stadt)
+    const message = `Bitte finde Unternehmen: Bundesland: ${config.state}, Branche: ${config.category}`;
+    // ... workflow starten
   } else {
-    // DB-Anweisung in vorhaben-Feld schreiben
-    const instruction = emailInstructions.find(i => i.id === instructionId);
-    if (instruction) {
-      setValue('vorhaben', instruction.instruction);
-    }
+    // Multi-Stadt: Scheduled Runs erstellen
+    const now = new Date();
+    const runs = config.cities.map((cityData, index) => ({
+      project_id: id,
+      user_id: user.id,
+      city: cityData.city,
+      state: cityData.state,
+      category: config.category,
+      max_companies: config.maxCompanies,
+      scheduled_at: new Date(now.getTime() + index * 5 * 60 * 1000).toISOString(),
+      status: 'pending',
+    }));
+    
+    // In DB speichern
+    await supabase.from('scheduled_felix_runs').insert(runs);
+    
+    // Ersten sofort triggern
+    // ... workflow starten
+    
+    toast.success(`${runs.length} Städte werden durchsucht (5 Min Intervall)`);
   }
 };
 ```
 
-#### UI-Änderung im Dialog
+#### 5. Neuer Hook: `src/hooks/useScheduledFelixRuns.ts`
 
-```text
-+------------------------------------------+
-|  Anweisung auswählen                     |
-|  +------------------------------------+  |
-|  | [Dropdown]                         |  |
-|  | - Eigene Anweisung (default)       |  |
-|  | - Formeller Geschäftsstil          |  |
-|  | - Freundlich & persönlich          |  |
-|  | - Sales-orientiert                 |  |
-|  +------------------------------------+  |
-|                                          |
-|  Ihr Vorhaben *                          |
-|  +------------------------------------+  |
-|  | Textarea                           |  |
-|  | (vorausgefüllt bei DB-Auswahl,     |  |
-|  |  aber immer editierbar)            |  |
-|  +------------------------------------+  |
-+------------------------------------------+
+Für die Anzeige geplanter Runs:
+```typescript
+export const useScheduledFelixRuns = (projectId: string) => {
+  return useQuery({
+    queryKey: ['scheduled-felix-runs', projectId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('scheduled_felix_runs')
+        .select('*')
+        .eq('project_id', projectId)
+        .in('status', ['pending', 'triggered'])
+        .order('scheduled_at', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+};
 ```
 
 ---
@@ -123,43 +178,114 @@ const handleInstructionChange = (instructionId: string) => {
 ### Implementierungsreihenfolge
 
 1. **Datenbank-Migration**
-   - Tabelle `email_instructions` erstellen
+   - Tabelle `scheduled_felix_runs` erstellen
    - RLS-Policies hinzufügen
-   - Trigger für `updated_at`
 
-2. **Hook erstellen** (`useEmailInstructions.ts`)
-   - CRUD-Operationen
+2. **Edge Function erstellen** (`schedule-felix-runs`)
+   - Cron-Setup (jede Minute)
+   - Workflow-Trigger-Logik
+   - Status-Updates
 
-3. **Manager-Komponente erstellen** (`EmailInstructionManager.tsx`)
-   - UI für Verwaltung in Settings
+3. **Dialog überarbeiten** (`SingleFinderFelixDialog.tsx`)
+   - Suchodus-Toggle (Bundesland/Multi-Stadt)
+   - Multi-Select für Städte
+   - Angepasste Validierung
 
-4. **Settings.tsx erweitern**
-   - 4. Tab hinzufügen
+4. **Dashboard anpassen** (`ProjectDashboard.tsx`)
+   - `triggerFelix` erweitern für beide Modi
+   - Scheduled Runs anlegen
 
-5. **SinglePitchPaulDialog anpassen**
-   - Dropdown für Anweisungsauswahl
-   - Bei Auswahl: `vorhaben`-Feld befüllen
-
----
-
-### Keine Änderungen erforderlich
-
-- `src/types/workflow.ts` - keine neuen Felder nötig
-- `supabase/functions/trigger-n8n-workflow/index.ts` - `vorhaben` wird bereits korrekt übergeben
-- n8n Webhook - empfängt weiterhin `userGoal` / `vorhaben`
+5. **Optional: Anzeige geplanter Runs**
+   - Hook erstellen
+   - UI-Komponente für ausstehende Suchen
 
 ---
 
-### Beispiel-Anweisungen
+### UI-Mockup: Dialog
 
-Nach der Implementierung könnten Benutzer z.B. folgende Anweisungen anlegen:
+```text
+┌─────────────────────────────────────────────────────────┐
+│  Finder Felix starten                              [X]  │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  Suchmodus:                                             │
+│  (•) Bundesland-Suche   ( ) Multi-Stadt-Suche           │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  Bundesland *                                           │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │ Bayern                                       ▼  │    │
+│  └─────────────────────────────────────────────────┘    │
+│                                                         │
+│  Kategorie / Branche *                                  │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │ IT-Dienstleister                                │    │
+│  └─────────────────────────────────────────────────┘    │
+│                                                         │
+│  Maximale Anzahl Firmen (optional)                      │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │ 50                                              │    │
+│  └─────────────────────────────────────────────────┘    │
+│                                                         │
+│                         [Abbrechen]  [Felix starten]    │
+└─────────────────────────────────────────────────────────┘
+```
 
-1. **"Formeller Geschäftsstil"**
-   > Schreibe professionelle, formelle E-Mails mit Siezen. Verwende eine sachliche Sprache und halte die E-Mail kurz und prägnant.
+```text
+┌─────────────────────────────────────────────────────────┐
+│  Finder Felix starten                              [X]  │
+├─────────────────────────────────────────────────────────┤
+│                                                         │
+│  Suchmodus:                                             │
+│  ( ) Bundesland-Suche   (•) Multi-Stadt-Suche           │
+│                                                         │
+│  ─────────────────────────────────────────────────────  │
+│                                                         │
+│  Städte hinzufügen *                                    │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │ Stadt suchen...                                 │    │
+│  └─────────────────────────────────────────────────┘    │
+│                                                         │
+│  Ausgewählte Städte (3):                                │
+│  [München, BY ✕] [Nürnberg, BY ✕] [Augsburg, BY ✕]      │
+│                                                         │
+│  ℹ️ 3 Workflows werden im 5-Minuten-Intervall gestartet  │
+│                                                         │
+│  Kategorie / Branche *                                  │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │ IT-Dienstleister                                │    │
+│  └─────────────────────────────────────────────────┘    │
+│                                                         │
+│  Maximale Anzahl Firmen pro Stadt (optional)            │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │ 50                                              │    │
+│  └─────────────────────────────────────────────────┘    │
+│                                                         │
+│                         [Abbrechen]  [Suchen starten]   │
+└─────────────────────────────────────────────────────────┘
+```
 
-2. **"Freundlich & persönlich"**
-   > Schreibe freundliche E-Mails mit persönlicher Note. Zeige echtes Interesse am Empfänger und seinen Bedürfnissen.
+---
 
-3. **"Sales-orientiert"**
-   > Fokussiere auf den Mehrwert für den Kunden. Nutze überzeugende Formulierungen und einen klaren Call-to-Action.
+### Technische Details
+
+#### Edge Function Cron-Setup (`supabase/config.toml`)
+```toml
+[functions.schedule-felix-runs]
+verify_jwt = false
+schedule = "* * * * *"  # Jede Minute
+```
+
+#### Message-Format Bundesland-Suche
+```
+Bitte finde Unternehmen mit folgenden Kriterien: Bundesland: Bayern, Branche: IT-Dienstleister
+```
+(Stadt wird weggelassen)
+
+#### Message-Format Multi-Stadt
+```
+Bitte finde Unternehmen mit folgenden Kriterien: Bundesland: Bayern, Stadt: München, Branche: IT-Dienstleister
+```
+(Pro Stadt ein separater Workflow)
 
