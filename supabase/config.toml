@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.cleanup-companies]
 verify_jwt = false
+
+[functions.schedule-felix-runs]
+verify_jwt = false

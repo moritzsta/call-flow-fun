@@ -596,6 +596,69 @@ export type Database = {
           },
         ]
       }
+      scheduled_felix_runs: {
+        Row: {
+          category: string
+          city: string
+          created_at: string
+          error_message: string | null
+          id: string
+          max_companies: number | null
+          project_id: string
+          scheduled_at: string
+          state: string
+          status: string
+          updated_at: string
+          user_id: string
+          workflow_state_id: string | null
+        }
+        Insert: {
+          category: string
+          city: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_companies?: number | null
+          project_id: string
+          scheduled_at: string
+          state: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          workflow_state_id?: string | null
+        }
+        Update: {
+          category?: string
+          city?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_companies?: number | null
+          project_id?: string
+          scheduled_at?: string
+          state?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          workflow_state_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_felix_runs_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_felix_runs_workflow_state_id_fkey"
+            columns: ["workflow_state_id"]
+            isOneToOne: false
+            referencedRelation: "n8n_workflow_states"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
