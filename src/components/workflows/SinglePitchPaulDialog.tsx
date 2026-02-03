@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,6 +10,7 @@ import { AdaptiveDialog } from '@/components/ui/adaptive-dialog';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
+import { useEmailInstructions } from '@/hooks/useEmailInstructions';
 import { PaulWorkflowConfig } from '@/types/workflow';
 import {
   Select,
@@ -46,6 +48,8 @@ export const SinglePitchPaulDialog = ({
   companiesCount,
 }: SinglePitchPaulDialogProps) => {
   const { templates, isLoading: templatesLoading } = useEmailTemplates();
+  const { instructions: emailInstructions, isLoading: instructionsLoading } = useEmailInstructions();
+  const [selectedInstructionId, setSelectedInstructionId] = useState<string>('custom');
   
   const {
     register,
@@ -69,6 +73,19 @@ export const SinglePitchPaulDialog = ({
 
   const selectedTemplateId = watch('templateId');
 
+  const handleInstructionChange = (instructionId: string) => {
+    setSelectedInstructionId(instructionId);
+    
+    if (instructionId === 'custom') {
+      setValue('vorhaben', '');
+    } else {
+      const instruction = emailInstructions.find(i => i.id === instructionId);
+      if (instruction) {
+        setValue('vorhaben', instruction.instruction);
+      }
+    }
+  };
+
   const onSubmit = (data: PaulFormData) => {
     const selectedTemplate = templates.find(t => t.id === data.templateId);
     
@@ -84,8 +101,8 @@ export const SinglePitchPaulDialog = ({
       },
     };
     
-    onStart(config);
     reset();
+    setSelectedInstructionId('custom');
   };
 
   return (
@@ -111,6 +128,31 @@ export const SinglePitchPaulDialog = ({
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Email Instruction Dropdown */}
+        <div className="space-y-2">
+          <Label htmlFor="instructionSelect">Anweisung auswählen</Label>
+          <Select
+            value={selectedInstructionId}
+            onValueChange={handleInstructionChange}
+            disabled={isStarting || instructionsLoading}
+          >
+            <SelectTrigger id="instructionSelect">
+              <SelectValue placeholder="Anweisung auswählen..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="custom">Eigene Anweisung</SelectItem>
+              {emailInstructions.map((instruction) => (
+                <SelectItem key={instruction.id} value={instruction.id}>
+                  {instruction.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Wählen Sie eine gespeicherte Anweisung oder schreiben Sie Ihre eigene.
+          </p>
+        </div>
 
         <div className="space-y-2">
           <Label htmlFor="vorhaben">Ihr Vorhaben *</Label>
