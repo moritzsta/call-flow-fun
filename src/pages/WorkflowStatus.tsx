@@ -6,14 +6,15 @@ import { AppSidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { WorkflowStatusBadge } from '@/components/workflows/WorkflowStatusBadge';
 import { WorkflowLoadingAnimation } from '@/components/workflows/WorkflowLoadingAnimation';
 import { useWorkflowMaxLoops } from '@/hooks/useWorkflowMaxLoops';
 import { useWorkflowCancel } from '@/hooks/useWorkflowCancel';
-import { ArrowLeft, MessageSquare, XCircle, Building2 } from 'lucide-react';
+import { ArrowLeft, MessageSquare, XCircle, Building2, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 
 interface WorkflowState {
   id: string;
@@ -22,6 +23,7 @@ interface WorkflowState {
   created_at: string;
   started_at: string;
   completed_at: string | null;
+  updated_at: string;
   trigger_data: any;
   result_summary: any;
   loop_count: number;
@@ -42,6 +44,11 @@ export default function WorkflowStatus() {
   const { id: projectId, workflowId } = useParams<{ id: string; workflowId: string }>();
   const navigate = useNavigate();
   const { cancelWorkflow, isCancelling } = useWorkflowCancel();
+  
+  // Track time since last DB update
+  const [timeSinceUpdate, setTimeSinceUpdate] = useState<number>(0);
+  const [showProgressPulse, setShowProgressPulse] = useState(false);
+  const prevUpdatedAt = useRef<string | null>(null);
 
   const { data: workflow, isLoading, refetch } = useQuery({
     queryKey: ['workflow-state', workflowId],
@@ -144,6 +151,43 @@ export default function WorkflowStatus() {
       supabase.removeChannel(channel);
     };
   }, [workflow?.project_id, isFinderFelix, isActive, stableRefetchCompanies]);
+
+  // Track time since last update
+  useEffect(() => {
+    if (!workflow || !isActive) {
+      setTimeSinceUpdate(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      if (workflow.updated_at) {
+        const secondsSince = Math.floor((Date.now() - new Date(workflow.updated_at).getTime()) / 1000);
+        setTimeSinceUpdate(secondsSince);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [workflow?.updated_at, isActive]);
+
+  // Detect updates and trigger pulse effect
+  useEffect(() => {
+    if (!workflow?.updated_at || !isActive) return;
+
+    const currentTimestamp = workflow.updated_at;
+    const prevTimestamp = prevUpdatedAt.current;
+
+    if (prevTimestamp && currentTimestamp !== prevTimestamp) {
+      const prevTime = new Date(prevTimestamp).getTime();
+      const currentTime = new Date(currentTimestamp).getTime();
+      
+      if (currentTime > prevTime) {
+        setShowProgressPulse(true);
+        setTimeout(() => setShowProgressPulse(false), 1200);
+      }
+    }
+
+    prevUpdatedAt.current = currentTimestamp;
+  }, [workflow?.updated_at, isActive]);
 
   if (isLoading) {
     return (
@@ -273,24 +317,40 @@ export default function WorkflowStatus() {
                     </div>
                   ) : (
                     // Other workflows: Show loop count progress
-                    <div>
-                      <p className="text-sm text-muted-foreground">Fortschritt</p>
-                      <div className="mt-2">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-sm font-medium">
-                            {workflow.loop_count} / {maxLoopsValue > 0 ? maxLoopsValue : '∞'} Durchläufe
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            {progress.toFixed(0)}%
-                          </span>
-                        </div>
-                        <div className="w-full bg-secondary rounded-full h-2">
-                          <div
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: `${progress}%` }}
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Fortschritt</p>
+                        <div className="mt-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-medium">
+                              {workflow.loop_count} / {maxLoopsValue > 0 ? maxLoopsValue : '∞'} Durchläufe
+                            </span>
+                            <span className="text-sm text-muted-foreground">
+                              {progress.toFixed(0)}%
+                            </span>
+                          </div>
+                          <Progress 
+                            value={progress}
+                            showPulse={showProgressPulse}
+                            isActive={isActive}
+                            className="h-3"
                           />
                         </div>
                       </div>
+                      
+                      {/* Time since last DB update */}
+                      {isActive && (
+                        <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/30 border border-border/50">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Letzte DB-Änderung:</span>
+                          <span className={`text-sm font-medium tabular-nums ${
+                            timeSinceUpdate > 120 ? 'text-destructive' : 
+                            timeSinceUpdate > 60 ? 'text-warning' : 'text-foreground'
+                          }`}>
+                            vor {timeSinceUpdate}s
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
 
