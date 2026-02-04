@@ -8,8 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCitySearch } from '@/hooks/useCitySearch';
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
+import { useEmailInstructions } from '@/hooks/useEmailInstructions';
 import { useAnalyseInstructions } from '@/hooks/useAnalyseInstructions';
 import { PaulWorkflowConfig } from '@/types/workflow';
 import { 
@@ -21,7 +23,8 @@ import {
   User, 
   Sparkles,
   Building2,
-  Search
+  Search,
+  Info
 } from 'lucide-react';
 import {
   Select,
@@ -38,9 +41,34 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
+// German states
+const GERMAN_STATES = [
+  'Baden-Württemberg',
+  'Bayern',
+  'Berlin',
+  'Brandenburg',
+  'Bremen',
+  'Hamburg',
+  'Hessen',
+  'Mecklenburg-Vorpommern',
+  'Niedersachsen',
+  'Nordrhein-Westfalen',
+  'Rheinland-Pfalz',
+  'Saarland',
+  'Sachsen',
+  'Sachsen-Anhalt',
+  'Schleswig-Holstein',
+  'Thüringen',
+];
+
 const automationSchema = z.object({
-  city: z.string().min(1, 'Bitte wählen Sie eine Stadt'),
-  state: z.string().min(1, 'Bundesland erforderlich'),
+  searchMode: z.enum(['state', 'cities']),
+  // State mode fields
+  stateOnly: z.string().optional(),
+  // City mode fields
+  city: z.string().optional(),
+  state: z.string().optional(),
+  // Common fields
   category: z.string().min(1, 'Kategorie ist erforderlich').max(200),
   vorhaben: z.string().min(10, 'Bitte beschreiben Sie Ihr Vorhaben (mind. 10 Zeichen)').max(5000),
   maxCompanies: z.number().positive('Bitte geben Sie eine positive Zahl ein').optional().or(z.literal(undefined)),
@@ -51,14 +79,35 @@ const automationSchema = z.object({
   sellerAddress: z.string().optional(),
   sellerPhone: z.string().optional(),
   sellerWebsite: z.string().url('Ungültige URL').optional().or(z.literal('')),
+}).refine((data) => {
+  if (data.searchMode === 'state') {
+    return !!data.stateOnly;
+  }
+  return true;
+}, {
+  message: 'Bundesland erforderlich',
+  path: ['stateOnly'],
+}).refine((data) => {
+  if (data.searchMode === 'cities') {
+    return !!data.city && !!data.state;
+  }
+  return true;
+}, {
+  message: 'Mindestens eine Stadt erforderlich',
+  path: ['city'],
 });
 
 type AutomationFormData = z.infer<typeof automationSchema>;
 
+interface SelectedCity {
+  city: string;
+  state: string;
+}
+
 interface AutomationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onStart: (config: AutomationFormData) => void;
+  onStart: (config: any) => void;
   isStarting: boolean;
 }
 
@@ -71,9 +120,12 @@ export const AutomationDialog = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedCities, setSelectedCities] = useState<SelectedCity[]>([]);
+  const [searchMode, setSearchMode] = useState<'state' | 'cities'>('state');
 
   const { templates, isLoading: templatesLoading } = useEmailTemplates();
   const { instructions: analyseInstructions, isLoading: instructionsLoading } = useAnalyseInstructions();
+  const { instructions: emailInstructions, isLoading: emailInstructionsLoading } = useEmailInstructions();
 
   const {
     register,
@@ -82,9 +134,12 @@ export const AutomationDialog = ({
     setValue,
     watch,
     reset,
+    trigger,
   } = useForm<AutomationFormData>({
     resolver: zodResolver(automationSchema),
     defaultValues: {
+      searchMode: 'state',
+      stateOnly: '',
       city: '',
       state: '',
       category: '',
@@ -102,6 +157,7 @@ export const AutomationDialog = ({
 
   const selectedCity = watch('city');
   const selectedState = watch('state');
+  const selectedStateOnly = watch('stateOnly');
   const selectedTemplateId = watch('templateId');
   const selectedAnalyseInstructionId = watch('analyseInstructionId');
 
@@ -118,15 +174,50 @@ export const AutomationDialog = ({
 
   const { data: cities = [], isLoading: citiesLoading } = useCitySearch(
     debouncedSearchTerm,
-    searchTerm.length >= 2
+    searchTerm.length >= 2 && searchMode === 'cities'
   );
+
+  const handleSearchModeChange = (mode: 'state' | 'cities') => {
+    setSearchMode(mode);
+    setValue('searchMode', mode);
+    // Reset mode-specific fields
+    if (mode === 'state') {
+      setSelectedCities([]);
+      setValue('city', '');
+      setValue('state', '');
+    } else {
+      setValue('stateOnly', '');
+    }
+  };
 
   const onSubmit = (data: AutomationFormData) => {
     const selectedTemplate = templates.find(t => t.id === data.templateId);
     const selectedInstruction = analyseInstructions.find(i => i.id === data.analyseInstructionId);
     
+    // Determine city and state based on search mode
+    let finalCity = '';
+    let finalState = '';
+    let citiesArray: SelectedCity[] = [];
+    
+    if (searchMode === 'state') {
+      finalState = data.stateOnly || '';
+    } else {
+      if (selectedCities.length > 0) {
+        finalCity = selectedCities[0].city;
+        finalState = selectedCities[0].state;
+        citiesArray = selectedCities;
+      } else if (data.city && data.state) {
+        finalCity = data.city;
+        finalState = data.state;
+      }
+    }
+    
     const extendedData = {
       ...data,
+      searchMode,
+      city: finalCity,
+      state: finalState,
+      cities: citiesArray.length > 0 ? citiesArray : undefined,
       templateEnumName: selectedTemplate?.enum_name,
       analyseInstruction: selectedInstruction?.instruction,
       analyseInstructionId: data.analyseInstructionId,
@@ -143,21 +234,52 @@ export const AutomationDialog = ({
     onStart(extendedData);
     reset();
     setSearchTerm('');
+    setSelectedCities([]);
+    setSearchMode('state');
   };
 
   const handleCitySelect = (city: string, state: string) => {
-    setValue('city', city, { shouldValidate: true });
-    setValue('state', state, { shouldValidate: true });
+    // Check if city already selected
+    const exists = selectedCities.some(c => c.city === city && c.state === state);
+    if (!exists) {
+      const newCities = [...selectedCities, { city, state }];
+      setSelectedCities(newCities);
+      // Set first city as form value for validation
+      if (newCities.length === 1) {
+        setValue('city', city, { shouldValidate: true });
+        setValue('state', state, { shouldValidate: true });
+      }
+    }
     setSearchTerm('');
   };
 
-  const handleClearCity = () => {
-    setValue('city', '');
-    setValue('state', '');
-    setSearchTerm('');
+  const handleRemoveCity = (index: number) => {
+    const newCities = selectedCities.filter((_, i) => i !== index);
+    setSelectedCities(newCities);
+    if (newCities.length === 0) {
+      setValue('city', '');
+      setValue('state', '');
+    } else {
+      setValue('city', newCities[0].city, { shouldValidate: true });
+      setValue('state', newCities[0].state, { shouldValidate: true });
+    }
+  };
+
+  const handleEmailInstructionSelect = (instructionId: string) => {
+    if (instructionId === 'none') {
+      return;
+    }
+    const instruction = emailInstructions.find(i => i.id === instructionId);
+    if (instruction) {
+      setValue('vorhaben', instruction.instruction, { shouldValidate: true });
+    }
   };
 
   const handleFillTestData = () => {
+    setSearchMode('cities');
+    setValue('searchMode', 'cities');
+    
+    setSelectedCities([{ city: 'Leinfelden-Echterdingen', state: 'Baden-Württemberg' }]);
     setValue('city', 'Leinfelden-Echterdingen', { shouldValidate: true });
     setValue('state', 'Baden-Württemberg', { shouldValidate: true });
     setValue('category', 'Fitnessstudios', { shouldValidate: true });
@@ -210,81 +332,171 @@ export const AutomationDialog = ({
                   Suchkriterien
                 </div>
 
-                {/* City Search */}
-                <div className="space-y-2">
-                  <Label htmlFor="city-search" className="flex items-center gap-1.5">
-                    <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                    Stadt & Bundesland *
-                  </Label>
-                  
-                  <div className="relative">
-                    <Input
-                      id="city-search"
-                      type="text"
-                      placeholder="Stadt eingeben (mind. 2 Zeichen)..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      disabled={isStarting || !!selectedCity}
-                      className="w-full"
-                      autoComplete="off"
-                    />
-                    
-                    {isSearching && (
-                      <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
+                {/* Search Mode Toggle */}
+                <div className="space-y-3">
+                  <Label>Suchmodus</Label>
+                  <RadioGroup
+                    value={searchMode}
+                    onValueChange={(value) => handleSearchModeChange(value as 'state' | 'cities')}
+                    className="flex gap-6"
+                    disabled={isStarting}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="state" id="auto-mode-state" />
+                      <Label htmlFor="auto-mode-state" className="cursor-pointer font-normal">
+                        Bundesland-Suche
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="cities" id="auto-mode-cities" />
+                      <Label htmlFor="auto-mode-cities" className="cursor-pointer font-normal">
+                        Multi-Stadt-Suche
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <div className="border-t pt-4" />
+
+                {/* State Search Mode */}
+                {searchMode === 'state' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="stateOnly" className="flex items-center gap-1.5">
+                      <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                      Bundesland *
+                    </Label>
+                    <Select
+                      value={selectedStateOnly}
+                      onValueChange={(value) => setValue('stateOnly', value, { shouldValidate: true })}
+                      disabled={isStarting}
+                    >
+                      <SelectTrigger id="stateOnly">
+                        <SelectValue placeholder="Bundesland auswählen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GERMAN_STATES.map((state) => (
+                          <SelectItem key={state} value={state}>
+                            {state}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.stateOnly && (
+                      <p className="text-sm text-destructive">{errors.stateOnly.message}</p>
                     )}
                   </div>
-                  
-                  {selectedCity && selectedState && (
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-sm">
-                        {selectedCity}, {selectedState}
-                      </Badge>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleClearCity}
-                        disabled={isStarting}
-                        className="h-6 w-6 p-0"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {searchTerm.length >= 2 && !selectedCity && (
-                    <div className="max-h-48 overflow-y-auto border rounded-md bg-popover shadow-md">
-                      {citiesLoading ? (
-                        <div className="p-3 text-center text-muted-foreground text-sm">
-                          <Loader2 className="h-4 w-4 animate-spin mx-auto mb-1" />
-                          Suche...
-                        </div>
-                      ) : cities.length === 0 ? (
-                        <div className="p-3 text-center text-muted-foreground text-sm">
-                          Keine Städte gefunden
-                        </div>
-                      ) : (
-                        <div className="divide-y">
-                          {cities.map((city) => (
-                            <button
-                              key={city.id}
-                              type="button"
-                              className="w-full p-2.5 text-left hover:bg-accent transition-colors"
-                              onClick={() => handleCitySelect(city.city, city.state)}
-                            >
-                              <div className="font-medium text-sm">{city.city}</div>
-                              <div className="text-xs text-muted-foreground">{city.state}</div>
-                            </button>
-                          ))}
+                )}
+
+                {/* Multi-City Search Mode */}
+                {searchMode === 'cities' && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city-search" className="flex items-center gap-1.5">
+                        <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                        Städte hinzufügen *
+                      </Label>
+                      
+                      <div className="relative">
+                        <Input
+                          id="city-search"
+                          type="text"
+                          placeholder="Stadt eingeben (mind. 2 Zeichen)..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          disabled={isStarting}
+                          className="w-full"
+                          autoComplete="off"
+                        />
+                        
+                        {isSearching && (
+                          <Loader2 className="absolute right-3 top-3 h-4 w-4 animate-spin text-muted-foreground" />
+                        )}
+                      </div>
+                      
+                      {searchTerm.length >= 2 && (
+                        <div className="max-h-48 overflow-y-auto border rounded-md bg-popover shadow-md z-50">
+                          {citiesLoading ? (
+                            <div className="p-3 text-center text-muted-foreground text-sm">
+                              <Loader2 className="h-4 w-4 animate-spin mx-auto mb-1" />
+                              Suche...
+                            </div>
+                          ) : cities.length === 0 ? (
+                            <div className="p-3 text-center text-muted-foreground text-sm">
+                              Keine Städte gefunden
+                            </div>
+                          ) : (
+                            <div className="divide-y">
+                              {cities.map((city) => {
+                                const isSelected = selectedCities.some(
+                                  c => c.city === city.city && c.state === city.state
+                                );
+                                return (
+                                  <button
+                                    key={city.id}
+                                    type="button"
+                                    className={`w-full p-2.5 text-left transition-colors ${
+                                      isSelected 
+                                        ? 'bg-muted cursor-not-allowed opacity-50' 
+                                        : 'hover:bg-accent'
+                                    }`}
+                                    onClick={() => !isSelected && handleCitySelect(city.city, city.state)}
+                                    disabled={isSelected}
+                                  >
+                                    <div className="font-medium text-sm">{city.city}</div>
+                                    <div className="text-xs text-muted-foreground">{city.state}</div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  )}
-                  
-                  {errors.city && (
-                    <p className="text-sm text-destructive">{errors.city.message}</p>
-                  )}
-                </div>
+
+                    {/* Selected Cities */}
+                    {selectedCities.length > 0 && (
+                      <div className="space-y-2">
+                        <Label className="text-xs text-muted-foreground">
+                          Ausgewählte Städte ({selectedCities.length}):
+                        </Label>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedCities.map((cityData, index) => (
+                            <Badge 
+                              key={`${cityData.city}-${cityData.state}-${index}`} 
+                              variant="secondary"
+                              className="flex items-center gap-1 py-1 px-2"
+                            >
+                              {cityData.city}, {cityData.state.substring(0, 2).toUpperCase()}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveCity(index)}
+                                disabled={isStarting}
+                                className="hover:text-destructive ml-1"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Info about scheduling */}
+                    {selectedCities.length > 1 && (
+                      <div className="flex items-start gap-2 p-3 bg-muted rounded-lg text-sm">
+                        <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                        <span>
+                          <strong>{selectedCities.length} Workflows</strong> werden im 5-Minuten-Intervall 
+                          nacheinander gestartet.
+                        </span>
+                      </div>
+                    )}
+
+                    {errors.city && (
+                      <p className="text-sm text-destructive">{errors.city.message}</p>
+                    )}
+                  </div>
+                )}
 
                 {/* Category & Max Companies Row */}
                 <div className="grid grid-cols-2 gap-3">
@@ -325,10 +537,33 @@ export const AutomationDialog = ({
 
               {/* Vorhaben Card */}
               <Card className="p-4 space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Target className="h-4 w-4" />
-                  Ihr Vorhaben *
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <Target className="h-4 w-4" />
+                    Ihr Vorhaben *
+                  </div>
+                  
+                  {/* Email Instruction Dropdown */}
+                  <Select
+                    onValueChange={handleEmailInstructionSelect}
+                    disabled={isStarting || emailInstructionsLoading}
+                  >
+                    <SelectTrigger className="w-[200px] h-8 text-xs">
+                      <SelectValue placeholder="Vorlage laden..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none" disabled>
+                        Vorlage auswählen...
+                      </SelectItem>
+                      {emailInstructions.map((instruction) => (
+                        <SelectItem key={instruction.id} value={instruction.id}>
+                          {instruction.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+                
                 <Textarea
                   id="vorhaben"
                   placeholder="Beschreiben Sie Ihr Vorhaben, z.B. 'Ich möchte eine neue Dienstleistung anbieten...'"
