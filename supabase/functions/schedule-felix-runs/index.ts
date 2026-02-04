@@ -122,9 +122,12 @@ Deno.serve(async (req) => {
           project_id: run.project_id,
           user_id: run.user_id,
           trigger_data: triggerData,
+          // KRITISCH: message muss auf Top-Level sein, da n8n es dort erwartet
+          message: triggerData.message,
+          maxCompanies: triggerData.maxCompanies,
         };
 
-        console.log(`[schedule-felix-runs] Calling n8n webhook for run ${run.id}`);
+        console.log(`[schedule-felix-runs] Webhook payload for run ${run.id}:`, JSON.stringify(webhookPayload, null, 2));
 
         const webhookResponse = await fetch(webhookUrl, {
           method: 'POST',
