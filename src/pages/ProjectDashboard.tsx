@@ -744,7 +744,7 @@ export default function ProjectDashboard() {
                             Analysiert: {companiesLoading ? '-' : analyzedCompanies}
                           </Badge>
                           <Badge variant="secondary" className="text-xs">
-                            Mit E-Mail: {companiesLoading ? '-' : companiesWithEmail}
+                            Email: {companiesLoading ? '-' : companiesWithEmail}
                           </Badge>
                         </div>
                       </div>
