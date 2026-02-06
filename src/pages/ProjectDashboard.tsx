@@ -124,7 +124,8 @@ export default function ProjectDashboard() {
   const { emails, totalCount: totalEmails, isLoading: emailsLoading } = useEmails(
     id || '',
     undefined,
-    undefined
+    undefined,
+    { page: 0, pageSize: 1000 }
   );
 
   const draftEmails = emails.filter((e) => e.status === 'draft').length;
