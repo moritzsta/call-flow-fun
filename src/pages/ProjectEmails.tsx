@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, RefreshCw, Send, Trash2, Loader2, TestTube } from 'lucide-react';
-import { useEmails, EmailFilters as Filters, EmailSortConfig } from '@/hooks/useEmails';
+import { ArrowLeft, Mail, RefreshCw, Send, Trash2, Loader2, TestTube, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEmails, EmailFilters as Filters, EmailSortConfig, PaginationConfig } from '@/hooks/useEmails';
 import { EmailFilters } from '@/components/emails/EmailFilters';
 import { EmailsTable } from '@/components/emails/EmailsTable';
 import { EmailStats } from '@/components/emails/EmailStats';
@@ -48,12 +48,17 @@ export default function ProjectEmails() {
     field: 'created_at',
     ascending: false,
   });
+  const [pagination, setPagination] = useState<PaginationConfig>({
+    page: 0,
+    pageSize: 50,
+  });
   const [isRemovingDuplicates, setIsRemovingDuplicates] = useState(false);
   const [testEmailDialogOpen, setTestEmailDialogOpen] = useState(false);
   const [testEmail, setTestEmail] = useState('');
 
   const {
     emails,
+    totalCount,
     isLoading,
     refetch,
     deleteEmail,
@@ -62,7 +67,12 @@ export default function ProjectEmails() {
     isSendingAll,
     updateAllRecipients,
     isUpdatingRecipients,
-  } = useEmails(id, filters, sortConfig);
+  } = useEmails(id, filters, sortConfig, pagination);
+
+  // Pagination calculations
+  const totalPages = Math.ceil(totalCount / pagination.pageSize);
+  const from = totalCount > 0 ? pagination.page * pagination.pageSize + 1 : 0;
+  const to = Math.min((pagination.page + 1) * pagination.pageSize, totalCount);
 
   const readyToSendCount = emails.filter(
     e => e.status === 'draft' || e.status === 'ready_to_send'
@@ -167,7 +177,7 @@ export default function ProjectEmails() {
                 <div>
                   <h1 className={`font-bold ${isMobile ? 'text-2xl' : 'text-3xl'}`}>E-Mails</h1>
                   <p className="text-muted-foreground text-sm">
-                    {emails.length} {emails.length === 1 ? 'E-Mail' : 'E-Mails'} gesamt
+                    {totalCount} {totalCount === 1 ? 'E-Mail' : 'E-Mails'} gesamt
                   </p>
                 </div>
               </div>
@@ -256,6 +266,38 @@ export default function ProjectEmails() {
               sortConfig={sortConfig}
               onSortChange={setSortConfig}
             />
+
+            {/* Pagination Controls */}
+            {totalCount > pagination.pageSize && (
+              <div className="flex items-center justify-between pt-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  {from}–{to} von {totalCount} E-Mails
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))}
+                    disabled={pagination.page === 0}
+                  >
+                    <ChevronLeft className="h-4 w-4 mr-1" />
+                    Vorherige
+                  </Button>
+                  <span className="text-sm text-muted-foreground px-2">
+                    Seite {pagination.page + 1} von {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))}
+                    disabled={pagination.page >= totalPages - 1}
+                  >
+                    Nächste
+                    <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -270,7 +312,7 @@ export default function ProjectEmails() {
                 des E-Mail-Versands.
                 <br /><br />
                 <strong className="text-destructive">
-                  ⚠️ Achtung: Diese Aktion überschreibt alle {emails.length} 
+                  ⚠️ Achtung: Diese Aktion überschreibt alle {totalCount} 
                   Empfänger-Adressen unwiderruflich!
                 </strong>
               </DialogDescription>
