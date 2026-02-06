@@ -120,14 +120,13 @@ export default function ProjectDashboard() {
   const foundCompanies = companies.filter((c) => c.status === 'found').length;
   const analyzedCompanies = companies.filter((c) => c.analysis !== null).length;
 
-  // Emails Data
-  const { emails, isLoading: emailsLoading } = useEmails(
+  // Emails Data - use totalCount for accurate count
+  const { emails, totalCount: totalEmails, isLoading: emailsLoading } = useEmails(
     id || '',
     undefined,
     undefined
   );
 
-  const totalEmails = emails.length;
   const draftEmails = emails.filter((e) => e.status === 'draft').length;
   const sentEmails = emails.filter((e) => e.status === 'sent').length;
   const improvedEmails = emails.filter((e) => e.body_improved && e.body_improved.length > 0).length;
