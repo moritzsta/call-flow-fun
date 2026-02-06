@@ -13,6 +13,7 @@ import { useCitySearch } from '@/hooks/useCitySearch';
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
 import { useEmailInstructions } from '@/hooks/useEmailInstructions';
 import { useAnalyseInstructions } from '@/hooks/useAnalyseInstructions';
+import { useSellerProfiles } from '@/hooks/useSellerProfiles';
 import { PaulWorkflowConfig } from '@/types/workflow';
 import { 
   Loader2, 
@@ -122,10 +123,12 @@ export const AutomationDialog = ({
   const [isSearching, setIsSearching] = useState(false);
   const [selectedCities, setSelectedCities] = useState<SelectedCity[]>([]);
   const [searchMode, setSearchMode] = useState<'state' | 'cities'>('state');
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('manual');
 
   const { templates, isLoading: templatesLoading } = useEmailTemplates();
   const { instructions: analyseInstructions, isLoading: instructionsLoading } = useAnalyseInstructions();
   const { instructions: emailInstructions, isLoading: emailInstructionsLoading } = useEmailInstructions();
+  const { profiles: sellerProfiles, isLoading: profilesLoading } = useSellerProfiles();
 
   const {
     register,
@@ -275,6 +278,24 @@ export const AutomationDialog = ({
     }
   };
 
+  const handleSellerProfileSelect = (profileId: string) => {
+    setSelectedProfileId(profileId);
+    
+    if (profileId === 'manual') {
+      // Keep current values or clear - we'll keep current for flexibility
+      return;
+    }
+    
+    const profile = sellerProfiles.find(p => p.id === profileId);
+    if (profile) {
+      setValue('sellerName', profile.name, { shouldValidate: true });
+      setValue('sellerCompany', profile.company, { shouldValidate: true });
+      setValue('sellerAddress', profile.address || '');
+      setValue('sellerPhone', profile.phone || '');
+      setValue('sellerWebsite', profile.website || '');
+    }
+  };
+
   const handleFillTestData = () => {
     setSearchMode('cities');
     setValue('searchMode', 'cities');
@@ -299,6 +320,7 @@ export const AutomationDialog = ({
     setValue('sellerCompany', 'up2summit', { shouldValidate: true });
     
     setSearchTerm('');
+    setSelectedProfileId('manual');
   };
 
   return (
@@ -637,9 +659,30 @@ export const AutomationDialog = ({
 
               {/* Verkäufer-Kontaktdaten Card */}
               <Card className="p-4 space-y-4">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-2">
-                  <User className="h-4 w-4" />
-                  Verkäufer-Kontaktdaten
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                    <User className="h-4 w-4" />
+                    Verkäufer-Kontaktdaten
+                  </div>
+                  
+                  {/* Seller Profile Dropdown */}
+                  <Select
+                    value={selectedProfileId}
+                    onValueChange={handleSellerProfileSelect}
+                    disabled={isStarting || profilesLoading}
+                  >
+                    <SelectTrigger className="w-[160px] h-8 text-xs">
+                      <SelectValue placeholder="Profil laden..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="manual">Manuell eingeben</SelectItem>
+                      {sellerProfiles.map((profile) => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.profile_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">

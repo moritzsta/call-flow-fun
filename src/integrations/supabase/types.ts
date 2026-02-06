@@ -659,6 +659,42 @@ export type Database = {
           },
         ]
       }
+      seller_profiles: {
+        Row: {
+          address: string | null
+          company: string
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          profile_name: string
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          company: string
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          profile_name: string
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          company?: string
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          profile_name?: string
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string

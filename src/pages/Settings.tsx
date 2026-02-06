@@ -10,13 +10,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { User, Mail, Save, BarChart3, MessageSquareText } from 'lucide-react';
+import { User, Mail, Save, BarChart3, MessageSquareText, UserCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { notifyProfileUpdated, notifyProfileError } from '@/lib/notifications';
 import { EmailTemplateManager } from '@/components/settings/EmailTemplateManager';
 import { AnalyseInstructionManager } from '@/components/settings/AnalyseInstructionManager';
 import { EmailInstructionManager } from '@/components/settings/EmailInstructionManager';
+import { SellerProfileManager } from '@/components/settings/SellerProfileManager';
 const profileSchema = z.object({
   full_name: z.string().trim().min(2, 'Name muss mindestens 2 Zeichen lang sein').max(100),
   preferred_language: z.enum(['de', 'en']),
@@ -99,22 +100,26 @@ export default function Settings() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <User className="h-4 w-4" />
-              Profil
+              <span className="hidden sm:inline">Profil</span>
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <Mail className="h-4 w-4" />
-              E-Mail-Templates
+              <span className="hidden sm:inline">E-Mail-Templates</span>
             </TabsTrigger>
             <TabsTrigger value="analyse" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Analyse-Anweisungen
+              <span className="hidden sm:inline">Analyse</span>
             </TabsTrigger>
             <TabsTrigger value="email-instructions" className="flex items-center gap-2">
               <MessageSquareText className="h-4 w-4" />
-              E-Mail-Anweisungen
+              <span className="hidden sm:inline">E-Mail-Anw.</span>
+            </TabsTrigger>
+            <TabsTrigger value="seller-profiles" className="flex items-center gap-2">
+              <UserCircle className="h-4 w-4" />
+              <span className="hidden sm:inline">Verkäufer</span>
             </TabsTrigger>
           </TabsList>
 
@@ -217,6 +222,11 @@ export default function Settings() {
           {/* Email Instructions Tab */}
           <TabsContent value="email-instructions">
             <EmailInstructionManager />
+          </TabsContent>
+
+          {/* Seller Profiles Tab */}
+          <TabsContent value="seller-profiles">
+            <SellerProfileManager />
           </TabsContent>
         </Tabs>
       </div>

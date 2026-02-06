@@ -11,6 +11,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
 import { useEmailInstructions } from '@/hooks/useEmailInstructions';
+import { useSellerProfiles } from '@/hooks/useSellerProfiles';
 import { PaulWorkflowConfig } from '@/types/workflow';
 import {
   Select,
@@ -49,7 +50,9 @@ export const SinglePitchPaulDialog = ({
 }: SinglePitchPaulDialogProps) => {
   const { templates, isLoading: templatesLoading } = useEmailTemplates();
   const { instructions: emailInstructions, isLoading: instructionsLoading } = useEmailInstructions();
+  const { profiles: sellerProfiles, isLoading: profilesLoading } = useSellerProfiles();
   const [selectedInstructionId, setSelectedInstructionId] = useState<string>('custom');
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('manual');
   
   const {
     register,
@@ -86,6 +89,28 @@ export const SinglePitchPaulDialog = ({
     }
   };
 
+  const handleProfileSelect = (profileId: string) => {
+    setSelectedProfileId(profileId);
+    
+    if (profileId === 'manual') {
+      // Clear all seller fields
+      setValue('sellerName', '');
+      setValue('sellerCompany', '');
+      setValue('sellerAddress', '');
+      setValue('sellerPhone', '');
+      setValue('sellerWebsite', '');
+    } else {
+      const profile = sellerProfiles.find(p => p.id === profileId);
+      if (profile) {
+        setValue('sellerName', profile.name);
+        setValue('sellerCompany', profile.company);
+        setValue('sellerAddress', profile.address || '');
+        setValue('sellerPhone', profile.phone || '');
+        setValue('sellerWebsite', profile.website || '');
+      }
+    }
+  };
+
   const onSubmit = (data: PaulFormData) => {
     const selectedTemplate = templates.find(t => t.id === data.templateId);
     
@@ -104,6 +129,7 @@ export const SinglePitchPaulDialog = ({
     onStart(config);
     reset();
     setSelectedInstructionId('custom');
+    setSelectedProfileId('manual');
   };
 
   return (
@@ -195,7 +221,28 @@ export const SinglePitchPaulDialog = ({
 
         {/* Seller Contact Data */}
         <div className="space-y-4 border-t pt-4">
-          <h3 className="font-semibold text-sm">Verkäufer-Kontaktdaten</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-sm">Verkäufer-Kontaktdaten</h3>
+            
+            {/* Seller Profile Dropdown */}
+            <Select
+              value={selectedProfileId}
+              onValueChange={handleProfileSelect}
+              disabled={isStarting || profilesLoading}
+            >
+              <SelectTrigger className="w-[180px] h-8 text-xs">
+                <SelectValue placeholder="Profil laden..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="manual">Manuell eingeben</SelectItem>
+                {sellerProfiles.map((profile) => (
+                  <SelectItem key={profile.id} value={profile.id}>
+                    {profile.profile_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
