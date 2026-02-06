@@ -236,6 +236,26 @@ export const useEmails = (
     },
   });
 
+  // Alle E-Mails eines Projekts löschen
+  const deleteAllEmailsMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const { error, count } = await supabase
+        .from('project_emails')
+        .delete()
+        .eq('project_id', projectId);
+
+      if (error) throw error;
+      return { deletedCount: count || 0 };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['project_emails'] });
+      toast.success(`${result.deletedCount} E-Mails gelöscht`);
+    },
+    onError: (error: Error) => {
+      notifyCrudError('Löschen aller E-Mails', error.message);
+    },
+  });
+
   // Alle Empfänger-E-Mails auf eine Test-Adresse aktualisieren
   const updateAllRecipientsMutation = useMutation({
     mutationFn: async ({ 
@@ -275,6 +295,8 @@ export const useEmails = (
     isSendingAll: sendAllEmailsMutation.isPending,
     updateEmailStatus: updateEmailStatusMutation.mutate,
     deleteEmail: deleteEmailMutation.mutate,
+    deleteAllEmails: deleteAllEmailsMutation.mutate,
+    isDeletingAll: deleteAllEmailsMutation.isPending,
     updateAllRecipients: updateAllRecipientsMutation.mutate,
     isUpdatingRecipients: updateAllRecipientsMutation.isPending,
   };

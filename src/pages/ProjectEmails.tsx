@@ -67,6 +67,8 @@ export default function ProjectEmails() {
     isSendingAll,
     updateAllRecipients,
     isUpdatingRecipients,
+    deleteAllEmails,
+    isDeletingAll,
   } = useEmails(id, filters, sortConfig, pagination);
 
   // Pagination calculations
@@ -223,6 +225,42 @@ export default function ProjectEmails() {
                     <AlertDialogCancel>Abbrechen</AlertDialogCancel>
                     <AlertDialogAction onClick={handleRemoveDuplicates}>
                       Duplikate löschen
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="destructive" 
+                    disabled={isDeletingAll || totalCount === 0}
+                    className={isMobile ? 'w-full' : ''}
+                  >
+                    {isDeletingAll ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Trash2 className="mr-2 h-4 w-4" />
+                    )}
+                    Alle löschen ({totalCount})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Alle E-Mails löschen?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Diese Aktion löscht <strong>alle {totalCount} E-Mails</strong> in diesem Projekt unwiderruflich.
+                      <br /><br />
+                      <strong className="text-destructive">Diese Aktion kann nicht rückgängig gemacht werden!</strong>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => deleteAllEmails(id!)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Alle {totalCount} E-Mails löschen
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
