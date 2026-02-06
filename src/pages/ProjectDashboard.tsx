@@ -175,6 +175,7 @@ export default function ProjectDashboard() {
   
   // Counts for dialogs
   const companiesWithWebsite = companies.filter((c) => c.website && c.website.length > 0).length;
+  const companiesWithEmail = companies.filter((c) => c.email && c.email.length > 0).length;
   const emailsWithoutImprovement = emails.filter((e) => !e.body_improved || e.body_improved.length === 0).length;
   const emailsToSend = emails.filter((e) => e.status === 'draft' || e.status === 'ready_to_send').length;
   
@@ -742,6 +743,9 @@ export default function ProjectDashboard() {
                           <Badge variant="secondary" className="text-xs">
                             Analysiert: {companiesLoading ? '-' : analyzedCompanies}
                           </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            Mit E-Mail: {companiesLoading ? '-' : companiesWithEmail}
+                          </Badge>
                         </div>
                       </div>
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -816,11 +820,9 @@ export default function ProjectDashboard() {
                             </Badge>
                           )}
                           {workflowCounts.failed > 0 && (
-                            <WorkflowStatusBadge 
-                              status="failed" 
-                              showIcon={false}
-                              className="text-xs"
-                            />
+                            <Badge variant="destructive" className="text-xs">
+                              Fehlgeschlagen: {workflowCounts.failed}
+                            </Badge>
                           )}
                         </div>
                       </div>
