@@ -26,7 +26,7 @@ import { SinglePitchPaulDialog } from '@/components/workflows/SinglePitchPaulDia
 import { SingleBrandingBrittaDialog } from '@/components/workflows/SingleBrandingBrittaDialog';
 import { SingleSendeSusanDialog } from '@/components/workflows/SingleSendeSusanDialog';
 import { SingleUpdateUweDialog } from '@/components/workflows/SingleUpdateUweDialog';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { PaulWorkflowConfig, UweWorkflowConfig, FelixWorkflowConfig } from '@/types/workflow';
 import { formatDistanceToNow } from 'date-fns';
