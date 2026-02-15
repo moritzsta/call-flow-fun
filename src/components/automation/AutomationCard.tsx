@@ -10,7 +10,7 @@ import { useWorkflowMaxLoops } from '@/hooks/useWorkflowMaxLoops';
 import { useAuth } from '@/contexts/AuthContext';
 import { Zap, Loader2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { useQuery } from '@tanstack/react-query';
 
 interface AutomationCardProps {

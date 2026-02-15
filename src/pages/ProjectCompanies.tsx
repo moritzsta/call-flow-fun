@@ -16,7 +16,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { CompanyStats } from '@/components/companies/CompanyStats';
 import { BulkActions } from '@/components/companies/BulkActions';
 import { ViewControls, ViewMode, Density, VisibleColumns } from '@/components/companies/ViewControls';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 import {

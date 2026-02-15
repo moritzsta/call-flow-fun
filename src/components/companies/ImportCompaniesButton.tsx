@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
 import Papa from 'papaparse';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 

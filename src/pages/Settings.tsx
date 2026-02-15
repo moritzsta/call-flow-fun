@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { User, Mail, Save, BarChart3, MessageSquareText, UserCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabaseClient';
 import { notifyProfileUpdated, notifyProfileError } from '@/lib/notifications';
 import { EmailTemplateManager } from '@/components/settings/EmailTemplateManager';
 import { AnalyseInstructionManager } from '@/components/settings/AnalyseInstructionManager';
