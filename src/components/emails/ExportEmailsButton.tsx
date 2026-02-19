@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import Papa from 'papaparse';
 

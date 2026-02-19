@@ -14,7 +14,7 @@ import { EmailStats } from '@/components/emails/EmailStats';
 import { ExportEmailsButton } from '@/components/emails/ExportEmailsButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { notifyEmailSent, notifyEmailSendError } from '@/lib/notifications';
 import {

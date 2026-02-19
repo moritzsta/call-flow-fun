@@ -22,7 +22,7 @@ import { useWorkflowTrigger } from '@/hooks/useWorkflowTrigger';
 import { useAuth } from '@/contexts/AuthContext';
 import { Company } from '@/hooks/useCompanies';
 import { notifyError } from '@/lib/notifications';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function CompanyDetail() {
   const { companyId } = useParams<{ companyId: string }>();
