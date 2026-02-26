@@ -150,7 +150,7 @@ export default function ProjectEmails() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="container max-w-7xl py-8">
+        <div className="container max-w-[1600px] py-8">
           <Skeleton className="h-10 w-32 mb-6" />
           <div className="space-y-4">
             <Skeleton className="h-24 w-full" />
@@ -163,7 +163,7 @@ export default function ProjectEmails() {
 
   return (
     <Layout>
-      <div className="container max-w-7xl py-8">
+      <div className="container max-w-[1600px] py-8">
         <Button
           variant="ghost"
           onClick={() => navigate(`/projects/${id}`)}

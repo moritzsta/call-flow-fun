@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Sparkles, Trash2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Mail, Sparkles, Trash2, Loader2, Building, ExternalLink } from 'lucide-react';
 import { useEmail } from '@/hooks/useEmail';
 import { useEmails, ProjectEmail } from '@/hooks/useEmails';
 import { EmailPreview } from '@/components/emails/EmailPreview';
@@ -109,8 +109,19 @@ export default function EmailDetail() {
                   <h1 className="text-3xl font-bold">{email.subject}</h1>
                   <p className="text-muted-foreground">
                     An: {email.recipient_email}
-                    {email.company_name && ` (${email.company_name})`}
                   </p>
+                  {email.company_name && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 text-muted-foreground hover:text-primary"
+                      onClick={() => navigate(`/companies/${email.company_id}`)}
+                    >
+                      <Building className="h-3 w-3 mr-1" />
+                      {email.company_name}
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </Button>
+                  )}
                   {email.body_improved && (
                     <div className="flex items-center gap-2 mt-2">
                       <Badge variant="secondary" className="bg-purple-500/10 text-purple-700 dark:text-purple-400">
