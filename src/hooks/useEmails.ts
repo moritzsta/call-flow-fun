@@ -283,6 +283,28 @@ export const useEmails = (
     },
   });
 
+  // Verbesserung (body_improved) bei allen E-Mails entfernen
+  const removeAllImprovementsMutation = useMutation({
+    mutationFn: async (projectId: string) => {
+      const { data, error } = await supabase
+        .from('project_emails')
+        .update({ body_improved: null, updated_at: new Date().toISOString() })
+        .eq('project_id', projectId)
+        .not('body_improved', 'is', null)
+        .select('id');
+
+      if (error) throw error;
+      return { updatedCount: data?.length || 0 };
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['project_emails', projectId] });
+      toast.success(`Verbesserungen bei ${result.updatedCount} E-Mails entfernt`);
+    },
+    onError: (error: Error) => {
+      notifyCrudError('Entfernen der Verbesserungen', error.message);
+    },
+  });
+
   return {
     emails,
     totalCount,
@@ -299,5 +321,7 @@ export const useEmails = (
     isDeletingAll: deleteAllEmailsMutation.isPending,
     updateAllRecipients: updateAllRecipientsMutation.mutate,
     isUpdatingRecipients: updateAllRecipientsMutation.isPending,
+    removeAllImprovements: removeAllImprovementsMutation.mutate,
+    isRemovingAllImprovements: removeAllImprovementsMutation.isPending,
   };
 };

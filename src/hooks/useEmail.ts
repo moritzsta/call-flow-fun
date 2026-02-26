@@ -99,6 +99,25 @@ export const useEmail = (emailId?: string) => {
     },
   });
 
+  const removeImprovementMutation = useMutation({
+    mutationFn: async (emailId: string) => {
+      const { error } = await supabase
+        .from('project_emails')
+        .update({ body_improved: null, updated_at: new Date().toISOString() })
+        .eq('id', emailId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['email', emailId] });
+      queryClient.invalidateQueries({ queryKey: ['project_emails'] });
+      notifyEmailSaved();
+    },
+    onError: (error: Error) => {
+      notifyCrudError('Entfernen der Verbesserung', error.message);
+    },
+  });
+
   return {
     email,
     isLoading,
@@ -108,6 +127,8 @@ export const useEmail = (emailId?: string) => {
       updateEmailMutation.mutate({ emailId: emailId!, subject, body, recipientEmail, status }),
     updateStatus: (status: ProjectEmail['status']) =>
       updateStatusMutation.mutate({ emailId: emailId!, status }),
+    removeImprovement: () => removeImprovementMutation.mutate(emailId!),
+    isRemovingImprovement: removeImprovementMutation.isPending,
     isUpdating: updateEmailMutation.isPending || updateStatusMutation.isPending,
   };
 };
