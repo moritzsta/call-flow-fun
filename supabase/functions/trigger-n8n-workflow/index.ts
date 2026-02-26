@@ -60,7 +60,7 @@ serve(async (req) => {
     baseUrl = baseUrl.replace(/\/webhook(-test)?$/, '');
     
     // TEMPORARY: Use webhook-test for workflows in test mode (only Sende Susan remains in test mode)
-    const testModeWorkflows = ['sende_susan', 'sende_susan_single'];
+    const testModeWorkflows = ['sende_susan'];
     const webhookPrefix = testModeWorkflows.includes(workflow_name) ? '/webhook-test' : '/webhook';
     const n8nUrl = `${baseUrl}${webhookPrefix}${webhookPath}`;
     
