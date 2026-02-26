@@ -11,13 +11,24 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Sparkles } from 'lucide-react';
+import { ArrowLeft, Mail, Sparkles, Trash2, Loader2 } from 'lucide-react';
 import { useEmail } from '@/hooks/useEmail';
 import { useEmails, ProjectEmail } from '@/hooks/useEmails';
 import { EmailPreview } from '@/components/emails/EmailPreview';
 import { EmailEditor } from '@/components/emails/EmailEditor';
 import { useAuth } from '@/contexts/AuthContext';
 import { notifyError } from '@/lib/notifications';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const statusMap: Record<ProjectEmail['status'], { label: string; className: string }> = {
   draft: { label: 'Entwurf', className: 'bg-gray-500/10 text-gray-700 dark:text-gray-400' },
@@ -31,7 +42,7 @@ export default function EmailDetail() {
   const { emailId } = useParams<{ emailId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { email, isLoading, updateEmail, updateStatus, isUpdating } = useEmail(emailId);
+  const { email, isLoading, updateEmail, updateStatus, isUpdating, removeImprovement, isRemovingImprovement } = useEmail(emailId);
   const { sendEmail } = useEmails();
 
   const handleStatusChange = (newStatus: ProjectEmail['status']) => {
@@ -101,10 +112,39 @@ export default function EmailDetail() {
                     {email.company_name && ` (${email.company_name})`}
                   </p>
                   {email.body_improved && (
-                    <Badge variant="secondary" className="mt-2 bg-purple-500/10 text-purple-700 dark:text-purple-400">
-                      <Sparkles className="h-3 w-3 mr-1" />
-                      Von Britta verschönert
-                    </Badge>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="secondary" className="bg-purple-500/10 text-purple-700 dark:text-purple-400">
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Von Britta verschönert
+                      </Badge>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" disabled={isRemovingImprovement} className="h-6 px-2 text-xs">
+                            {isRemovingImprovement ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3 w-3 mr-1" />
+                            )}
+                            Entfernen
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Verbesserung entfernen?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Die von Britta erstellte Verbesserung wird unwiderruflich entfernt. 
+                              Der Original-Text bleibt erhalten.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                            <AlertDialogAction onClick={removeImprovement}>
+                              Verbesserung entfernen
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   )}
                 </div>
               </div>

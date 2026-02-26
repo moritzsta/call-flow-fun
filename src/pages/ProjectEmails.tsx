@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, Mail, RefreshCw, Send, Trash2, Loader2, TestTube, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Mail, RefreshCw, Send, Trash2, Loader2, TestTube, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { useEmails, EmailFilters as Filters, EmailSortConfig, PaginationConfig } from '@/hooks/useEmails';
 import { EmailFilters } from '@/components/emails/EmailFilters';
 import { EmailsTable } from '@/components/emails/EmailsTable';
@@ -69,6 +69,8 @@ export default function ProjectEmails() {
     isUpdatingRecipients,
     deleteAllEmails,
     isDeletingAll,
+    removeAllImprovements,
+    isRemovingAllImprovements,
   } = useEmails(id, filters, sortConfig, pagination);
 
   // Pagination calculations
@@ -79,6 +81,8 @@ export default function ProjectEmails() {
   const readyToSendCount = emails.filter(
     e => e.status === 'draft' || e.status === 'ready_to_send'
   ).length;
+
+  const improvedCount = emails.filter(e => e.body_improved).length;
 
   // Realtime subscription for email status changes
   useEffect(() => {
@@ -230,6 +234,37 @@ export default function ProjectEmails() {
                 </AlertDialogContent>
               </AlertDialog>
 
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    disabled={isRemovingAllImprovements || improvedCount === 0}
+                    className={isMobile ? 'w-full' : ''}
+                  >
+                    {isRemovingAllImprovements ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Sparkles className="mr-2 h-4 w-4" />
+                    )}
+                    Verbesserungen entfernen ({improvedCount})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Alle Verbesserungen entfernen?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Bei allen {improvedCount} verbesserten E-Mails wird die von Britta erstellte 
+                      Verbesserung unwiderruflich entfernt. Der Original-Text bleibt erhalten.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => removeAllImprovements(id!)}>
+                      Alle Verbesserungen entfernen
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button 
