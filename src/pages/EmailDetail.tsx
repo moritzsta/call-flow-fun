@@ -117,7 +117,6 @@ export default function EmailDetail() {
                   onValueChange={(value) =>
                     handleStatusChange(value as ProjectEmail['status'])
                   }
-                  disabled={email.status === 'sent'}
                 >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue />
@@ -125,9 +124,7 @@ export default function EmailDetail() {
                   <SelectContent>
                     <SelectItem value="draft">Entwurf</SelectItem>
                     <SelectItem value="ready_to_send">Bereit</SelectItem>
-                    <SelectItem value="sent" disabled>
-                      Versendet
-                    </SelectItem>
+                    <SelectItem value="sent">Versendet</SelectItem>
                     <SelectItem value="failed" disabled>
                       Fehlgeschlagen
                     </SelectItem>
