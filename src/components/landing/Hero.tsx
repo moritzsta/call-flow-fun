@@ -51,6 +51,12 @@ export const Hero = () => {
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
+          <Link to="/demo">
+            <Button size="lg" variant="secondary" className="w-full sm:w-auto group">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Live-Demo ausprobieren
+            </Button>
+          </Link>
           <a href="#features">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
               So funktioniert's

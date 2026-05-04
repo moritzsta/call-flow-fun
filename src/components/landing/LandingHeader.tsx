@@ -9,6 +9,7 @@ export const LandingHeader = () => {
 
   const navigation = [
     { name: 'Features', href: '#features' },
+    { name: 'Demo', href: '/demo' },
     { name: 'Preise', href: '/pricing' },
     { name: 'Über uns', href: '/about' },
     { name: 'Kontakt', href: '/contact' },
