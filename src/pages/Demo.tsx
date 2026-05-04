@@ -67,12 +67,12 @@ export default function Demo() {
   const [emails, setEmails] = useState<DemoEmail[]>([]);
 
   // Felix form
-  const [felixState, setFelixState] = useState(DEMO_DUMMY_DATA.felix.state);
-  const [felixCity, setFelixCity] = useState(DEMO_DUMMY_DATA.felix.city);
-  const [felixCategory, setFelixCategory] = useState(DEMO_DUMMY_DATA.felix.category);
+  const [felixState, setFelixState] = useState<string>(DEMO_DUMMY_DATA.felix.state);
+  const [felixCity, setFelixCity] = useState<string>(DEMO_DUMMY_DATA.felix.city);
+  const [felixCategory, setFelixCategory] = useState<string>(DEMO_DUMMY_DATA.felix.category);
 
   // Paul form
-  const [paulGoal, setPaulGoal] = useState(DEMO_DUMMY_DATA.paul.userGoal);
+  const [paulGoal, setPaulGoal] = useState<string>(DEMO_DUMMY_DATA.paul.userGoal);
 
   // ----- Live polling for companies/emails while running -----
   useEffect(() => {
