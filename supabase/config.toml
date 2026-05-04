@@ -29,3 +29,6 @@ verify_jwt = false
 
 [functions.schedule-felix-runs]
 verify_jwt = false
+
+[functions.demo-trigger-workflow]
+verify_jwt = false
