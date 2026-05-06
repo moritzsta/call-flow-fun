@@ -13,14 +13,14 @@ const DEMO_MAX_COMPANIES = 10;
 // Only these workflows are allowed in demo mode (NO sende_susan!)
 const ALLOWED_WORKFLOWS = new Set([
   'finder_felix',
-  'analyse_anna',
+  'analyse_anna_auto',
   'pitch_paul',
   'branding_britta',
 ]);
 
 const WEBHOOK_PATHS: Record<string, string> = {
   finder_felix: '/finder-felix',
-  analyse_anna: '/analyse-anna',
+  analyse_anna_auto: '/analyse-anna-auto',
   pitch_paul: '/pitch-paul',
   branding_britta: '/branding-britta',
 };
