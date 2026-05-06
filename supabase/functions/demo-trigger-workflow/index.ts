@@ -95,6 +95,7 @@ serve(async (req) => {
     if (workflow_name === 'analyse_anna') {
       requestBody.userGoal = safeTriggerData.userGoal;
       requestBody.analyseInstruction = safeTriggerData.analyseInstruction;
+      requestBody.analyseInstructionId = safeTriggerData.analyseInstructionId;
       requestBody.analyseInstructionName = safeTriggerData.analyseInstructionName;
     }
     if (workflow_name === 'pitch_paul') {
