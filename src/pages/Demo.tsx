@@ -183,6 +183,7 @@ export default function Demo() {
     try {
       await triggerWorkflow('analyse_anna', {
         analyseInstruction: DEMO_DUMMY_DATA.anna.analyseInstruction,
+        analyseInstructionId: DEMO_DUMMY_DATA.anna.analyseInstructionId,
         analyseInstructionName: DEMO_DUMMY_DATA.anna.analyseInstructionName,
         userGoal: DEMO_DUMMY_DATA.anna.userGoal,
         maxCompanies: DEMO_MAX_COMPANIES,
