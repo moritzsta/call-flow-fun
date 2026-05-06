@@ -13,14 +13,14 @@ const DEMO_MAX_COMPANIES = 10;
 // Only these workflows are allowed in demo mode (NO sende_susan!)
 const ALLOWED_WORKFLOWS = new Set([
   'finder_felix',
-  'analyse_anna',
+  'analyse_anna_auto',
   'pitch_paul',
   'branding_britta',
 ]);
 
 const WEBHOOK_PATHS: Record<string, string> = {
   finder_felix: '/finder-felix',
-  analyse_anna: '/analyse-anna',
+  analyse_anna_auto: '/analyse-anna-auto',
   pitch_paul: '/pitch-paul',
   branding_britta: '/branding-britta',
 };
@@ -65,8 +65,8 @@ serve(async (req) => {
       ? Math.min(requestedMax, DEMO_MAX_COMPANIES)
       : DEMO_MAX_COMPANIES;
 
-    // Strip any sender data for analyse_anna (defense-in-depth)
-    if (workflow_name === 'analyse_anna') {
+    // Strip any sender data for analyse_anna_auto (defense-in-depth)
+    if (workflow_name === 'analyse_anna_auto') {
       delete safeTriggerData.sellerContact;
       delete safeTriggerData.sellerName;
       delete safeTriggerData.sellerCompany;
@@ -92,7 +92,7 @@ serve(async (req) => {
       maxCompanies: safeTriggerData.maxCompanies,
       demo: true,
     };
-    if (workflow_name === 'analyse_anna') {
+    if (workflow_name === 'analyse_anna_auto') {
       requestBody.userGoal = safeTriggerData.userGoal;
       requestBody.analyseInstruction = safeTriggerData.analyseInstruction;
       requestBody.analyseInstructionId = safeTriggerData.analyseInstructionId;

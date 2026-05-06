@@ -112,7 +112,7 @@ export default function Demo() {
   };
 
   const triggerWorkflow = async (
-    workflowName: 'finder_felix' | 'analyse_anna' | 'pitch_paul',
+    workflowName: 'finder_felix' | 'analyse_anna_auto' | 'pitch_paul',
     triggerData: Record<string, any>
   ) => {
     // Insert workflow state row (Public RLS allows this for the demo project)
@@ -143,6 +143,24 @@ export default function Demo() {
 
     if (fnError) throw new Error(fnError.message);
     return data;
+  };
+
+  // After Felix: keep only the first DEMO_MAX_COMPANIES, delete the rest
+  const trimToMaxCompanies = async () => {
+    const { data: keep } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('project_id', DEMO_PROJECT_ID)
+      .order('created_at', { ascending: true })
+      .limit(DEMO_MAX_COMPANIES);
+    const keepIds = (keep || []).map((c) => c.id);
+    if (keepIds.length === 0) return;
+    const inList = `(${keepIds.map((id) => `"${id}"`).join(',')})`;
+    await supabase
+      .from('companies')
+      .delete()
+      .eq('project_id', DEMO_PROJECT_ID)
+      .not('id', 'in', inList);
   };
 
   // ----- Step handlers -----
@@ -181,7 +199,9 @@ export default function Demo() {
     setError(null);
     setRunning('anna');
     try {
-      await triggerWorkflow('analyse_anna', {
+      // Felix may have found more than 10 — trim before analysis
+      await trimToMaxCompanies();
+      await triggerWorkflow('analyse_anna_auto', {
         analyseInstruction: DEMO_DUMMY_DATA.anna.analyseInstruction,
         analyseInstructionId: DEMO_DUMMY_DATA.anna.analyseInstructionId,
         analyseInstructionName: DEMO_DUMMY_DATA.anna.analyseInstructionName,
