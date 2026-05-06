@@ -7,7 +7,7 @@ const corsHeaders = {
 
 // Hardcoded demo IDs — these match the public RLS policies on the local DB
 const DEMO_PROJECT_ID = '00000000-0000-0000-0000-000000000d31';
-const DEMO_USER_ID = '00000000-0000-0000-0000-000000000d3a';
+const DEMO_USER_ID = '34fc522c-4c10-463b-b8d4-8625d1476eda';
 const DEMO_MAX_COMPANIES = 10;
 
 // Only these workflows are allowed in demo mode (NO sende_susan!)
