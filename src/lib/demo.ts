@@ -19,6 +19,7 @@ export const DEMO_DUMMY_DATA = {
     maxCompanies: DEMO_MAX_COMPANIES,
   },
   anna: {
+    analyseInstructionId: '3ea6ea87-b64b-4b20-8135-83e92c667479',
     analyseInstructionName: 'Standard-Analyse',
     analyseInstruction:
       'Analysiere die Webseite des Unternehmens. Identifiziere Branche, Zielgruppe, Alleinstellungsmerkmale, mögliche Pain Points und Verbesserungspotenziale für die digitale Präsenz.',
