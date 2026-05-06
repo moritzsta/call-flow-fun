@@ -65,8 +65,8 @@ serve(async (req) => {
       ? Math.min(requestedMax, DEMO_MAX_COMPANIES)
       : DEMO_MAX_COMPANIES;
 
-    // Strip any sender data for analyse_anna (defense-in-depth)
-    if (workflow_name === 'analyse_anna') {
+    // Strip any sender data for analyse_anna_auto (defense-in-depth)
+    if (workflow_name === 'analyse_anna_auto') {
       delete safeTriggerData.sellerContact;
       delete safeTriggerData.sellerName;
       delete safeTriggerData.sellerCompany;
@@ -92,7 +92,7 @@ serve(async (req) => {
       maxCompanies: safeTriggerData.maxCompanies,
       demo: true,
     };
-    if (workflow_name === 'analyse_anna') {
+    if (workflow_name === 'analyse_anna_auto') {
       requestBody.userGoal = safeTriggerData.userGoal;
       requestBody.analyseInstruction = safeTriggerData.analyseInstruction;
       requestBody.analyseInstructionId = safeTriggerData.analyseInstructionId;
