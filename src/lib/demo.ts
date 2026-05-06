@@ -3,7 +3,7 @@
  * Diese IDs sind in der lokalen Supabase-DB als Demo-Einträge mit
  * Public-RLS-Policies konfiguriert (siehe docs/DEMO_SETUP.sql).
  */
-export const DEMO_USER_ID = '34fc522c-4c10-463b-b8d4-8625d1476eda';
+export const DEMO_USER_ID = '00000000-0000-0000-0000-000000000d3a';
 export const DEMO_ORG_ID = '00000000-0000-0000-0000-000000000d30';
 export const DEMO_PROJECT_ID = '00000000-0000-0000-0000-000000000d31';
 
