@@ -199,6 +199,8 @@ export default function Demo() {
     setError(null);
     setRunning('anna');
     try {
+      // Felix may have found more than 10 — trim before analysis
+      await trimToMaxCompanies();
       await triggerWorkflow('analyse_anna_auto', {
         analyseInstruction: DEMO_DUMMY_DATA.anna.analyseInstruction,
         analyseInstructionId: DEMO_DUMMY_DATA.anna.analyseInstructionId,
