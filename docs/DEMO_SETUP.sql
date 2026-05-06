@@ -8,7 +8,7 @@ SET search_path TO projekt_b;
 -- Feste Demo-IDs
 -- Demo Org:  00000000-0000-0000-0000-000000000d30
 -- Demo Proj: 00000000-0000-0000-0000-000000000d31
--- Demo User: 00000000-0000-0000-0000-000000000d3a (DUMMY-UUID, kein echter auth.users-Eintrag nötig)
+-- Demo User: 34fc522c-4c10-463b-b8d4-8625d1476eda (DUMMY-UUID, kein echter auth.users-Eintrag nötig)
 
 -- 1. Demo-Organisation anlegen
 -- Falls owner_id eine FK auf auth.users hat, brauchen wir einen Demo-Auth-User.
@@ -25,7 +25,7 @@ INSERT INTO organizations (id, name, owner_id, description)
 VALUES (
   '00000000-0000-0000-0000-000000000d30',
   'Demo Organisation',
-  '00000000-0000-0000-0000-000000000d3a',  -- ggf. durch echten Demo-User ersetzen
+  '34fc522c-4c10-463b-b8d4-8625d1476eda',  -- ggf. durch echten Demo-User ersetzen
   'Öffentliches Demo für die Landingpage'
 )
 ON CONFLICT (id) DO NOTHING;
@@ -77,7 +77,7 @@ CREATE POLICY "Public can insert demo workflow states"
   ON n8n_workflow_states FOR INSERT
   WITH CHECK (
     project_id = '00000000-0000-0000-0000-000000000d31'
-    AND user_id = '00000000-0000-0000-0000-000000000d3a'
+    AND user_id = '34fc522c-4c10-463b-b8d4-8625d1476eda'
   );
 
 -- 5. Public-DELETE für Demo-Reset (löscht alle Firmen/Emails/Workflows des Demo-Projekts)
