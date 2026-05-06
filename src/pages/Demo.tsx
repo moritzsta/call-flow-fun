@@ -199,7 +199,7 @@ export default function Demo() {
     setError(null);
     setRunning('anna');
     try {
-      await triggerWorkflow('analyse_anna', {
+      await triggerWorkflow('analyse_anna_auto', {
         analyseInstruction: DEMO_DUMMY_DATA.anna.analyseInstruction,
         analyseInstructionId: DEMO_DUMMY_DATA.anna.analyseInstructionId,
         analyseInstructionName: DEMO_DUMMY_DATA.anna.analyseInstructionName,
